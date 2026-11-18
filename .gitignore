@@ -1,0 +1,7 @@
+.DS_Store
+data/*.csv
+*.log
+
+# Java app: compiled output and local database credentials
+CrimeRadar/build/
+CrimeRadar/src/main/java/db.properties

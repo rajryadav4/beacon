@@ -1,0 +1,7 @@
+# Copy this file to db.properties (same folder) and fill in your own MySQL login.
+# db.properties is git-ignored, so your password stays on your machine.
+db.user=root
+db.password=your-mysql-password
+db.host=localhost
+db.port=3306
+db.schema=CrimeRadar

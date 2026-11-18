@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CrimeRadar Poster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<style>
+  /* Canvas = 2000 x 1333 px (3:2). Prints to 36 x 24 in as vector PDF. */
+  @page { size: 2000px 1333px; margin: 0; }
+  :root{
+    --red:#C8102E; --gold:#A5804A; --ink:#111; --ink2:#3a3a3a; --muted:#6b6b6b;
+    --grid:#e4e4e4; --gray:#c9c9c9; --night:#2F5FA8; --day:#B8862B; --tint:#fbf3f4;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:2000px;height:1333px;background:#fff;color:var(--ink);
+    font-family:Lato,"Helvetica Neue",Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .poster{position:relative;width:2000px;height:1333px;overflow:hidden;background:#fff}
+
+  /* ---------- header (template) ---------- */
+  header{height:184px;background:var(--red);color:#fff;text-align:center;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px}
+  header h1{font-weight:900;font-size:40px;line-height:1.12;letter-spacing:.2px}
+  header .sub{font-size:23px;line-height:1.3}
+
+  /* ---------- body grid ---------- */
+  main{position:absolute;top:184px;left:0;right:0;bottom:113px;
+    padding:26px 44px 18px 44px;display:grid;
+    grid-template-columns:440px 470px 1fr;column-gap:48px}
+  .col{display:flex;flex-direction:column;min-width:0}
+  section{margin-bottom:16px}
+  h2{font-size:36px;font-weight:900;line-height:1.05;margin-bottom:8px;color:var(--ink)}
+  h3{font-size:20px;font-weight:900;line-height:1.2;color:var(--ink);margin-bottom:4px}
+  p,li{font-size:20.5px;line-height:1.36;color:var(--ink2)}
+  ul{padding-left:24px}
+  li{margin-bottom:3px}
+  li::marker{color:var(--red)}
+  b,strong{color:var(--ink);font-weight:900}
+  .red{color:var(--red)}
+  .note{font-size:14.5px;color:var(--muted);line-height:1.3}
+
+  /* hypothesis cards */
+  .hyp{display:grid;grid-template-columns:44px 1fr;gap:6px 10px;align-items:start}
+  .hyp .tag{font-weight:900;font-size:17px;color:#fff;background:var(--red);border-radius:6px;
+    text-align:center;padding:4px 0}
+  .hyp p{font-size:19.5px;line-height:1.3}
+
+  /* pipeline */
+  .pipe{display:flex;align-items:stretch;gap:0;margin:8px 0 2px}
+  .pipe .step{flex:1;border-radius:8px;padding:10px 8px 9px;text-align:center;color:#fff;position:relative}
+  .pipe .step .k{font-size:15px;letter-spacing:.8px;text-transform:uppercase;opacity:.9;font-weight:700}
+  .pipe .step .v{font-size:18px;font-weight:900;line-height:1.15;margin-top:3px}
+  .pipe .arrow{width:18px;display:flex;align-items:center;justify-content:center;color:#999;font-size:20px;font-weight:900}
+  .s1{background:#5b5b5b}.s2{background:#7a5c35}.s3{background:var(--gold)}.s4{background:var(--red)}
+
+  /* schema */
+  .schema{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .grp{border:2px solid #e2d6c4;border-radius:8px;padding:7px 10px 8px;background:#fcfaf6}
+  .grp .gt{font-size:14px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+  .grp .t{display:inline-block;font-size:14.5px;font-weight:700;color:#333;background:#fff;border:1px solid #ddd;
+    border-radius:4px;padding:2px 6px;margin:2px 2px 0 0}
+  .grp .t.core{background:var(--red);color:#fff;border-color:var(--red)}
+
+  .formula{margin-top:10px;border-left:6px solid var(--red);background:var(--tint);border-radius:0 8px 8px 0;padding:10px 14px}
+  .formula .f{font-size:22px;font-weight:900;color:var(--ink);line-height:1.25}
+  .formula .f .sm{font-weight:400;font-size:17px;color:var(--ink2)}
+
+  /* results */
+  .results-top{display:grid;grid-template-columns:1fr 1fr;column-gap:40px}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 10px}
+  .kpi{border-top:5px solid var(--red);background:#f7f7f7;padding:8px 12px 9px;border-radius:0 0 8px 8px}
+  .kpi .n{font-size:31px;font-weight:900;line-height:1;color:var(--ink)}
+  .kpi .l{font-size:15.5px;color:var(--ink2);line-height:1.25;margin-top:4px}
+  .chart-title{font-size:18px;font-weight:900;color:var(--ink);margin:4px 0 0}
+  .chart-sub{font-size:14.5px;color:var(--muted);margin-bottom:2px}
+  svg text{font-family:Lato,"Helvetica Neue",Arial,sans-serif}
+
+  .lower{display:grid;grid-template-columns:1fr 1fr;column-gap:40px;margin-top:4px}
+  .legend{display:flex;gap:16px;font-size:15px;color:var(--ink2);margin:2px 0 0}
+  .legend i{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:6px;vertical-align:-2px}
+
+  /* ---------- footer (template) ---------- */
+  footer{position:absolute;left:0;right:0;bottom:0;height:113px;background:var(--gold);
+    display:flex;align-items:center;justify-content:space-between;padding:0 22px 0 16px}
+  footer img{height:112px;display:block}
+  footer .right{text-align:right;color:#111}
+  footer .right .a{font-size:30px;font-weight:900}
+  footer .right .a em{font-weight:900}
+  footer .right .b{font-size:18px;margin-top:2px}
+</style>
+</head>
+<body>
+<div class="poster">
+
+<header>
+  <h1>CrimeRadar: Turning Seattle Police Data into<br>Safer Times, Places &amp; Routes</h1>
+  <div class="sub">Team 6 &nbsp;·&nbsp; Raj Ranjit Yadav, Trevor Kkhaya, Purvesha Kolhe</div>
+  <div class="sub">Faculty Advisor: Professor Bruce Chhay &nbsp;·&nbsp; CS 5200 Database Management Systems</div>
+</header>
+
+<main>
+  <!-- ================= COLUMN 1 ================= -->
+  <div class="col">
+    <section>
+      <h2>Introduction</h2>
+      <ul>
+        <li>Seattle publishes every police-reported offense, but the raw portal is hard to read and only shows the past.</li>
+        <li><b>CrimeRadar</b> is a safety app built on a relational model of <b>150,000 SPD incidents</b>. It gives a crime heatmap, personal risk scores, safer route picks, alerts and a one-tap SOS.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Problem Statement</h2>
+      <ul>
+        <li>Residents, tourists and newcomers can’t easily tell <b>which areas are risky, at what times</b>, or how to get around safely.</li>
+        <li>Existing crime maps are static and give no personal guidance.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Hypothesis</h2>
+      <div class="hyp">
+        <div class="tag">H1</div><p>Crime is concentrated in a small number of neighborhoods.</p>
+        <div class="tag">H2</div><p>Crime rises in the summer tourist months (June–Sept).</p>
+        <div class="tag">H3</div><p>Crimes against people are more likely after dark than in daytime.</p>
+      </div>
+    </section>
+
+    <section style="margin-bottom:0">
+      <div class="chart-title">When incidents happen (4-hour blocks)</div>
+      <div class="chart-sub">All 150,000 incidents by hour the crime occurred</div>
+      <svg id="c-hours" width="440" height="250"></svg>
+    </section>
+  </div>
+
+  <!-- ================= COLUMN 2 ================= -->
+  <div class="col">
+    <section>
+      <h2>Project Strategy</h2>
+      <ul>
+        <li>Load the <b>SPD Crime Data</b> export (newest 150K offenses, with MCPP neighborhoods) into a staging table.</li>
+        <li>Parse dates, dedupe and drop invalid coordinates in SQL, then load into <b>MySQL</b>.</li>
+        <li>Answer 11 business questions in SQL, then build the app on that model.</li>
+      </ul>
+      <div class="pipe">
+        <div class="step s1"><div class="k">Source</div><div class="v">SPD Open Data CSV</div></div>
+        <div class="arrow">›</div>
+        <div class="step s2"><div class="k">Clean</div><div class="v">SQL staging + dedupe</div></div>
+        <div class="arrow">›</div>
+        <div class="step s3"><div class="k">Store</div><div class="v">MySQL · 13 tables</div></div>
+        <div class="arrow">›</div>
+        <div class="step s4"><div class="k">Serve</div><div class="v">JDBC + JSP app</div></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Methodology</h2>
+      <ul>
+        <li><b>Relational model:</b> 13 normalized tables with PK/FK, UNIQUE and CHECK constraints, indexed on time, place and category.</li>
+        <li><b>Analytics:</b> joins, aggregation, CASE, CTEs, HAVING and date functions.</li>
+      </ul>
+      <div class="schema">
+        <div class="grp"><div class="gt">Crime data</div>
+          <span class="t core">CrimeIncidents</span><span class="t">CrimeCategories</span><span class="t">DataSources</span><span class="t">EmergencyCalls</span></div>
+        <div class="grp"><div class="gt">Geography</div>
+          <span class="t">Neighborhoods</span><span class="t">PolicePrecincts</span><span class="t">SafetyResources</span></div>
+        <div class="grp"><div class="gt">Routing</div>
+          <span class="t">Routes</span><span class="t">RouteSegments</span><span class="t">RouteRecommendations</span></div>
+        <div class="grp"><div class="gt">Users &amp; safety</div>
+          <span class="t">AppUsers</span><span class="t">EmergencyContacts</span><span class="t">SOSAlerts</span></div>
+      </div>
+      <div class="formula">
+        <h3>Advanced feature: route risk score</h3>
+        <div class="f">Risk = Σ<sub>segments</sub> (km × incidents/day)</div>
+        <div class="f"><span class="sm">Each route segment is weighted by its neighborhood’s crime rate over the last 90 days. <b>5,000 routes</b> are scored and ranked safest-first in <b>0.28 s</b>.</span></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= COLUMNS 3–4 ================= -->
+  <div class="col">
+    <section style="margin-bottom:6px">
+      <h2>Results</h2>
+      <div class="kpis">
+        <div class="kpi"><div class="n">150K</div><div class="l">incidents loaded<br>Nov 2024 – Oct 2026</div></div>
+        <div class="kpi"><div class="n">47%</div><div class="l">of crime in just<br>10 neighborhoods</div></div>
+        <div class="kpi"><div class="n">39%</div><div class="l">of crime happens<br>4 PM – midnight</div></div>
+        <div class="kpi"><div class="n">2.1×</div><div class="l">more night-time person<br>crime on Capitol Hill</div></div>
+      </div>
+      <div class="results-top">
+        <div>
+          <ul>
+            <li><b>H1 confirmed.</b> Capitol Hill leads by far. North and West precincts hold 57% of all crime.</li>
+          </ul>
+          <div class="chart-title">Top 10 neighborhoods by reported crime</div>
+          <svg id="c-nbhd" width="100%" height="268"></svg>
+        </div>
+        <div>
+          <ul>
+            <li><b>H2 partly confirmed.</b> Summer runs <b>12% above</b> Jan–Mar; October peaks.</li>
+          </ul>
+          <div class="chart-title">Reported crime by month, 2025</div>
+          <svg id="c-month" width="100%" height="268"></svg>
+        </div>
+      </div>
+    </section>
+
+    <div class="lower">
+      <div>
+        <section style="margin-bottom:12px">
+          <h2>Error Metrics</h2>
+          <ul>
+            <li>Average report delay is <b>5.2 days</b> (South) to <b>6.5 days</b> (North), so the newest week <b>undercounts</b> risk.</li>
+            <li>Unknown-precinct rows (1.1% with out-of-jurisdiction) lag <b>20 days</b>.</li>
+            <li>00:00 holds 11% of incidents, likely a default for unknown times.</li>
+          </ul>
+        </section>
+        <section style="margin-bottom:0">
+          <h2>Conclusion</h2>
+          <ul>
+            <li>Crime <b>clusters by place and time</b>, so a time-aware score beats a static map.</li>
+            <li>Weekends aren’t busier (Friday is), but have the highest <b>share of crime against people</b> (16.6% Sunday).</li>
+          </ul>
+        </section>
+      </div>
+      <div>
+        <section style="margin-bottom:10px">
+          <ul style="margin-top:4px">
+            <li><b>H3 confirmed.</b> Night beats day in 9 of 10 areas; Downtown is the exception.</li>
+          </ul>
+          <div class="chart-title" style="display:flex;justify-content:space-between;align-items:baseline">Crimes against people: night vs. day<span style="font-weight:400;font-size:14px;color:#6b6b6b">night ÷ day</span></div>
+          <div class="legend"><span><i style="background:var(--night)"></i>Night (8 PM–4 AM)</span><span><i style="background:var(--day)"></i>Day (8 AM–4 PM)</span></div>
+          <svg id="c-night" width="100%" height="208"></svg>
+        </section>
+        <section style="margin-bottom:0">
+          <h2>Next Steps</h2>
+          <ul>
+            <li>JDBC/JSP app: CRUD + live route scoring</li>
+            <li>ETL events &amp; tourism data for busy-area risk</li>
+            <li>Lag-adjusted scores, walking routes, alerts</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <img src="assets/neu_logo_crop.png" alt="Northeastern University">
+  <div class="right">
+    <div class="a">Data: <em>Seattle Police Department Open Data</em></div>
+    <div class="b">data.seattle.gov · SPD Crime Data 2008–Present (tazs-3rd5) · MCPP Neighborhoods</div>
+  </div>
+</footer>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const C={red:'#C8102E',gray:'#cfcfcf',ink:'#111',ink2:'#3a3a3a',muted:'#6b6b6b',grid:'#e6e6e6',night:'#2F5FA8',day:'#B8862B'};
+function el(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+const fmt=n=>n.toLocaleString('en-US');
+// bar with 4px rounded data-end, square at baseline
+function vbar(g,x,y,w,h,r,fill){r=Math.min(r,h,w/2);const d=`M${x},${y+h}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h}Z`;return el('path',{d,fill},g);}
+function hbar(g,x,y,w,h,r,fill){r=Math.min(r,w,h/2);const d=`M${x},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h-r}Q${x+w},${y+h} ${x+w-r},${y+h}H${x}Z`;return el('path',{d,fill},g);}
+
+/* ---- 1. time-of-day blocks ---- */
+(function(){
+  const svg=document.getElementById('c-hours');const W=440,H=250,L=8,R=8,T=26,B=46;
+  // From Q5 results: hour 0 = 16,706; hours 1–3 = 14,533; 4–7 = 13,841 (remainder of 150,000)
+  const d=[{k:'12–4 AM',v:31239,mid:16706},{k:'4–8 AM',v:13841},{k:'8 AM–12',v:19994},{k:'12–4 PM',v:26366},{k:'4–8 PM',v:29611},{k:'8 PM–12',v:28949}];
+  const max=32000,iw=W-L-R,ih=H-T-B,bw=iw/d.length;
+  const defs=el('defs',{},svg);const pat=el('pattern',{id:'hatch',width:8,height:8,patternUnits:'userSpaceOnUse',patternTransform:'rotate(45)'},defs);
+  el('rect',{width:8,height:8,fill:'#f2d3d8'},pat);el('line',{x1:0,y1:0,x2:0,y2:8,stroke:C.red,'stroke-width':2.2},pat);
+  el('line',{x1:L,x2:W-R,y1:T+ih,y2:T+ih,stroke:'#9a9a9a','stroke-width':1.5},svg);
+  d.forEach((r,i)=>{
+    const x=L+i*bw+7,w=bw-14,h=r.v/max*ih,y=T+ih-h;const evening=(i>=4);
+    const fill=evening?C.red:'#9c9c9c';
+    if(r.mid){ // split: true 1–3 AM bottom solid, midnight-stamp portion hatched on top
+      const hm=r.mid/max*ih;vbar(svg,x,y,w,hm,4,'url(#hatch)');el('rect',{x,y:y+hm+2,width:w,height:h-hm-2,fill},svg);
+    } else vbar(svg,x,y,w,h,4,fill);
+    el('title',{},svg.lastChild,`${r.k}: ${fmt(r.v)}`);
+    el('text',{x:x+w/2,y:y-7,'text-anchor':'middle','font-size':15,'font-weight':900,fill:C.ink},svg,(r.v/1000).toFixed(1)+'K');
+    el('text',{x:x+w/2,y:T+ih+20,'text-anchor':'middle','font-size':14,fill:C.ink2},svg,r.k);
+  });
+  el('text',{x:L,y:H-4,'font-size':13.5,fill:C.muted},svg,'Hatched = 00:00 timestamps (often an unknown time). Red = evening.');
+})();
+
+/* ---- 2. top neighborhoods (horizontal bars) ---- */
+(function(){
+  const svg=document.getElementById('c-nbhd');const W=svg.getBoundingClientRect().width,H=300;
+  const d=[['Capitol Hill',12346],['Queen Anne',8166],['Downtown Commercial',8033],['SLU/Cascade',7545],['Northgate',7168],['First Hill',6024],['University',5831],['Ballard South',5539],['Chinatown/ID',5231],['Roosevelt/Ravenna',5034]];
+  const LBL=176,T=4,rh=26,iw=W-LBL-58;
+  d.forEach(([k,v],i)=>{const y=T+i*rh,w=v/12346*iw;
+    el('text',{x:LBL-10,y:y+rh/2+5,'text-anchor':'end','font-size':15.5,fill:C.ink2,'font-weight':i==0?900:400},svg,k);
+    hbar(svg,LBL,y+4,w,rh-8,4,i==0?C.red:'#a9a9a9');el('title',{},svg.lastChild,`${k}: ${fmt(v)}`);
+    el('text',{x:LBL+w+6,y:y+rh/2+5,'font-size':15,'font-weight':900,fill:C.ink},svg,fmt(v));});
+})();
+
+/* ---- 3. monthly 2025 ---- */
+(function(){
+  const svg=document.getElementById('c-month');const W=svg.getBoundingClientRect().width,H=268,L=46,R=4,T=28,B=46;
+  const v=[6540,5356,6096,6119,6656,6390,6678,7059,6850,7172,6393,6702];const m='JFMAMJJASOND'.split('');
+  const min=4000,max=7400,iw=W-L-R,ih=H-T-B,bw=iw/12;
+  // summer band
+  el('rect',{x:L+5*bw,y:T-22,width:4*bw,height:ih+22,fill:'#fbeef0'},svg);
+  el('text',{x:L+7*bw,y:T-8,'text-anchor':'middle','font-size':14,'font-weight':900,fill:C.red},svg,'Peak tourist season');
+  [5000,6000,7000].forEach(g=>{const y=T+ih-(g-min)/(max-min)*ih;el('line',{x1:L,x2:W-R,y1:y,y2:y,stroke:C.grid,'stroke-width':1},svg);
+    el('text',{x:L-6,y:y+4,'text-anchor':'end','font-size':13,fill:C.muted},svg,fmt(g));});
+  el('line',{x1:L,x2:W-R,y1:T+ih,y2:T+ih,stroke:'#9a9a9a','stroke-width':1.5},svg);
+  v.forEach((val,i)=>{const x=L+i*bw+5,w=bw-10,h=(val-min)/(max-min)*ih,y=T+ih-h;const summer=i>=5&&i<=8;
+    vbar(svg,x,y,w,h,4,summer?C.red:'#a9a9a9');el('title',{},svg.lastChild,`${m[i]} 2025: ${fmt(val)}`);
+    el('text',{x:x+w/2,y:T+ih+19,'text-anchor':'middle','font-size':14.5,fill:C.ink2},svg,m[i]);
+    if(i==9||i==1){el('text',{x:x+w/2,y:y-6,'text-anchor':'middle','font-size':14,'font-weight':900,fill:C.ink},svg,fmt(val));}
+  });
+  el('text',{x:0,y:H-4,'font-size':13.5,fill:C.muted},svg,'Axis starts at 4,000. Low: Feb (5,356). High: Oct (7,172).');
+})();
+
+/* ---- 4. night vs day dumbbell ---- */
+(function(){
+  const svg=document.getElementById('c-night');const W=svg.getBoundingClientRect().width,H=208;
+  const d=[['Capitol Hill',1019,489],['First Hill',516,359],['Northgate',476,380],['SLU/Cascade',449,402],['Downtown Comm.',436,581],['Queen Anne',399,304],['Belltown',380,238],['Chinatown/ID',378,327],['University',340,276],['Pioneer Square',329,215]];
+  const LBL=150,T=4,rh=20,max=1100,iw=W-LBL-60;const sx=v=>LBL+v/max*iw;
+  [0,250,500,750,1000].forEach(g=>{el('line',{x1:sx(g),x2:sx(g),y1:T,y2:T+rh*d.length,stroke:C.grid},svg);});
+  d.forEach(([k,n,dy],i)=>{const y=T+i*rh+rh/2;
+    el('text',{x:LBL-10,y:y+5,'text-anchor':'end','font-size':14.5,fill:C.ink2,'font-weight':i==0?900:400},svg,k);
+    el('line',{x1:sx(Math.min(n,dy)),x2:sx(Math.max(n,dy)),y1:y,y2:y,stroke:'#bdbdbd','stroke-width':3},svg);
+    el('circle',{cx:sx(dy),cy:y,r:6.5,fill:C.day,stroke:'#fff','stroke-width':2},svg);
+    el('circle',{cx:sx(n),cy:y,r:6.5,fill:C.night,stroke:'#fff','stroke-width':2},svg);
+    el('title',{},svg.lastChild,`${k}: night ${n}, day ${dy}`);
+    const ratio=(n/dy).toFixed(2);
+    el('text',{x:W-2,y:y+5,'text-anchor':'end','font-size':14.5,'font-weight':900,fill:n<dy?C.muted:C.ink},svg,ratio+'×');
+  });
+})();
+</script>
+</body>
+</html>
