@@ -1,0 +1,5 @@
+# Copy this file to routing.properties (same folder) and paste your openrouteservice key.
+# Free key: https://openrouteservice.org/dev/#/signup
+# routing.properties is git-ignored, so your key stays on your machine.
+# You can also set the ORS_API_KEY environment variable instead.
+ors.apiKey=your-openrouteservice-api-key
