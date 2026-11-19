@@ -4,6 +4,8 @@
 -- Requires MySQL 8.0+. Run in one session:
 --   mysql --local-infile=1 -u root -p < crime_radar_all.sql
 -- Safe to re-run: drops and rebuilds everything.
+-- BUT once sql/app_tables.sql has run, first run `scripts\setup-db.ps1 --drop-only`
+-- (the app tables point at AppUsers and RouteRecommendations, so MySQL cannot drop those).
 -- ============================================================
 
 SET GLOBAL local_infile = 1;
@@ -265,7 +267,7 @@ CREATE TABLE RouteRecommendations (
 
 
 -- ============================================================
--- PART 3: LOAD SPD CRIME DATA (last 4 years, newest 150,000)
+-- PART 3: LOAD SPD CRIME DATA (every valid offense of the last 4 years, about 319,000)
 -- ============================================================
 
 DROP TEMPORARY TABLE IF EXISTS stg;
@@ -306,7 +308,8 @@ IGNORE 1 LINES;
 
 SELECT COUNT(*) AS StagingRows FROM stg;
 
--- 3c. Clean, dedupe, filter, and keep the newest 150,000
+-- 3c. Clean, dedupe, and keep every offense of the last 4 years
+--     (the app's heatmap and risk model use all 4 years)
 CREATE TEMPORARY TABLE sel AS
 SELECT
     x.rpt,
@@ -350,8 +353,7 @@ FROM (
 ) x
 WHERE x.rn = 1
   AND x.occ >= DATE_SUB(CURDATE(), INTERVAL 4 YEAR)
-ORDER BY x.occ DESC
-LIMIT 150000;
+ORDER BY x.occ DESC;
 
 SELECT COUNT(*) AS SelectedRows FROM sel;
 

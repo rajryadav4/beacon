@@ -1,0 +1,66 @@
+code_description,group_key
+Simple Assault,violent
+Aggravated Assault,violent
+Intimidation,violent
+Kidnapping/Abduction,violent
+Rape,violent
+Sodomy,violent
+Sexual Assault With An Object,violent
+Fondling,violent
+Statutory Rape,violent
+Incest,violent
+Murder & Nonnegligent Manslaughter,violent
+Negligent Manslaughter,violent
+"Human Trafficking, Commercial Sex Acts",violent
+"Human Trafficking, Involuntary Servitude",violent
+Robbery,robbery
+All Other Larceny,theft
+Shoplifting,theft
+Theft From Building,theft
+Pocket-picking,theft
+Purse-snatching,theft
+Theft From Coin-Operated Machine or Device,theft
+Stolen Property Offenses,theft
+Theft From Motor Vehicle,vehicle
+Motor Vehicle Theft,vehicle
+Theft of Motor Vehicle Parts or Accessories,vehicle
+Burglary/Breaking & Entering,burglary
+Trespass of Real,burglary
+Destruction/Damage/Vandalism of Property,vandalism
+Arson,vandalism
+Drug/Narcotic Violations,drugs
+Drug Equipment Violations,drugs
+Weapon Law Violations,drugs
+Disorderly Conduct,drugs
+Curfew/Loitering/Vagrancy Violations,drugs
+Drunkenness,drugs
+Liquor Law Violations,drugs
+Prostitution,drugs
+Purchasing Prostitution,drugs
+Assisting or Promoting Prostitution,drugs
+All Other Offenses,other
+Driving Under the Influence,other
+Violation of No Contact Orders,other
+"Family Offenses, Nonviolent",other
+Pornography/Obscene Material,other
+Animal Cruelty,other
+Peeping Tom,other
+Betting/Wagering,other
+Gambling Equipment Violation,other
+Operating/Promoting/Assisting Gambling,other
+Credit Card/Automated Teller Machine Fraud,other
+Identity Theft,other
+False Pretenses/Swindle/Confidence Game,other
+Wire Fraud,other
+Counterfeiting/Forgery,other
+Impersonation,other
+Extortion/Blackmail,other
+Hacking/Computer Invasion,other
+Embezzlement,other
+Bad Checks,other
+Welfare Fraud,other
+Bribery,other
+UNKNOWN,other
+-,other
+Not Reportable to NIBRS,exclude
+Justifiable Homicide,exclude

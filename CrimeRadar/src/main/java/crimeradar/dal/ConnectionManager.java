@@ -45,8 +45,20 @@ public class ConnectionManager {
 
 	private static Properties loadProperties() {
 		Properties dbProperties = new Properties();
-		InputStream in = ConnectionManager.class.getClassLoader()
-			.getResourceAsStream(PROPERTIES_FILE);
+		InputStream in = null;
+		// Optional: CRIMERADAR_DB_PROPERTIES points at another properties file
+		// (used to test against a scratch database). Normally it is not set.
+		String override = System.getenv("CRIMERADAR_DB_PROPERTIES");
+		if (override != null && !override.isEmpty()) {
+			try {
+				in = new java.io.FileInputStream(override);
+			} catch (IOException e) {
+				throw new IllegalStateException("Cannot read CRIMERADAR_DB_PROPERTIES file.", e);
+			}
+		}
+		if (in == null) {
+			in = ConnectionManager.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE);
+		}
 		if (in == null) {
 			throw new IllegalStateException(PROPERTIES_FILE + " not found on the classpath. "
 				+ "Copy src/main/java/db.properties.example to src/main/java/db.properties "

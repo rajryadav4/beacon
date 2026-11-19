@@ -114,6 +114,25 @@ public class AppUsersDao {
 		}
 	}
 
+	/** Store a new password hash (used to upgrade old SHA-256 hashes to PBKDF2 at login). */
+	public void updatePasswordHash(long userId, String newPasswordHash) throws SQLException {
+		String updateAppUser = "UPDATE AppUsers SET PasswordHash=? WHERE UserId=?;";
+		Connection connection = null;
+		PreparedStatement updateStmt = null;
+		try {
+			connection = connectionManager.getConnection();
+			updateStmt = connection.prepareStatement(updateAppUser);
+			updateStmt.setString(1, newPasswordHash);
+			updateStmt.setLong(2, userId);
+			updateStmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			DaoUtils.close(connection, updateStmt, null);
+		}
+	}
+
 	/**
 	 * Delete the AppUsers instance in one transaction. The schema has no ON DELETE CASCADE, so
 	 * the user's EmergencyContacts and SOSAlerts are deleted first; RouteRecommendations are

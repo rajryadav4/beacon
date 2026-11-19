@@ -5,3 +5,7 @@ data/*.csv
 # Java app: compiled output and local database credentials
 CrimeRadar/build/
 CrimeRadar/src/main/java/db.properties
+
+# ML: trained model binaries (rebuilt by ml/train_risk_model.py)
+ml/output/*.joblib
+__pycache__/

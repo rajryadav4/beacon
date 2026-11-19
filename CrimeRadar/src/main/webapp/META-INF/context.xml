@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Tomcat context settings for CrimeRadar.
+  The session cookie (JSESSIONID) is HttpOnly and SameSite=Lax:
+  the browser does not send it on cross-site POST requests.
+-->
+<Context useHttpOnly="true">
+	<CookieProcessor className="org.apache.tomcat.util.http.Rfc6265CookieProcessor"
+		sameSiteCookies="lax" />
+</Context>

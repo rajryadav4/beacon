@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>CrimeRadar · Safer routes through Seattle</title>
+  <meta name="description" content="CrimeRadar turns 4 years of Seattle Police data into a crime heatmap, time-aware safe routes and danger alerts.">
+  <meta name="theme-color" content="#12152a">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"
+        integrity="sha256-V2sIX92Uh6ZaGSFTKMHghsB85b9toJtmazgG09AI2uk=" crossorigin="">
+  <link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body>
+  <div id="map" class="map" role="region" aria-label="Map of Seattle"></div>
+  <div class="map-vignette" aria-hidden="true"></div>
+
+  <!-- Boot: shown until the crime data is loaded -->
+  <div id="boot" class="boot" role="status" aria-live="polite">
+    <div class="boot-inner">
+      <div class="radar" aria-hidden="true"></div>
+      <div class="brand brand-lg" style="color:#fff">CrimeRadar</div>
+      <div class="boot-text" id="boot-text">Loading 4 years of Seattle crime data…</div>
+      <button class="btn btn-secondary" id="boot-retry" type="button" hidden>Try again</button>
+    </div>
+  </div>
+
+  <!-- Login: the first screen for a signed-out visitor -->
+  <section id="login" class="login" hidden aria-labelledby="login-heading">
+    <div class="login-layout">
+      <div class="login-pitch">
+        <div class="radar" aria-hidden="true"></div>
+        <div class="brand brand-lg"><img src="assets/img/logo.svg" alt=""> CrimeRadar</div>
+        <h1>Know the <span class="grad-text">safer way</span>,<br>at the time you travel.</h1>
+        <p>CrimeRadar reads Seattle Police reports, predicts the risk of every block for each time of day, and suggests the safer route for how you travel.</p>
+        <div class="pitch-stats">
+          <div class="pitch-stat"><b data-stat="incidents">285,000+</b><span>police reports</span></div>
+          <div class="pitch-stat"><b data-stat="years">4 years</b><span>of history</span></div>
+          <div class="pitch-stat"><b data-stat="hoods">58</b><span>neighborhoods ranked</span></div>
+        </div>
+        <div class="pitch-features" aria-label="Features">
+          <span>Live crime heatmap</span><span>ML risk model</span><span>Time-aware safe routes</span><span>Danger alerts</span>
+        </div>
+      </div>
+
+      <div class="login-card">
+        <h2 id="login-heading">Sign in</h2>
+        <p class="sub" id="login-sub">Your saved places and route settings stay with your account.</p>
+        <form id="login-form" novalidate>
+          <div class="field" id="field-name" hidden>
+            <label for="login-name">Your name</label>
+            <input class="input" id="login-name" name="displayName" autocomplete="name" maxlength="100">
+          </div>
+          <div class="field">
+            <label for="login-email">Email</label>
+            <input class="input" id="login-email" name="email" type="email" autocomplete="email" maxlength="255" required>
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input class="input" id="login-password" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required>
+          </div>
+          <p class="form-error" id="login-error" role="alert" hidden></p>
+          <button class="btn btn-primary btn-block" id="login-submit" type="submit">Sign in</button>
+        </form>
+        <div class="divider">or</div>
+        <button class="btn btn-secondary btn-block" id="login-demo" type="button">Explore with the demo account</button>
+        <p class="demo-note">The demo account has a saved Home and Work.</p>
+        <p class="login-switch"><span id="login-switch-text">New to CrimeRadar?</span>
+          <button class="link" id="login-switch" type="button">Create an account</button></p>
+        <p class="login-foot">Data: Seattle Police Department, data.seattle.gov · <span id="login-range">2022–2026</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- App -->
+  <div id="app" hidden>
+    <aside class="panel" id="panel" aria-label="CrimeRadar">
+      <button class="sheet-handle" id="sheet-handle" type="button" aria-label="Expand panel" aria-expanded="false"></button>
+      <header class="panel-head">
+        <div class="brand"><img src="assets/img/logo.svg" alt=""> CrimeRadar</div>
+        <span class="mode-pill" id="mode-pill" title=""></span>
+      </header>
+      <p class="greeting" id="greeting"></p>
+
+      <div class="tabs" role="tablist" aria-label="Views">
+        <button class="tab" role="tab" id="tab-explore" aria-controls="view-explore" aria-selected="true" type="button">Explore</button>
+        <button class="tab" role="tab" id="tab-directions" aria-controls="view-directions" aria-selected="false" type="button">Directions</button>
+      </div>
+
+      <div class="panel-body" id="panel-body">
+        <!-- Explore -->
+        <section id="view-explore" role="tabpanel" aria-labelledby="tab-explore">
+          <div class="section">
+            <div class="row-between section-title">
+              <span>Time of day</span>
+              <span class="title-actions">
+                <button class="play-btn" id="play-day" type="button" aria-pressed="false" title="Watch crime move through a whole day">Play the day</button>
+                <button class="link" id="explore-now" type="button">Now</button>
+              </span>
+            </div>
+            <div class="seg" id="band-seg" role="radiogroup" aria-label="Time of day"></div>
+          </div>
+
+          <div class="section">
+            <div class="section-title"><span>Crime types</span>
+              <span><button class="link" id="groups-all" type="button">All</button> · <button class="link" id="groups-street" type="button">Street safety</button></span>
+            </div>
+            <div class="chips" id="group-chips"></div>
+          </div>
+
+          <div class="section">
+            <div class="section-title"><span>Map layer</span></div>
+            <div class="seg" id="layer-seg" role="radiogroup" aria-label="Map layer">
+              <label><input type="radio" name="layer" value="heat" checked><span>Heatmap<small>where crime happened</small></span></label>
+              <label><input type="radio" name="layer" value="grid"><span>Risk grid<small>model prediction</small></span></label>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="stats" id="explore-stats"></div>
+          </div>
+
+          <div class="section">
+            <div class="section-title"><span>Areas, most to least dangerous</span><small id="rank-caption"></small></div>
+            <ol class="rank-list" id="rank-list"></ol>
+            <button class="btn btn-ghost btn-sm rank-more" id="rank-more" type="button">Show all areas</button>
+            <p class="hint">Danger index = severity-weighted incidents per year per km², for the selected time and crime types.</p>
+          </div>
+        </section>
+
+        <!-- Directions -->
+        <section id="view-directions" role="tabpanel" aria-labelledby="tab-directions" hidden>
+          <div class="section">
+            <div class="trip-form">
+              <div class="place-field">
+                <span class="marker marker-from" aria-hidden="true"></span>
+                <label class="sr-only" for="from-input">From</label>
+                <input id="from-input" type="text" placeholder="Choose start" autocomplete="off" spellcheck="false"
+                       role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="from-suggest">
+                <button class="icon-btn" id="from-gps" type="button" title="Use my location" aria-label="Use my location"></button>
+                <ul class="suggest" id="from-suggest" role="listbox" aria-label="Start suggestions" hidden></ul>
+              </div>
+              <div class="place-field">
+                <span class="marker marker-to" aria-hidden="true"></span>
+                <label class="sr-only" for="to-input">To</label>
+                <input id="to-input" type="text" placeholder="Where to?" autocomplete="off" spellcheck="false"
+                       role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="to-suggest">
+                <button class="icon-btn" id="to-save" type="button" title="Save this place" aria-label="Save this place" hidden></button>
+                <ul class="suggest" id="to-suggest" role="listbox" aria-label="Destination suggestions" hidden></ul>
+              </div>
+              <button class="icon-btn swap-btn" id="swap-btn" type="button" title="Swap start and destination" aria-label="Swap start and destination"></button>
+            </div>
+            <div class="quick" id="quick-places" aria-label="Saved places"></div>
+          </div>
+
+          <div class="options-row">
+            <div class="seg" id="mode-seg" role="radiogroup" aria-label="Travel mode"></div>
+            <div class="time-row">
+              <div class="seg" role="radiogroup" aria-label="Departure time">
+                <label><input type="radio" name="when" value="now" checked><span>Leave now</span></label>
+                <label><input type="radio" name="when" value="at"><span>Leave at…</span></label>
+              </div>
+              <label class="sr-only" for="depart-time">Departure time</label>
+              <input class="time-input" id="depart-time" type="time" step="900" hidden>
+            </div>
+          </div>
+
+          <div class="routes" id="routes" aria-live="polite"></div>
+        </section>
+
+        <!-- Trip in progress -->
+        <section id="view-trip" hidden aria-label="Trip in progress"></section>
+      </div>
+    </aside>
+
+    <button class="avatar" id="avatar-btn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="account-menu" title="Account"></button>
+    <div class="account-menu" id="account-menu" role="dialog" aria-modal="false" aria-label="Account" hidden></div>
+
+    <div class="time-badge" id="time-badge" aria-live="polite"></div>
+    <div class="legend" id="legend"></div>
+    <button class="map-btn" id="locate-btn" type="button" title="Show my location" aria-label="Show my location"></button>
+    <button class="map-btn tilt-btn" id="tilt-btn" type="button" title="3D view" aria-label="3D view" aria-pressed="false" hidden>3D</button>
+    <div class="danger-banner" id="danger-banner" role="alert" hidden></div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"
+          integrity="sha256-65UqrlgGoRAnKfKRuriH3eeDrOhZgZo1SCenduc+SGo=" crossorigin=""></script>
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"
+          integrity="sha256-vpYzxNhw4m+zfxz+XFp3GBZnEUAD6hYgeseFDY2ordE=" crossorigin=""></script>
+  <script type="module" src="assets/js/main.js"></script>
+</body>
+</html>

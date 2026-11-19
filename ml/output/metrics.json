@@ -1,0 +1,196 @@
+{
+  "generatedAt": "2026-11-19T09:27:44Z",
+  "dataRange": {
+    "from": "2022-11-19",
+    "to": "2026-11-17"
+  },
+  "windows": {
+    "W1": "2022-11-19 to 2023-11-17",
+    "W2": "2023-11-18 to 2024-11-17",
+    "W3": "2024-11-18 to 2025-11-17",
+    "W4": "2025-11-18 to 2026-11-17"
+  },
+  "train": {
+    "features": "2022-11-19 to 2023-11-17 + 2023-11-18 to 2024-11-17",
+    "target": "2024-11-18 to 2025-11-17",
+    "rows": 16768
+  },
+  "test": {
+    "features": "2023-11-18 to 2024-11-17 + 2024-11-18 to 2025-11-17",
+    "target": "2025-11-18 to 2026-11-17",
+    "rows": 16768,
+    "totalActual": 64549.5
+  },
+  "cells": 4192,
+  "unknownTimeLeftOut": 24641,
+  "results": {
+    "model": {
+      "poissonDeviance": 2.1899,
+      "mae": 2.0347,
+      "spearman": 0.698,
+      "hotspotCapture10": 0.6344,
+      "totalPredicted": 66957.0
+    },
+    "lastYear": {
+      "name": "last-year counts",
+      "poissonDeviance": 5.8135,
+      "mae": 2.3811,
+      "spearman": 0.5967,
+      "hotspotCapture10": 0.6182,
+      "totalPredicted": 70953.5
+    },
+    "meanTwoYears": {
+      "name": "mean of the last two years",
+      "poissonDeviance": 3.61,
+      "mae": 2.3305,
+      "spearman": 0.6432,
+      "hotspotCapture10": 0.6298,
+      "totalPredicted": 74735.8
+    }
+  },
+  "bestBaseline": "meanTwoYears",
+  "modelWins": 3,
+  "shipped": "model",
+  "params": {
+    "loss": "poisson",
+    "learning_rate": 0.05,
+    "max_iter": 300,
+    "max_leaf_nodes": 31,
+    "min_samples_leaf": 40,
+    "l2_regularization": 1.0,
+    "early_stopping": false,
+    "random_state": 42
+  },
+  "trainSeconds": 2.23,
+  "featureImportance": [
+    {
+      "feature": "cell_total_mean2",
+      "devianceIncrease": 6.1189
+    },
+    {
+      "feature": "sev_mean2",
+      "devianceIncrease": 2.1494
+    },
+    {
+      "feature": "sm3_mean2",
+      "devianceIncrease": 0.0615
+    },
+    {
+      "feature": "lat",
+      "devianceIncrease": 0.0581
+    },
+    {
+      "feature": "trend",
+      "devianceIncrease": 0.0475
+    },
+    {
+      "feature": "sm3_last",
+      "devianceIncrease": 0.0375
+    },
+    {
+      "feature": "nb_rate",
+      "devianceIncrease": 0.0275
+    },
+    {
+      "feature": "sev_last",
+      "devianceIncrease": 0.0259
+    },
+    {
+      "feature": "band_evening",
+      "devianceIncrease": 0.0173
+    },
+    {
+      "feature": "band_morning",
+      "devianceIncrease": 0.0164
+    },
+    {
+      "feature": "grp_other",
+      "devianceIncrease": 0.0137
+    },
+    {
+      "feature": "sev_prev",
+      "devianceIncrease": 0.0135
+    },
+    {
+      "feature": "sm5_mean2",
+      "devianceIncrease": 0.013
+    },
+    {
+      "feature": "lng",
+      "devianceIncrease": 0.0124
+    },
+    {
+      "feature": "grp_robbery",
+      "devianceIncrease": 0.0067
+    },
+    {
+      "feature": "grp_theft",
+      "devianceIncrease": 0.005
+    },
+    {
+      "feature": "grp_vandalism",
+      "devianceIncrease": 0.0045
+    },
+    {
+      "feature": "grp_burglary",
+      "devianceIncrease": 0.0023
+    },
+    {
+      "feature": "band_afternoon",
+      "devianceIncrease": 0.0019
+    },
+    {
+      "feature": "grp_vehicle",
+      "devianceIncrease": 0.0014
+    },
+    {
+      "feature": "band_night",
+      "devianceIncrease": 0.0005
+    },
+    {
+      "feature": "grp_violent",
+      "devianceIncrease": -0.0021
+    },
+    {
+      "feature": "grp_drugs",
+      "devianceIncrease": -0.0064
+    }
+  ],
+  "quantiles": {
+    "q50": 0.99,
+    "q75": 2.45,
+    "q90": 7.16,
+    "q97": 23.76,
+    "q99": 45.81
+  },
+  "levels": {
+    "elevated": 7.16,
+    "high": 23.76
+  },
+  "levelQuantiles": {
+    "elevated": "q90",
+    "high": "q97"
+  },
+  "levelShares": {
+    "low": 0.8998,
+    "elevated": 0.0701,
+    "high": 0.0301
+  },
+  "nextYearTotal": 61337.4,
+  "metaModel": {
+    "version": "risk-2026-11-19",
+    "algorithm": "HistGradientBoostingRegressor (Poisson loss)",
+    "trainedOn": "2022-11-19 to 2025-11-17, tested on 2025-11-18 to 2026-11-17 (shipped model refit on 2022-11-19 to 2026-11-17)",
+    "metrics": {
+      "hotspotCapture10": 0.6344,
+      "spearman": 0.698,
+      "poissonDeviance": 2.1899
+    },
+    "baseline": {
+      "name": "mean of the last two years",
+      "hotspotCapture10": 0.6298,
+      "spearman": 0.6432,
+      "poissonDeviance": 3.61
+    }
+  }
+}
