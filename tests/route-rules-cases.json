@@ -1,0 +1,95 @@
+{
+  "about": "Route decision cases shared by the Java rules (RouteRulesSharedCasesTest) and the browser copy (node tools/check_route_rules.mjs). Durations in seconds, exposure null = unknown.",
+  "cases": [
+    {
+      "name": "Same exposure: the faster route wins",
+      "mode": "walk", "preference": "balanced",
+      "routes": [{ "id": "a", "duration": 720, "distance": 1000, "exposure": 50 }, { "id": "b", "duration": 840, "distance": 1100, "exposure": 50 }],
+      "expect": { "recommendedId": "a", "explanationContains": ["lowest crime exposure"] }
+    },
+    {
+      "name": "Small improvement: keep the fastest route",
+      "mode": "walk", "preference": "balanced",
+      "routes": [{ "id": "a", "duration": 720, "distance": 1000, "exposure": 50 }, { "id": "b", "duration": 840, "distance": 1100, "exposure": 46 }],
+      "expect": { "recommendedId": "a", "explanationContains": ["only 8% lower", "15% needed"] }
+    },
+    {
+      "name": "Big improvement for 2 extra minutes: take it",
+      "mode": "walk", "preference": "balanced",
+      "routes": [{ "id": "a", "duration": 720, "distance": 1000, "exposure": 80 }, { "id": "b", "duration": 840, "distance": 1100, "exposure": 45 }],
+      "expect": { "recommendedId": "b", "explanationContains": ["This walking route adds 2 min", "14 min instead of 12 min", "44% lower"] }
+    },
+    {
+      "name": "Plan example: 12, 14 and 22 minutes; the 22-minute route is over the 15-minute limit",
+      "mode": "walk", "preference": "balanced",
+      "routes": [{ "id": "a", "duration": 720, "distance": 1000, "exposure": 80 }, { "id": "b", "duration": 840, "distance": 1100, "exposure": 45 }, { "id": "c", "duration": 1320, "distance": 1700, "exposure": 20 }],
+      "expect": { "recommendedId": "b" }
+    },
+    {
+      "name": "All safer routes too slow: say so",
+      "mode": "walk", "preference": "balanced",
+      "routes": [{ "id": "a", "duration": 720, "distance": 1000, "exposure": 80 }, { "id": "c", "duration": 1320, "distance": 1700, "exposure": 20 }],
+      "expect": { "recommendedId": "a", "explanationContains": ["75% lower", "takes 22 min", "over your limit of 15 min"] }
+    },
+    {
+      "name": "Fastest preset never detours",
+      "mode": "walk", "preference": "fastest",
+      "routes": [{ "id": "a", "duration": 720, "distance": 1000, "exposure": 80 }, { "id": "b", "duration": 750, "distance": 1050, "exposure": 10 }],
+      "expect": { "recommendedId": "a", "explanationContains": ["over your limit of 12 min"] }
+    },
+    {
+      "name": "The smaller of % and minutes applies (30-min walk: 5 min, not 7.5)",
+      "mode": "walk", "preference": "balanced",
+      "routes": [{ "id": "a", "duration": 1800, "distance": 2400, "exposure": 80 }, { "id": "b", "duration": 2094, "distance": 2600, "exposure": 10 }, { "id": "c", "duration": 2130, "distance": 2700, "exposure": 5 }],
+      "expect": { "recommendedId": "b" }
+    },
+    {
+      "name": "Equal exposure among alternatives: the faster one",
+      "mode": "walk", "preference": "balanced",
+      "routes": [{ "id": "a", "duration": 720, "distance": 1000, "exposure": 80 }, { "id": "b", "duration": 840, "distance": 1100, "exposure": 40 }, { "id": "c", "duration": 780, "distance": 1050, "exposure": 40 }],
+      "expect": { "recommendedId": "c" }
+    },
+    {
+      "name": "No crime predicted anywhere: fastest route",
+      "mode": "walk", "preference": "balanced",
+      "routes": [{ "id": "a", "duration": 720, "distance": 1000, "exposure": 0 }, { "id": "b", "duration": 840, "distance": 1100, "exposure": 0 }],
+      "expect": { "recommendedId": "a", "explanationContains": ["No crime is predicted"] }
+    },
+    {
+      "name": "Only one route",
+      "mode": "walk", "preference": "balanced",
+      "routes": [{ "id": "a", "duration": 720, "distance": 1000, "exposure": 80 }],
+      "expect": { "recommendedId": "a", "explanationContains": ["Only one walking route"] }
+    },
+    {
+      "name": "Fastest route could not be scored: never guess",
+      "mode": "walk", "preference": "balanced",
+      "routes": [{ "id": "a", "duration": 720, "distance": 1000, "exposure": null }, { "id": "b", "duration": 840, "distance": 1100, "exposure": 10 }],
+      "expect": { "recommendedId": "a", "explanationContains": ["could not be evaluated"] }
+    },
+    {
+      "name": "Unscored alternative: do not claim the fastest is lowest",
+      "mode": "walk", "preference": "balanced",
+      "routes": [{ "id": "a", "duration": 720, "distance": 1000, "exposure": 100 }, { "id": "b", "duration": 840, "distance": 1100, "exposure": null }],
+      "expect": { "recommendedId": "a", "explanationContains": ["could not be scored"] }
+    },
+    {
+      "name": "Safer preset allows a longer detour (12 to 18 min) with a 10% bar",
+      "mode": "walk", "preference": "safer",
+      "routes": [{ "id": "a", "duration": 720, "distance": 1000, "exposure": 80 }, { "id": "c", "duration": 1080, "distance": 1500, "exposure": 70 }],
+      "expect": { "recommendedId": "c", "explanationContains": ["adds 6 min", "13% lower"] }
+    },
+    {
+      "name": "Cycling uses its own limits and words",
+      "mode": "bike", "preference": "balanced",
+      "routes": [{ "id": "a", "duration": 600, "distance": 2500, "exposure": 80 }, { "id": "b", "duration": 700, "distance": 2800, "exposure": 40 }],
+      "expect": { "recommendedId": "b", "explanationContains": ["This cycling route"] }
+    },
+    {
+      "name": "Driving cap is 8 minutes: one second over is excluded",
+      "mode": "car", "preference": "balanced",
+      "routes": [{ "id": "a", "duration": 2700, "distance": 30000, "exposure": 100 }, { "id": "b", "duration": 3181, "distance": 32000, "exposure": 10 }],
+      "expect": { "recommendedId": "a", "explanationContains": ["over your limit of 53 min"] }
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 // The risk model in the browser: grid lookups, levels, area ranking and route scoring.
 // The numbers come from the ML model output (grid.json risk) and the incident counts (grid.json counts).
 
-import { densify } from './geo.js';
+import { densify, haversine } from './geo.js';
 
 export const STREET_GROUPS = [0, 1, 2, 6]; // assault, robbery, theft, drugs/weapons/disorder: what a person on the street meets
 /** Crime types that matter for each travel mode (used for the counts and the "Why?" breakdown). */
@@ -142,6 +142,44 @@ export class RiskModel {
   }
 
   // ---- routes ----
+  /**
+   * Total crime exposure of a route, as in the server's MlRouteRiskScorer: the sum over 25 m steps of
+   * (step km x model risk of the step's block, in the time band when the traveller reaches it).
+   * Total, not average, so a long detour is not rewarded for being long. `matched` is the share of the
+   * route on the Seattle grid; below 0.5 the exposure is unknown (null), never zero.
+   * @param coords [[lat, lng], ...]  @param durationSec route duration  @param hour,minute departure (Seattle)
+   */
+  routeExposure(coords, durationSec, hour, minute) {
+    let total = 0;
+    for (let i = 1; i < coords.length; i++) total += haversine(coords[i - 1], coords[i]);
+    if (!(total > 0) || !(durationSec > 0)) return { exposure: null, matched: 0 };
+    const startSec = hour * 3600 + minute * 60;
+    let exposure = 0;
+    let matchedM = 0;
+    let travelled = 0;
+    for (let i = 1; i < coords.length; i++) {
+      const a = coords[i - 1];
+      const b = coords[i];
+      const seg = haversine(a, b);
+      if (seg <= 0) continue;
+      const steps = Math.max(1, Math.ceil(seg / 25));
+      const step = seg / steps;
+      for (let s = 0; s < steps; s++) {
+        const f = (s + 0.5) / steps;
+        const id = this.cellId(a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f);
+        if (id < 0) continue;
+        const atSec = startSec + Math.round((durationSec * (travelled + seg * f)) / total);
+        const band = Math.floor((Math.floor(atSec / 3600) % 24) / 6);
+        const cell = this.cells.get(id);
+        exposure += (step / 1000) * (cell ? cell.r[band] : 0);
+        matchedM += step;
+      }
+      travelled += seg;
+    }
+    const matched = Math.min(1, matchedM / total);
+    return { exposure: matched >= 0.5 ? exposure : null, matched };
+  }
+
   scoreRoute(coords, mode, band) {
     const pts = densify(coords, 25);
     const vul = this.vulnerability(mode);

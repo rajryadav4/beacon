@@ -20,7 +20,7 @@ Source of truth: [`sql/crime_radar_all.sql`](../sql/crime_radar_all.sql) (build 
 | Can we upsert daily updates? | **Yes.** `UNIQUE (SourceId, SourceOffenseId)` on `CrimeIncidents`. `SourceOffenseId = ReportNumber-OffenseId` | `INSERT … ON DUPLICATE KEY UPDATE` works today for a daily sync job |
 | Do incidents have coordinates? | **Yes.** `Latitude`, `Longitude` (invalid ones set to NULL during load) | Enables grid-based scoring of real routes ([04](04-recommendation-engine.md)) |
 | Do neighborhoods have boundaries? | **No.** Name + precinct only | Can't do polygon matching without importing MCPP GeoJSON |
-| Do routes have street geometry? | **No.** Start/end points + 2 segments each with a neighborhood and distance | Fine for the Milestone 4 demo; real routing needs openrouteservice |
+| Do routes have street geometry? | **No.** Start/end points + 2 segments each with a neighborhood and distance | Fine for the Milestone 4 demo; real routes come from OSRM |
 | Indexes | `OccurredAt`, `NeighborhoodId`, `CategoryId` | Good for 90-day and time-of-day queries |
 
 ### Real vs. generated data

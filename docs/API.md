@@ -199,7 +199,7 @@ Trip        = { "id": 9, "fromLabel": "...", "toLabel": "...", "toLat": 47.6, "t
 Demo account (seeded by the backend setup): `demo@crimeradar.app` / `CrimeRadar2026!`,
 with a Home and a Work place. It is a public test login for the exhibition, not a secret.
 
-## 4. Route scoring (done in the browser)
+## 4. Route scoring and the recommendation
 
 1. Get up to 3 routes from OSRM (`routing.openstreetmap.de`, profiles `foot`, `bike`, `car`).
 2. Walk each route every 25 m and look up the grid cell of each point.
@@ -207,10 +207,68 @@ with a Home and a Work place. It is a public test login for the exhibition, not 
 4. `adjusted = intensity * vulnerability[mode]`. The level uses the thresholds in `meta.risk.levels`.
 5. `score` (0-100) = `100 * ln(1 + adjusted) / ln(1 + maxCellRisk)`, where `maxCellRisk` is the largest
    risk value in `grid.json`. (A quantile scale capped at q99 gave every downtown evening route 100.)
-6. Ranking: `w * normRisk + (1 - w) * normDuration`, with `w = preferences.safetyWeight`.
-   Map colors: rank 1 = green (recommended); of the others, the riskiest = red (most dangerous), the rest = orange
-   (moderate). With 2 routes, the other one is red only if it is riskier than rank 1.
+6. Recommendation (section 5): `exposure` = sum over 25 m steps of `km x risk[band at arrival]` (total, not
+   average); then the decision rules with the preset from `preferences.safetyWeight`. The browser decides at once
+   (`recommend.js`), and in server mode `POST api/routes/recommend` replaces that decision.
+   Map colors: the recommended route = green; of the others, the most exposure = red (most dangerous), the rest =
+   orange (moderate). With 2 routes, the other one is red only if it has more exposure than the recommended one.
+   The 0-100 `score` above stays the display level on the cards.
 7. "Incidents along the route": sum of `counts[band*8 + g]` over the unique cells, divided by `dataRange.years`,
    for the groups that matter for the travel mode: walk and bike = 0, 1, 2, 6 (street crime);
    car = 0, 1, 3 (assault, robbery, vehicle crime).
 8. Demo account: the server resets its saved places, trips and preferences at each demo login (shared login).
+
+## 5. Route recommendation
+
+The rules are in `crimeradar.service.RecommendationService` (Java) and `assets/js/recommend.js` (browser copy).
+Both run `tests/route-rules-cases.json`. Design: [project-plan/04](../project-plan/04-recommendation-engine.md).
+
+Presets (`preference`, or `safetyWeight`: below 0.34 = fastest, below 0.67 = balanced, else safer):
+
+| Preset | Walk | Bike | Car | Minimum exposure gain |
+|---|---|---|---|---|
+| `fastest` | no detour | no detour | no detour | - |
+| `balanced` | 25% or 5 min | 20% or 6 min | 20% or 8 min | 15% |
+| `safer` | 50% or 10 min | 40% or 12 min | 40% or 15 min | 10% |
+
+The smaller of the two limits applies. A slower route is recommended only when it is within the limit and its
+exposure is lower by at least the minimum gain. Ties go to the faster route; an unknown exposure is never zero.
+
+### `POST api/routes/recommend`
+
+No sign-in needed. Header `X-CrimeRadar: 1` (as for every POST). JSON body:
+
+```json
+{ "mode": "walk", "departAt": "2026-11-19T21:15", "preference": "balanced",
+  "routes": [ { "id": "R1", "duration": 720, "distance": 980,
+                "coords": [[47.6097, -122.3422], [47.6191, -122.3203]] } ] }
+```
+
+- `mode`: `walk`, `bike` or `car` (also `walking`, `cycling`, `driving`).
+- `departAt`: Seattle local time, `YYYY-MM-DDTHH:MM`. Default: now.
+- `preference` or `safetyWeight` (0-1). Default: `balanced`.
+- `routes`: 1 to 5 routes; `duration` (s) and `distance` (m) > 0; `coords` 2 to 5,000 points as `[lat, lng]`.
+
+`200`:
+
+```json
+{ "recommendedId": "R2", "fastestId": "R1", "lowestExposureId": "R2", "preference": "balanced",
+  "maximumAllowedSeconds": 900,
+  "explanation": "This walking route adds 2 min to the fastest option (14 min instead of 12 min) and has 44% lower crime exposure.",
+  "warnings": ["Crime exposure uses risk model ...", "..."],
+  "routes": [ { "id": "R1", "exposure": 1.82, "withinLimit": true, "vsFastestPercent": null,
+                "dataQuality": { "confidence": null, "matchedGeometryFraction": 1.0, "demonstrationData": false, "messages": [] } } ] }
+```
+
+`exposure` is `null` when the route could not be scored (mostly outside Seattle, or no risk model loaded:
+the decision then uses travel time only and says so in `warnings`). Errors: `400` bad input, `403` missing header,
+`413` body over 2 MB.
+
+### `GET recommendroutes`
+
+Same engine with routing on the server (openrouteservice when `ORS_API_KEY` is set, otherwise OSRM).
+Parameters: `originLat`, `originLon`, `destinationLat`, `destinationLon`, `mode`, optional `departureTime`
+(ISO local, Seattle) and `preference`. Returns `{recommendedRoute, fastestRoute, lowestExposureRoute,
+alternativeRoutes, explanation, comparisonMetrics, warnings}` with full route geometry. `400` bad input,
+`502` routing failed.
+

@@ -35,7 +35,7 @@ CrimeRadar compares up to 3 routes (R1-R3):
 
 | On the card | Meaning |
 |---|---|
-| **Recommended** (green) | The best route for your "Route choice" setting (safety against travel time). |
+| **Recommended** (green) | The route with the least crime exposure that stays within your detour limit, or the fastest route when a detour is not worth it. The **Why this route?** line above the cards says which. |
 | **Moderate risk** (orange) | The middle option. |
 | **Most dangerous** (red) | The riskiest of the options. With only 2 routes, the other one is red only when it is riskier than the recommended one. |
 | **Safest** / **Fastest** | The route with the lowest risk / the shortest time. |
@@ -57,7 +57,7 @@ The colors compare the routes with each other. The badge on each card (Lower / E
 ## 5. Account menu (top-right circle)
 
 - **How I usually travel**: the default travel mode.
-- **Route choice**: a slider from Fastest to Safest. The default ranks routes 70% on safety and 30% on time.
+- **Route choice**: a slider from Fastest to Safest. Fastest never detours; the middle allows a walk 25% or 5 minutes longer (whichever is less) for at least 15% less crime exposure; the safe end (the default) allows 50% or 10 minutes for at least 10% less.
 - **Danger alerts**: on or off.
 - **Saved places**: remove a place (you can undo for a few seconds). To save a place, choose it as the destination and tap the star.
 - **Sign out**.
@@ -74,7 +74,7 @@ The colors compare the routes with each other. The badge on each card (Lower / E
 | 6 | **Directions** → **Home** | "Three routes on the map: green is recommended, orange is moderate, red is the most dangerous. Each has a risk score for this time and this travel mode." Open **Why?** on R1. |
 | 7 | Switch **Walk** → **Car**, then **Leave at…** 9:00 AM | "In a car, or in the morning, the same trip is safer." |
 | 8 | **Simulate** on a route with red dots | "CrimeRadar warns you before you enter a high-risk block." |
-| 9 | Account menu → **Route choice** slider | "Each user decides how much safety counts against time." |
+| 9 | Account menu → **Route choice** slider | "Each user decides how long a detour they accept. CrimeRadar never sends you on a long detour for a tiny gain, and the Why line says so." |
 
 ## 7. Privacy
 

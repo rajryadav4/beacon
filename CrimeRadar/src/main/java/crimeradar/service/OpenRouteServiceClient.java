@@ -1,7 +1,7 @@
 package crimeradar.service;
 
 import java.io.IOException;
-import java.io.StringReader;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -15,18 +15,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import com.google.gson.Strictness;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonToken;
-
 import crimeradar.model.Coordinate;
 import crimeradar.model.RouteOption;
 import crimeradar.model.RouteRequest;
 import crimeradar.model.RoutingResponse;
 import crimeradar.model.TravelMode;
+import crimeradar.util.Json;
 
 /**
  * ORS Directions GeoJSON adapter. No live traffic or future traffic
@@ -80,7 +74,7 @@ public final class OpenRouteServiceClient implements RoutingService {
             throw new IllegalArgumentException(
                     "ORS alternative routes are limited to 100 km; choose closer endpoints.");
         }
-        String body = new Gson().toJson(Map.of("coordinates", List.of(
+        String body = Json.write(Map.of("coordinates", List.of(
                 List.of(request.origin().longitude(), request.origin().latitude()),
                 List.of(request.destination().longitude(), request.destination().latitude())),
                 "alternative_routes", Map.of("target_count", 3, "share_factor", .6, "weight_factor", 1.4),
@@ -123,39 +117,35 @@ public final class OpenRouteServiceClient implements RoutingService {
         return new RoutingException("Routing provider returned HTTP " + status + "." + reason);
     }
 
-    private static RoutingResponse mapResponse(String body, TravelMode mode) throws RoutingException {
+    static RoutingResponse mapResponse(String body, TravelMode mode) throws RoutingException {
         try {
-            var reader = new JsonReader(new StringReader(body));
-            reader.setStrictness(Strictness.STRICT);
-            var root = JsonParser.parseReader(reader).getAsJsonObject();
-            if (reader.peek() != JsonToken.END_DOCUMENT)
+            Map<String, Object> root = object(Json.parse(body));
+            if (!"FeatureCollection".equals(root.get("type")))
                 throw new IllegalArgumentException();
-            if (!"FeatureCollection".equals(root.get("type").getAsString()))
-                throw new IllegalArgumentException();
-            var features = root.getAsJsonArray("features");
+            List<Object> features = array(root.get("features"));
             var routes = new ArrayList<RouteOption>();
             var warnings = new ArrayList<String>();
             warnings.add("Travel durations are estimates without live traffic or future traffic predictions.");
             warnings.add("Routing attribution: openrouteservice / HeiGIT; OpenStreetMap contributors.");
-            if (root.has("metadata") && root.getAsJsonObject("metadata").has("attribution")) {
-                warnings.add(
-                        "Provider attribution: " + root.getAsJsonObject("metadata").get("attribution").getAsString());
+            if (root.get("metadata") instanceof Map<?, ?> metadata && metadata.get("attribution") instanceof String a) {
+                warnings.add("Provider attribution: " + a);
             }
-            for (var feature : features) {
-                var f = feature.getAsJsonObject();
-                if (!"Feature".equals(f.get("type").getAsString()))
+            for (Object feature : features) {
+                Map<String, Object> f = object(feature);
+                if (!"Feature".equals(f.get("type")))
                     throw new IllegalArgumentException();
-                var summary = f.getAsJsonObject("properties").getAsJsonObject("summary");
+                Map<String, Object> properties = object(f.get("properties"));
+                Map<String, Object> summary = object(properties.get("summary"));
                 double distance = number(summary.get("distance"));
                 double duration = number(summary.get("duration"));
                 if (distance <= 0 || duration <= 0)
                     throw new IllegalArgumentException();
-                var geo = f.getAsJsonObject("geometry");
-                if (!"LineString".equals(geo.get("type").getAsString()))
+                Map<String, Object> geo = object(f.get("geometry"));
+                if (!"LineString".equals(geo.get("type")))
                     throw new IllegalArgumentException();
                 var geometry = new ArrayList<Coordinate>();
-                for (var coordinate : geo.getAsJsonArray("coordinates")) {
-                    var c = coordinate.getAsJsonArray();
+                for (Object coordinate : array(geo.get("coordinates"))) {
+                    List<Object> c = array(coordinate);
                     if (c.size() < 2)
                         throw new IllegalArgumentException();
                     geometry.add(new Coordinate(number(c.get(0)), number(c.get(1))));
@@ -164,28 +154,44 @@ public final class OpenRouteServiceClient implements RoutingService {
                     throw new IllegalArgumentException();
                 String id = "ors-" + UUID.nameUUIDFromBytes((mode.name() + geometry).getBytes(StandardCharsets.UTF_8));
                 routes.add(new RouteOption(id, mode, distance, duration, geometry, null, null));
-                var properties = f.getAsJsonObject("properties");
-                if (properties.has("warnings")) {
-                    for (var w : properties.getAsJsonArray("warnings")) {
-                        warnings.add("Routing provider: " + w.getAsJsonObject().get("message").getAsString());
+                if (properties.containsKey("warnings")) {
+                    for (Object w : array(properties.get("warnings"))) {
+                        Object message = object(w).get("message");
+                        if (!(message instanceof String))
+                            throw new IllegalArgumentException();
+                        warnings.add("Routing provider: " + message);
                     }
                 }
             }
             if (routes.isEmpty())
                 warnings.add("Routing provider returned no routes for these endpoints.");
             return new RoutingResponse(routes, warnings);
-        } catch (RuntimeException | IOException e) {
+        } catch (RuntimeException e) {
             throw new RoutingException("Routing provider returned an invalid GeoJSON route response.", e);
         }
     }
 
-    private static double number(JsonElement e) {
-        if (e == null || !e.isJsonPrimitive() || !e.getAsJsonPrimitive().isNumber())
+    @SuppressWarnings("unchecked")
+    static Map<String, Object> object(Object value) {
+        if (!(value instanceof Map))
+            throw new IllegalArgumentException("Expected a JSON object.");
+        return (Map<String, Object>) value;
+    }
+
+    @SuppressWarnings("unchecked")
+    static List<Object> array(Object value) {
+        if (!(value instanceof List))
+            throw new IllegalArgumentException("Expected a JSON array.");
+        return (List<Object>) value;
+    }
+
+    static double number(Object value) {
+        if (!(value instanceof BigDecimal))
+            throw new IllegalArgumentException("Expected a JSON number.");
+        double d = ((BigDecimal) value).doubleValue();
+        if (!Double.isFinite(d))
             throw new IllegalArgumentException();
-        double value = e.getAsDouble();
-        if (!Double.isFinite(value))
-            throw new IllegalArgumentException();
-        return value;
+        return d;
     }
 
     private static double directDistance(Coordinate a, Coordinate b) {

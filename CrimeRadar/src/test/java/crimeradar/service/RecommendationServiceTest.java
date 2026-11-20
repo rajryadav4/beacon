@@ -32,7 +32,7 @@ class RecommendationServiceTest {
         assertEquals("b", result.lowestExposureRoute().routeId());
         assertEquals(100, result.comparisonMetrics().additionalSeconds());
         assertEquals(.30, result.comparisonMetrics().exposureImprovementFraction(), 1e-9);
-        assertTrue(result.explanation().contains("30.0%"));
+        assertTrue(result.explanation().contains("30%"));
     }
     @Test void percentageDetourRejected() {
         var result = compare(route("a", 600, 100d), route("b", 751, 1d));
@@ -120,7 +120,7 @@ class RecommendationServiceTest {
     @Test void unknownAlternativeDoesNotImplyThereIsNoLowerExposureRoute() {
         RecommendationResult result = compare(route("a", 600, 100d), route("b", 700, null));
         assertEquals("a", result.recommendedRoute().routeId());
-        assertTrue(result.explanation().contains("no scored practical alternative"));
+        assertTrue(result.explanation().contains("could not be scored"));
     }
     @Test void allScoresMissing() {
         var result = compare(route("a", 600, null), route("b", 700, null));
@@ -178,7 +178,7 @@ class RecommendationServiceTest {
         assertNull(compare(new RouteOption("a", a.travelMode(), -1, 600, a.geometry(), 1d, null)).recommendedRoute());
         assertNull(compare(new RouteOption("a", a.travelMode(), 100, 600, List.of(), 1d, null)).recommendedRoute());
         assertNull(compare(new RouteOption("a", a.travelMode(), 100, 600,
-                List.of(a.geometry().getFirst(), a.geometry().getFirst()), 1d, null)).recommendedRoute());
+                List.of(a.geometry().get(0), a.geometry().get(0)), 1d, null)).recommendedRoute());
         for (double distance : new double[] {0, Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY}) {
             assertNull(compare(new RouteOption("a", a.travelMode(), distance, 600, a.geometry(), 1d, null)).recommendedRoute());
         }

@@ -24,8 +24,8 @@ class RouteRecommendationEngineTest {
                 route("car", TravelMode.DRIVING, 10, 0d)), List.of());
         RouteRiskScorer scorer = (routes, departure) -> {
             assertEquals(request.departureTime(), departure); assertEquals(1, routes.size());
-            assertEquals(TravelMode.WALKING, routes.getFirst().travelMode());
-            assertNull(routes.getFirst().historicalExposureScore()); assertFalse(routes.getFirst().geometry().isEmpty());
+            assertEquals(TravelMode.WALKING, routes.get(0).travelMode());
+            assertNull(routes.get(0).historicalExposureScore()); assertFalse(routes.get(0).geometry().isEmpty());
             return List.of();
         };
         new RouteRecommendationEngine(source, scorer, new RecommendationService()).recommend(request);
@@ -37,9 +37,9 @@ class RouteRecommendationEngineTest {
         RoutingService source = r -> new RoutingResponse(List.of(first, duplicate), List.of());
         RouteRiskScorer scorer = (routes, departure) -> {
             assertEquals(1, routes.size());
-            assertEquals(first.geometry(), routes.getFirst().geometry());
-            assertNull(routes.getFirst().historicalExposureScore());
-            assertNull(routes.getFirst().dataQuality());
+            assertEquals(first.geometry(), routes.get(0).geometry());
+            assertNull(routes.get(0).historicalExposureScore());
+            assertNull(routes.get(0).dataQuality());
             return List.of(new RouteRiskScore("a", 42d, null));
         };
 

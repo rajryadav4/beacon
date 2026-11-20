@@ -9,47 +9,43 @@
 | Database | MySQL 8 | Keeps all Milestone 2 and 3 work |
 | Data access | JDBC + DAOs | Required for Milestone 4 |
 | Map | Leaflet + OpenStreetMap tiles | Free, open source |
-| Route generation | openrouteservice (hosted, free tier) | Walking / cycling / driving routes with alternatives |
+| Route generation | OSRM at routing.openstreetmap.de (no key); openrouteservice optional with `ORS_API_KEY` | Walking / cycling / driving routes with alternatives |
 | Recommendation logic | Java service + SQL | Explainable, cheap, testable ([04](04-recommendation-engine.md)) |
 | Daily data updates | Java importer (`HttpClient` + JDBC) | Same language, no extra infrastructure |
 | Scheduling | macOS `launchd` (or run manually) | Free. A paid server isn't needed. |
 | Optional ML | Python + pandas + scikit-learn, offline | Only if it beats a historical-average baseline |
-| Tests | Plain Java test runner (`crimeradar.tools.RecommendationEngineTest`) | Service logic is tested without a database or extra jars |
+| Tests | JUnit 5 via `CrimeRadar/pom.xml` (`mvn test`) + `node tools/check_route_rules.mjs` | Rules and scoring are tested without a database |
 
 > **The app targets Tomcat 9 and Java 17**, as set up in the merged Eclipse project (PR #1). Servlets import `javax.servlet.*`. Moving to Tomcat 10.1 later means switching every import to `jakarta.servlet.*` and swapping the JSTL jars, so do it all at once, not file by file.
 
-## Request flow
+## Request flow (route recommendations)
 
 ```
-RecommendRoute.jsp (start, destination, mode, departure time, detour limits)
-  → RecommendRoute servlet       validate input, build RecommendationSettings
-  → RouteRecommender
-       ├─ OpenRouteServiceClient  up to 3 route alternatives (geometry, distance, duration)
-       ├─ CrimeStatsDao (JDBC)    incident counts per grid cell + citywide time pattern
-       └─ RecommendationService   mode, detour, exposure and time rules
-  → RecommendRoute.jsp + Leaflet map
+Safe routes screen (directions.js): OSRM routes in the browser, instant decision (recommend.js)
+  → POST api/routes/recommend          RouteRecommendServlet
+       ├─ MlRouteRiskScorer (JDBC)     exposure from the ML risk grid (MapDataDao, cached)
+       └─ RecommendationService         mode, detour cap, minimum gain, explanation
+  → the server's decision replaces the browser's; offline mode keeps the browser's
 ```
 
-SQL calculates what the data says about each route. Java decides which route fits the user. Each layer has one job, which is what makes it testable.
+SQL and the ML model say how risky each block is. Java decides which route fits the user. Details: [04](04-recommendation-engine.md).
 
 ## Java packages (as built)
 
 ```
-crimeradar.model           One class per table (PR #1)
-crimeradar.dal             ConnectionManager, one CRUD DAO per table (PR #1), CrimeStatsDao (recommender)
-crimeradar.recommendation  TravelMode, CrimeGrid, ExposureCalculator, RecommendationService,
-                           RouteRecommender, OpenRouteServiceClient, ... (see 04)
-crimeradar.servlet         FindIncidents, RecommendRoute
-crimeradar.tools           Inserter (data-layer test), RecommendationEngineTest (recommender tests)
-src/main/webapp            FindIncidents.jsp, RecommendRoute.jsp
+crimeradar.model     One class per table (PR #1); route models (RouteOption, RouteRiskScore, ...)
+crimeradar.dal       ConnectionManager, one CRUD DAO per table (PR #1), MapDataDao and app DAOs (PR #2)
+crimeradar.service   Route rules, ML route scorer, OSRM/ORS routing, map data cache
+crimeradar.api       JSON API under /api (PR #2), including POST /api/routes/recommend
+crimeradar.servlet   FindIncidents, RecommendRoutes (GET /recommendroutes), RouteServicesListener
+crimeradar.tools     Inserter, SetupAppSchema, SyncIncidents and other command-line tools
+src/main/webapp      index.html + assets/ (the app), FindIncidents.jsp
 ```
-
-Later additions (not built yet): `SavedRoutes` / `UserPreferences` DAOs and pages, and a daily Seattle data sync job.
 
 ## Configuration and secrets
 
 - MySQL login: `src/main/java/db.properties` (git-ignored, copied from `db.properties.example`).
-- openrouteservice key: `src/main/java/routing.properties` (git-ignored, copied from `routing.properties.example`), or the `ORS_API_KEY` environment variable.
+- Optional openrouteservice key: the `ORS_API_KEY` environment variable. Without it, OSRM is used.
 - The repo is public, so never commit keys or passwords.
 
 ## Two kinds of data

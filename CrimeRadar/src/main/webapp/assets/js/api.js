@@ -283,3 +283,32 @@ export const account = {
     return saved;
   },
 };
+
+// ---------------- Route decision ----------------
+
+export const routing = {
+  /**
+   * The server's choice among routes the browser already has (POST api/routes/recommend, see docs/API.md).
+   * Server mode only. The caller keeps its offline decision (recommend.js) when this fails.
+   */
+  async recommend(payload, signal) {
+    if (mode !== 'server') throw new ApiError('No CrimeRadar server in offline mode.', 0);
+    let r;
+    try {
+      r = await fetchWithTimeout('api/routes/recommend', {
+        method: 'POST',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        signal,
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CrimeRadar': '1' },
+        body: JSON.stringify(payload),
+      }, 15000);
+    } catch (e) {
+      if (e && e.name === 'AbortError') throw e;
+      throw new ApiError('Could not reach the CrimeRadar server.', 0);
+    }
+    const body = await r.json().catch(() => null);
+    if (!r.ok) throw new ApiError((body && body.error) || `Request failed (HTTP ${r.status}).`, r.status);
+    return body;
+  },
+};
