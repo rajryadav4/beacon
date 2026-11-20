@@ -20,4 +20,12 @@ export default defineConfig({
     port: 5173,
     proxy: { '/api': process.env.API_URL ?? 'http://localhost:8000' },
   },
+  // `vite preview` serves the production build (and proxies /api) for quick sharing
+  // through a Cloudflare quick tunnel; only *.trycloudflare.com hosts are allowed.
+  preview: {
+    port: 4173,
+    strictPort: true,
+    allowedHosts: ['.trycloudflare.com'],
+    proxy: { '/api': process.env.API_URL ?? 'http://localhost:8000' },
+  },
 });

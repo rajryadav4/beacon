@@ -1,0 +1,224 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "bbox": [
+    -69.1883,
+    -31.4302,
+    -69.1883,
+    -31.4302
+   ],
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -69.1883,
+     -31.4302
+    ]
+   },
+   "properties": {
+    "eventtype": "EQ",
+    "eventid": 1578308,
+    "episodeid": 1747670,
+    "eventname": "",
+    "glide": "",
+    "name": "Earthquake in Argentina",
+    "description": "Earthquake in Argentina",
+    "htmldescription": "Green M 4.8 Earthquake in Argentina at: 20 Nov 2026 02:57:18.",
+    "icon": "https://www.gdacs.org/images/gdacs_icons/maps/Green/EQ.png",
+    "iconoverall": "https://www.gdacs.org/images/gdacs_icons/maps/Green/EQ.png",
+    "url": {
+     "geometry": "https://www.gdacs.org/gdacsapi/api/polygons/getgeometry?eventtype=EQ&eventid=1578308&episodeid=1747670",
+     "report": "https://www.gdacs.org/report.aspx?eventid=1578308&episodeid=1747670&eventtype=EQ",
+     "details": "https://www.gdacs.org/gdacsapi/api/events/geteventdata?eventtype=EQ&eventid=1578308"
+    },
+    "alertlevel": "Green",
+    "alertscore": 1,
+    "episodealertlevel": "Green",
+    "episodealertscore": 0.0,
+    "istemporary": "false",
+    "iscurrent": "true",
+    "country": "Argentina",
+    "fromdate": "2026-11-20T02:57:18",
+    "todate": "2026-11-20T02:57:18",
+    "datemodified": "2026-11-20T03:37:22",
+    "iso3": "ARG",
+    "source": "NEIC",
+    "sourceid": "",
+    "polygonlabel": "Centroid",
+    "Class": "Point_Centroid",
+    "severitydata": {
+     "severity": 4.8,
+     "severitytext": "Magnitude 4.8M, Depth:113.86km",
+     "severityunit": "M"
+    }
+   }
+  },
+  {
+   "type": "Feature",
+   "bbox": [
+    97.0253,
+    4.3685,
+    97.0253,
+    4.3685
+   ],
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     97.0253,
+     4.3685
+    ]
+   },
+   "properties": {
+    "eventtype": "FL",
+    "eventid": 1104253,
+    "episodeid": 6,
+    "eventname": "",
+    "glide": "",
+    "name": "Flood in Indonesia",
+    "description": "Flood in Indonesia",
+    "htmldescription": "Green Flood in Indonesia from: 24 Oct 2026 01 to: 20 Nov 2026 01.",
+    "icon": "https://www.gdacs.org/images/gdacs_icons/maps/Green/FL.png",
+    "iconoverall": "https://www.gdacs.org/images/gdacs_icons/maps/Green/FL.png",
+    "url": {
+     "geometry": "https://www.gdacs.org/gdacsapi/api/polygons/getgeometry?eventtype=FL&eventid=1104253&episodeid=6",
+     "report": "https://www.gdacs.org/report.aspx?eventid=1104253&episodeid=6&eventtype=FL",
+     "details": "https://www.gdacs.org/gdacsapi/api/events/geteventdata?eventtype=FL&eventid=1104253"
+    },
+    "alertlevel": "Green",
+    "alertscore": 1,
+    "episodealertlevel": "Green",
+    "episodealertscore": 0.5,
+    "istemporary": "false",
+    "iscurrent": "true",
+    "country": "Indonesia",
+    "fromdate": "2026-10-24T01:00:00",
+    "todate": "2026-11-20T01:00:00",
+    "datemodified": "2026-11-19T23:09:33",
+    "iso3": "IDN",
+    "source": "GLOFAS",
+    "sourceid": "",
+    "polygonlabel": "Centroid",
+    "Class": "Point_Centroid",
+    "severitydata": {
+     "severity": 0.0,
+     "severitytext": "Magnitude 0 ",
+     "severityunit": ""
+    }
+   }
+  },
+  {
+   "type": "Feature",
+   "bbox": [
+    171.2326,
+    -24.6996,
+    171.2326,
+    -24.6996
+   ],
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     171.2326,
+     -24.6996
+    ]
+   },
+   "properties": {
+    "eventtype": "EQ",
+    "eventid": 1578280,
+    "episodeid": 1747643,
+    "eventname": "",
+    "glide": "",
+    "name": "Earthquake in Southeast Of Loyalty Islands",
+    "description": "Earthquake in Southeast Of Loyalty Islands",
+    "htmldescription": "Green M 5.6 Earthquake in Southeast Of Loyalty Islands at: 20 Nov 2026 00:49:14.",
+    "icon": "https://www.gdacs.org/images/gdacs_icons/maps/Green/EQ.png",
+    "iconoverall": "https://www.gdacs.org/images/gdacs_icons/maps/Green/EQ.png",
+    "url": {
+     "geometry": "https://www.gdacs.org/gdacsapi/api/polygons/getgeometry?eventtype=EQ&eventid=1578280&episodeid=1747643",
+     "report": "https://www.gdacs.org/report.aspx?eventid=1578280&episodeid=1747643&eventtype=EQ",
+     "details": "https://www.gdacs.org/gdacsapi/api/events/geteventdata?eventtype=EQ&eventid=1578280"
+    },
+    "alertlevel": "Green",
+    "alertscore": 1,
+    "episodealertlevel": "Green",
+    "episodealertscore": 0.0,
+    "istemporary": "false",
+    "iscurrent": "true",
+    "country": "Southeast Of Loyalty Islands",
+    "fromdate": "2026-11-20T00:49:14",
+    "todate": "2026-11-20T00:49:14",
+    "datemodified": "2026-11-20T02:54:47",
+    "iso3": "",
+    "source": "NEIC",
+    "sourceid": "",
+    "polygonlabel": "Centroid",
+    "Class": "Point_Centroid",
+    "severitydata": {
+     "severity": 5.6,
+     "severitytext": "Magnitude 5.6M, Depth:10km",
+     "severityunit": "M"
+    }
+   }
+  },
+  {
+   "type": "Feature",
+   "bbox": [
+    -69.1883,
+    -31.4302,
+    -69.1883,
+    -31.4302
+   ],
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -122.25,
+     47.45
+    ]
+   },
+   "properties": {
+    "eventtype": "FL",
+    "eventid": 999001,
+    "episodeid": 1747670,
+    "eventname": "",
+    "glide": "",
+    "name": "Flood in United States",
+    "description": "Earthquake in Argentina",
+    "htmldescription": "Orange flood alert in United States",
+    "icon": "https://www.gdacs.org/images/gdacs_icons/maps/Green/EQ.png",
+    "iconoverall": "https://www.gdacs.org/images/gdacs_icons/maps/Green/EQ.png",
+    "url": {
+     "geometry": "https://www.gdacs.org/gdacsapi/api/polygons/getgeometry?eventtype=EQ&eventid=1578308&episodeid=1747670",
+     "report": "https://www.gdacs.org/report.aspx?eventid=1578308&episodeid=1747670&eventtype=EQ",
+     "details": "https://www.gdacs.org/gdacsapi/api/events/geteventdata?eventtype=EQ&eventid=1578308"
+    },
+    "alertlevel": "Orange",
+    "alertscore": 1,
+    "episodealertlevel": "Green",
+    "episodealertscore": 0.0,
+    "istemporary": "false",
+    "iscurrent": "true",
+    "country": "Argentina",
+    "fromdate": "2026-11-19T00:00:00",
+    "todate": "2026-11-20T00:00:00",
+    "datemodified": "2026-11-20T03:37:22",
+    "iso3": "ARG",
+    "source": "NEIC",
+    "sourceid": "",
+    "polygonlabel": "Centroid",
+    "Class": "Point_Centroid",
+    "affectedcountries": [
+     {
+      "iso2": "AR",
+      "iso3": "ARG",
+      "countryname": "Argentina"
+     }
+    ],
+    "severitydata": {
+     "severity": 4.8,
+     "severitytext": "Magnitude 4.8M, Depth:113.86km",
+     "severityunit": "M"
+    }
+   }
+  }
+ ]
+}
