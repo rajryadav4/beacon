@@ -8,8 +8,8 @@ about 4.9 million CAP messages since 2012. We take a varied sample, not the whol
   plus NWS products that carry the generic SAME code `NWS` (air quality, ashfall,
   tsunami advisories, ...), queried by event name;
 - a code with at most `--cap` alerts is fetched whole; a bigger one is sampled over
-  half-year windows from 2012 to today, at two random offsets per window, so every
-  season and year is in the sample and not only the first days of each window.
+  yearly windows from 2012 to today, at two random offsets per window, so every year
+  is in the sample and not only the first days of each window.
 
 Only `status eq 'Actual'` messages. One output row per CAP <info> block (an alert can
 have an English and a Spanish block), saved to data/ipaws/alerts.jsonl.gz (git-ignored).
@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import gzip
+import http.client
 import json
 import math
 import random
@@ -62,17 +63,17 @@ NWS_EVENTS = [
 ]
 
 
-def get_json(params: dict, retries: int = 5) -> dict:
+def get_json(params: dict, retries: int = 8) -> dict:
     url = API + "?" + urllib.parse.urlencode(params)
     req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
     for attempt in range(retries):
         try:
             with urllib.request.urlopen(req, timeout=180) as resp:
                 return json.load(resp)
-        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
+        except (OSError, http.client.HTTPException, json.JSONDecodeError) as exc:  # URLError, timeouts, resets
             if isinstance(exc, urllib.error.HTTPError) and exc.code == 400:
                 raise
-            wait = 2 ** attempt
+            wait = min(60, 2 ** attempt)  # OpenFEMA answers 503 under load
             print(f"  retry in {wait}s: {exc}", file=sys.stderr)
             time.sleep(wait)
     raise RuntimeError(f"giving up on {url}")
@@ -98,9 +99,7 @@ def fetch(flt: str, top: int, skip: int = 0) -> list[dict]:
 def windows(until: dt.date) -> list[tuple[str, str]]:
     out = []
     for year in range(FIRST_YEAR, until.year + 1):
-        for start, end in ((f"{year}-01-01", f"{year}-07-01"), (f"{year}-07-01", f"{year + 1}-01-01")):
-            if start <= until.isoformat():
-                out.append((start, end))
+        out.append((f"{year}-01-01", f"{year + 1}-01-01"))
     return out
 
 
@@ -112,19 +111,25 @@ def run_plan(name: str, base_filter: str, cap: int, rng: random.Random) -> list[
     wins = windows(dt.date.today())
     per_window = math.ceil(cap / len(wins))
     rows: list[dict] = []
+    failed = 0
     for start, end in wins:
         wflt = f"{flt} and sent ge '{start}' and sent lt '{end}'"
-        n = count(wflt)
-        if n == 0:
-            continue
-        if n <= per_window:
-            rows.extend(fetch(wflt, n))
-            continue
-        half = math.ceil(per_window / 2)
-        offsets = sorted(rng.sample(range(0, max(1, n - half)), k=min(2, max(1, n - half))))
-        for off in offsets:
-            rows.extend(fetch(wflt, half, skip=off))
-    print(f"  {name}: {total:,} in archive, sampled {len(rows):,}", flush=True)
+        try:
+            n = count(wflt)
+            if n == 0:
+                continue
+            if n <= per_window:
+                rows.extend(fetch(wflt, n))
+                continue
+            half = math.ceil(per_window / 2)
+            offsets = sorted(rng.sample(range(0, max(1, n - half)), k=min(2, max(1, n - half))))
+            for off in offsets:
+                rows.extend(fetch(wflt, half, skip=off))
+        except RuntimeError as exc:  # heavy windows can keep timing out (503); skip them
+            failed += 1
+            print(f"  {name}: skipped window {start}: {exc}", file=sys.stderr, flush=True)
+    note = f", {failed} windows skipped" if failed else ""
+    print(f"  {name}: {total:,} in archive, sampled {len(rows):,}{note}", flush=True)
     return rows
 
 
@@ -171,7 +176,7 @@ def main() -> None:
     parser.add_argument("--cap", type=int, default=2000, help="max alerts per mapped SAME code (default 2000)")
     parser.add_argument("--unmapped-cap", type=int, default=300, help="max alerts per unmapped code")
     parser.add_argument("--event-cap", type=int, default=1500, help="max alerts per NWS event name")
-    parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--workers", type=int, default=3)
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
@@ -194,7 +199,11 @@ def main() -> None:
         if path.exists():
             return
         rng = random.Random(f"{args.seed}-{name}")
-        alerts = run_plan(name, flt, cap, rng)
+        try:
+            alerts = run_plan(name, flt, cap, rng)
+        except Exception as exc:  # leave no file, so the next run retries this plan
+            print(f"  {name}: FAILED, rerun to retry: {exc}", flush=True)
+            return
         tmp = path.with_suffix(".tmp")
         with gzip.open(tmp, "wt", encoding="utf-8") as fh:
             for alert in alerts:
