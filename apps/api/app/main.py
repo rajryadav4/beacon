@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .db import pool
 from .routers import map_data
+from .routers import alerts
 
 
 @asynccontextmanager
@@ -27,6 +28,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(map_data.router, prefix="/api")
+app.include_router(alerts.router, prefix="/api")
 
 
 @app.get("/api/health")
