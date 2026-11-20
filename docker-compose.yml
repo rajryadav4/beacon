@@ -5,22 +5,22 @@
 services:
   db:
     image: postgis/postgis:16-3.4
-    container_name: crimeradar-db
+    container_name: beacon-db
     environment:
-      POSTGRES_DB: crimeradar
-      POSTGRES_USER: crimeradar
+      POSTGRES_DB: beacon
+      POSTGRES_USER: beacon
       # Local development only. Override with POSTGRES_PASSWORD in a git-ignored .env file.
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-crimeradar-dev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-beacon-dev}
     ports:
       - "${DB_PORT:-5433}:5432"
     volumes:
-      - crimeradar-pg:/var/lib/postgresql/data
+      - beacon-pg:/var/lib/postgresql/data
       - ./db/schema:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U crimeradar -d crimeradar"]
+      test: ["CMD-SHELL", "pg_isready -U beacon -d beacon"]
       interval: 5s
       timeout: 3s
       retries: 20
 
 volumes:
-  crimeradar-pg:
+  beacon-pg:

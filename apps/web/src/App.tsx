@@ -73,8 +73,8 @@ export default function App() {
         <header className="brand">
           <img src="/favicon.svg" alt="" width={28} height={28} />
           <div>
-            <h1>CrimeRadar</h1>
-            <p>Seattle reported crime and block risk</p>
+            <h1>Beacon</h1>
+            <p>Know what's happening. Get to safety.</p>
           </div>
         </header>
 

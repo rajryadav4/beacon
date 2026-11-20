@@ -7,7 +7,7 @@ from pathlib import Path
 
 from psycopg_pool import ConnectionPool
 
-DEFAULT_URL = "postgresql://crimeradar:crimeradar-dev@localhost:5433/crimeradar"
+DEFAULT_URL = "postgresql://beacon:beacon-dev@localhost:5433/beacon"
 
 
 def database_url() -> str:

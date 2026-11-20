@@ -1,5 +1,5 @@
 -- ============================================================
--- CrimeRadar Showcase: core schema (PostgreSQL 16 + PostGIS)
+-- Beacon: core schema (PostgreSQL 16 + PostGIS)
 -- Port of the milestone 2 MySQL model in sql/crime_radar_all.sql.
 --
 -- Changes from the MySQL version:

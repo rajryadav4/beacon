@@ -10,7 +10,7 @@ import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_URL = "postgresql://crimeradar:crimeradar-dev@localhost:5433/crimeradar"
+DEFAULT_URL = "postgresql://beacon:beacon-dev@localhost:5433/beacon"
 
 
 def database_url() -> str:

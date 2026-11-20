@@ -1,6 +1,6 @@
-# Developing the showcase app
+# Developing Beacon
 
-The new app is a small monorepo. The class-project Java app in `CrimeRadar/` stays untouched as the reference.
+Beacon is a small monorepo. It grew out of CrimeRadar, our CS 5200 class project ([rajryadav4/CrimeRadar](https://github.com/rajryadav4/CrimeRadar)), which is a separate project. The class-project Java app in `CrimeRadar/` stays untouched as the reference.
 
 | Path | What it is |
 |---|---|
@@ -33,7 +33,7 @@ python3 -m venv .venv
 docker compose up -d db
 ```
 
-The database listens on `localhost:5433` (user and database `crimeradar`, local-only password `crimeradar-dev`).
+The database listens on `localhost:5433` (user and database `beacon`, local-only password `beacon-dev`).
 To change these, copy `.env.example` to `.env` (git-ignored) and edit it.
 
 Load the data (about 72 MB download, then about 30 s to load):

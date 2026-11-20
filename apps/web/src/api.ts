@@ -1,4 +1,4 @@
-// Typed client for the CrimeRadar API (apps/api). In dev, Vite proxies /api to uvicorn.
+// Typed client for the Beacon API (apps/api). In dev, Vite proxies /api to uvicorn.
 
 import type { FeatureCollection, Point, Polygon } from 'geojson';
 

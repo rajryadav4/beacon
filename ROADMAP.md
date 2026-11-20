@@ -1,10 +1,10 @@
-# CrimeRadar Showcase: Roadmap
+# Beacon: Roadmap
 
-**Goal:** turn the CS 5200 class project into a polished, public safety-navigation app that recommends **the safest reasonable route** and helps people act, not panic.
+**Goal:** grow the CrimeRadar CS 5200 class project into **Beacon**, a polished, public safety app that recommends **the safest reasonable route** day to day and, in a disaster or conflict, picks up official alerts and guides people to a safe place. It helps people act, not panic.
 
-> *Citizen shows you every siren in the city. CrimeRadar tells you what matters to you, when it matters, and the safest way to get home.*
+> *Citizen shows you every siren in the city. Beacon tells you what matters to you, when it matters, and the safest way to get home.*
 
-## Starting point (from the class project)
+## Starting point (from the CrimeRadar class project)
 
 | Already working | Where |
 |---|---|
@@ -16,7 +16,7 @@
 
 ## Advanced features
 
-Ranked by value for the showcase. ★ = build first.
+Ranked by value for Beacon. ★ = build first.
 
 | # | Feature | What it does | Data |
 |---|---|---|---|
@@ -30,7 +30,7 @@ Ranked by value for the showcase. ★ = build first.
 | 8 | **Saved-place watch** | Alert when risk around Home or Work rises well above normal; weekly summary | Saved places + recent vs. 1-year counts |
 | 9 | **Neighborhood report card** | Year-over-year trends, crime per resident (not raw counts), fairness note | Census population (ACS) |
 | 10 | **Model health dashboard** | Monthly predicted vs. actual, data freshness, model versions | Model runs + risk scores |
-| 11 | **Ask CrimeRadar** | Plain-English questions answered from the database | LLM API (paid; optional) |
+| 11 | **Ask Beacon** | Plain-English questions answered from the database | LLM API (paid; optional) |
 | 12 | **Accessibility + multilingual** | Screen-reader route summaries, translated alerts for tourists | — |
 
 Not planned: community crime reports. Moderating crowd accusations is where competitors got into trouble.
@@ -57,7 +57,7 @@ The Java/JSP/MySQL app stays in `CrimeRadar/` as the working reference until eac
 | 1 | **Port core features:** heatmap, safe routes with the recommendation rules and explanations, sign-in, saved places, danger alerts | Feature parity with the class app |
 | 2 | **★ Features 1–4:** live layer + "Is this normal?", walk-me-home timer, events, lighting | Each feature demoable end to end |
 | 3 | **Features 5–8:** safe havens, personal profiles, safest departure time, saved-place watch | |
-| 4 | **Features 9–12** and polish: report card, model dashboard, optional "Ask CrimeRadar", accessibility | |
+| 4 | **Features 9–12** and polish: report card, model dashboard, optional "Ask Beacon", accessibility | |
 | 5 | **Showcase:** deploy, demo script, poster/slides update, load test of routing | Public URL works on a phone |
 
 ## Principles

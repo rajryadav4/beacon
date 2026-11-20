@@ -1,4 +1,4 @@
-"""CrimeRadar API (FastAPI + PostgreSQL/PostGIS)."""
+"""Beacon API (FastAPI + PostgreSQL/PostGIS)."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ async def lifespan(_: FastAPI):
     pool.close()
 
 
-app = FastAPI(title="CrimeRadar API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="Beacon API", version="0.1.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=os.environ.get("CORS_ORIGINS", "http://localhost:5173").split(","),

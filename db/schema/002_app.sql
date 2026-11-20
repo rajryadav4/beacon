@@ -1,5 +1,5 @@
 -- ============================================================
--- CrimeRadar Showcase: app layer (port of sql/app_tables.sql)
+-- Beacon: app layer (port of sql/app_tables.sql)
 --
 -- The API never scans crime_incidents per request: pipeline/load_postgres.py
 -- reads it once and fills the small summary tables (cell_stats, ...).
