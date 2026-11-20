@@ -15,7 +15,8 @@ from fastapi.testclient import TestClient
 
 from app.hazard_taxonomy import HAZARD_KEYS, HAZARDS
 from app.main import app
-from app.routers.safe_places import KIND_LABELS, PREFERRED_RADIUS_M, _RedactNearestQuery
+from app.privacy import RedactLocation
+from app.routers.safe_places import KIND_LABELS, PREFERRED_RADIUS_M
 
 SEATTLE_BBOX = "-122.46,47.48,-122.22,47.75"
 DOWNTOWN = {"lat": 47.6097, "lng": -122.3331}
@@ -170,11 +171,11 @@ def test_access_log_drops_coordinates():
     record = logging.LogRecord("uvicorn.access", logging.INFO, __file__, 1, '%s - "%s %s HTTP/%s" %d',
                                ("127.0.0.1:5000", "GET", "/api/safe-places/nearest?lat=47.6&lng=-122.3",
                                 "1.1", 200), None)
-    assert _RedactNearestQuery().filter(record)
+    assert RedactLocation().filter(record)
     assert "47.6" not in record.getMessage() and "/api/safe-places/nearest" in record.getMessage()
     other = logging.LogRecord("uvicorn.access", logging.INFO, __file__, 1, '%s - "%s %s HTTP/%s" %d',
                               ("127.0.0.1:5000", "GET", "/api/heatmap?band=night", "1.1", 200), None)
-    _RedactNearestQuery().filter(other)
+    RedactLocation().filter(other)
     assert "band=night" in other.getMessage()
 
 

@@ -21,7 +21,7 @@ from app.alerts_rules import (
     resolve_hazard,
 )
 from app.main import app
-from app.routers.alerts import redact
+from app.privacy import redact
 
 FIXTURES = Path(__file__).parent / "fixtures"
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "pipeline"))
