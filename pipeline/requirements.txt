@@ -1,5 +1,7 @@
 # Postgres load and ML risk import (pipeline/load_postgres.py, pipeline/import_risk.py)
 psycopg[binary]>=3.2
+# Official alerts and 911 feeds (pipeline/ingest_alerts.py, pipeline/alerts_worker.py)
+httpx>=0.27
 # Fetch on python.org builds of Python that lack a CA bundle: SSL_CERT_FILE=$(python -m certifi)
 certifi
 # Model training and the class app's static data (ml/train_risk_model.py, pipeline/build_ui_data.py)

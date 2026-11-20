@@ -1,0 +1,38 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {"generated": 1795140000000, "title": "USGS Magnitude 2.5+ Earthquakes, Past Day (trimmed test fixture)", "count": 4},
+  "features": [
+    {
+      "type": "Feature",
+      "id": "uw00000001",
+      "properties": {"mag": 6.4, "place": "15 km NE of Example City, Washington", "time": 1795136400000,
+                     "url": "https://earthquake.usgs.gov/earthquakes/eventpage/uw00000001", "status": "reviewed",
+                     "tsunami": 1, "alert": "yellow", "type": "earthquake", "title": "M 6.4 - 15 km NE of Example City, Washington",
+                     "net": "uw", "code": "00000001"},
+      "geometry": {"type": "Point", "coordinates": [-122.1, 47.7, 22.5]}
+    },
+    {
+      "type": "Feature",
+      "id": "us00000002",
+      "properties": {"mag": 4.2, "place": "30 km S of Example Town, Alaska", "time": 1795100400000,
+                     "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us00000002", "status": "automatic",
+                     "tsunami": 0, "alert": null, "type": "earthquake", "title": "M 4.2 - 30 km S of Example Town, Alaska"},
+      "geometry": {"type": "Point", "coordinates": [-150.0, 61.0, 40.0]}
+    },
+    {
+      "type": "Feature",
+      "id": "nc00000003",
+      "properties": {"mag": 2.7, "place": "5 km W of Example Springs, CA", "time": 1795129200000,
+                     "url": "https://earthquake.usgs.gov/earthquakes/eventpage/nc00000003", "status": "automatic",
+                     "tsunami": 0, "alert": null, "type": "earthquake", "title": "M 2.7 - 5 km W of Example Springs, CA"},
+      "geometry": {"type": "Point", "coordinates": [-122.8, 38.8, 3.1]}
+    },
+    {
+      "type": "Feature",
+      "id": "us00000004",
+      "properties": {"mag": 3.0, "place": "Quarry blast", "time": 1795129200000, "status": "reviewed",
+                     "type": "quarry blast", "title": "M 3.0 Quarry Blast"},
+      "geometry": {"type": "Point", "coordinates": [-120.0, 45.0, 0.0]}
+    }
+  ]
+}

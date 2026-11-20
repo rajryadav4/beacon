@@ -1,0 +1,175 @@
+{
+  "type": "FeatureCollection",
+  "title": "Current watches, warnings, and advisories for Washington (trimmed test fixture)",
+  "updated": "2026-11-20T03:00:00+00:00",
+  "features": [
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.test-ffw.001.1",
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-122.40, 47.55], [-122.25, 47.55], [-122.25, 47.70], [-122.40, 47.70], [-122.40, 47.55]]]
+      },
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.test-ffw.001.1",
+        "id": "urn:oid:2.49.0.1.840.0.test-ffw.001.1",
+        "areaDesc": "King, WA",
+        "geocode": {"SAME": ["053033"], "UGC": ["WAC033"]},
+        "affectedZones": ["https://api.weather.gov/zones/county/WAC033"],
+        "references": [
+          {"identifier": "urn:oid:2.49.0.1.840.0.test-ffw-old.001.1", "sender": "w-nws.webmaster@noaa.gov",
+           "sent": "2026-11-19T17:00:00-08:00"}
+        ],
+        "sent": "2026-11-19T18:10:00-08:00",
+        "effective": "2026-11-19T18:10:00-08:00",
+        "onset": "2026-11-19T18:10:00-08:00",
+        "expires": "2026-11-19T21:15:00-08:00",
+        "ends": "2026-11-19T21:15:00-08:00",
+        "status": "Actual",
+        "messageType": "Update",
+        "category": "Met",
+        "severity": "Severe",
+        "certainty": "Likely",
+        "urgency": "Immediate",
+        "event": "Flash Flood Warning",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS Seattle WA",
+        "headline": "Flash Flood Warning issued November 19 at 6:10PM PST until November 19 at 9:15PM PST by NWS Seattle WA",
+        "description": "Heavy rain is causing flash flooding of small creeks and streams.",
+        "instruction": "Move to higher ground now. Turn around, don't drown.",
+        "response": "Avoid",
+        "parameters": {"NWSheadline": ["FLASH FLOOD WARNING IN EFFECT"]},
+        "eventCode": {"SAME": ["FFW"], "NationalWeatherService": ["FFW"]}
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.test-wsw.001.1",
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.test-wsw.001.1",
+        "id": "urn:oid:2.49.0.1.840.0.test-wsw.001.1",
+        "areaDesc": "Cascades of Snohomish and King Counties",
+        "geocode": {"SAME": ["053033", "053061"], "UGC": ["WAZ567", "WAZ568"]},
+        "affectedZones": ["https://api.weather.gov/zones/forecast/WAZ567", "https://api.weather.gov/zones/forecast/WAZ568"],
+        "references": [],
+        "sent": "2026-11-19T14:00:00-08:00",
+        "effective": "2026-11-19T14:00:00-08:00",
+        "onset": "2026-11-20T04:00:00-08:00",
+        "expires": "2026-11-20T06:00:00-08:00",
+        "ends": "2026-11-21T10:00:00-08:00",
+        "status": "Actual",
+        "messageType": "Alert",
+        "severity": "Severe",
+        "certainty": "Likely",
+        "urgency": "Expected",
+        "event": "Winter Storm Warning",
+        "senderName": "NWS Seattle WA",
+        "headline": null,
+        "description": "Heavy snow expected above 2500 feet.",
+        "instruction": null,
+        "parameters": {"NWSheadline": ["WINTER STORM WARNING IN EFFECT FROM 4 AM THURSDAY"]},
+        "eventCode": {"SAME": ["WSW"], "NationalWeatherService": ["WSW"]}
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0-KEEPALIVE-1",
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "id": "urn:oid:2.49.0.1.840.0-KEEPALIVE-1",
+        "areaDesc": "King",
+        "affectedZones": ["https://api.weather.gov/zones/county/WAC033"],
+        "references": [],
+        "sent": "2026-11-20T03:00:00+00:00",
+        "expires": "2026-11-20T03:10:00+00:00",
+        "status": "Test",
+        "messageType": "Alert",
+        "severity": "Unknown",
+        "certainty": "Unknown",
+        "urgency": "Unknown",
+        "event": "Test Message",
+        "description": "Monitoring message only. Please disregard.",
+        "eventCode": {"SAME": ["NWS"], "NationalWeatherService": ["TST"]}
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.test-smw.001.1",
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[-122.60, 47.80], [-122.40, 47.80], [-122.40, 47.95], [-122.60, 47.95], [-122.60, 47.80]]]
+      },
+      "properties": {
+        "id": "urn:oid:2.49.0.1.840.0.test-smw.001.1",
+        "areaDesc": "Puget Sound and Hood Canal",
+        "affectedZones": ["https://api.weather.gov/zones/forecast/PZZ135"],
+        "references": [],
+        "sent": "2026-11-19T19:00:00-08:00",
+        "effective": "2026-11-19T19:00:00-08:00",
+        "onset": "2026-11-19T19:00:00-08:00",
+        "expires": "2026-11-19T20:00:00-08:00",
+        "status": "Actual",
+        "messageType": "Alert",
+        "severity": "Severe",
+        "certainty": "Likely",
+        "urgency": "Immediate",
+        "event": "Special Marine Warning",
+        "senderName": "NWS Seattle WA",
+        "headline": "Special Marine Warning issued November 19 at 7:00PM PST",
+        "description": "Strong thunderstorm winds over the water.",
+        "instruction": "Boaters should seek safe harbor immediately.",
+        "eventCode": {"SAME": ["NWS"], "NationalWeatherService": ["MAW"]}
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.test-fgy.001.1",
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "id": "urn:oid:2.49.0.1.840.0.test-fgy.001.1",
+        "areaDesc": "Southwest Interior",
+        "affectedZones": ["https://api.weather.gov/zones/forecast/WAZ504"],
+        "references": [],
+        "sent": "2026-11-19T20:00:00-08:00",
+        "expires": "2026-11-20T10:00:00-08:00",
+        "status": "Actual",
+        "messageType": "Alert",
+        "severity": "Moderate",
+        "certainty": "Likely",
+        "urgency": "Expected",
+        "event": "Dense Fog Advisory",
+        "senderName": "NWS Portland OR",
+        "headline": "Dense Fog Advisory until 10 AM",
+        "description": "Visibility one quarter mile or less in dense fog.",
+        "eventCode": {"SAME": ["NWS"], "NationalWeatherService": ["FGY"]}
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.test-can.001.1",
+      "type": "Feature",
+      "geometry": null,
+      "properties": {
+        "id": "urn:oid:2.49.0.1.840.0.test-can.001.1",
+        "areaDesc": "King, WA",
+        "affectedZones": ["https://api.weather.gov/zones/county/WAC033"],
+        "references": [
+          {"identifier": "urn:oid:2.49.0.1.840.0.test-flw.001.1", "sender": "w-nws.webmaster@noaa.gov",
+           "sent": "2026-11-19T10:00:00-08:00"}
+        ],
+        "sent": "2026-11-19T19:30:00-08:00",
+        "expires": "2026-11-19T20:30:00-08:00",
+        "status": "Actual",
+        "messageType": "Cancel",
+        "severity": "Minor",
+        "certainty": "Observed",
+        "urgency": "Past",
+        "event": "Flood Warning",
+        "senderName": "NWS Seattle WA",
+        "headline": "The Flood Warning has been cancelled.",
+        "description": "The flood warning is cancelled.",
+        "eventCode": {"SAME": ["FLW"], "NationalWeatherService": ["FLW"]}
+      }
+    }
+  ]
+}
