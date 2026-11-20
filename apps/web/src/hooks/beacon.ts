@@ -1,7 +1,13 @@
+// Data hooks for Beacon's endpoints: alerts, safe places and the hazard outlook.
+// Every hook keeps working when its endpoint is down: it reports `unavailable` and the UI hides the section.
+
 import { useEffect, useState } from 'react';
-import { api, errorMessage, type ActiveAlerts, type AlertsStatus, type Hazard, type NearestPlace } from './api';
-import { FALLBACK_HAZARDS } from './lib/hazards';
-import type { LatLng } from './lib/routing';
+import {
+  ApiError, api, errorMessage, type ActiveAlerts, type AlertsStatus, type Hazard, type NearestPlace, type Outlook,
+  type SafeAreas,
+} from '../api';
+import { FALLBACK_HAZARDS } from '../lib/hazards';
+import type { LatLng } from '../lib/geo';
 
 export const ALERT_POLL_MS = 60_000;
 
@@ -18,18 +24,13 @@ export function useHazards(): Hazard[] {
   return hazards;
 }
 
-export interface AlertsState {
-  data: ActiveAlerts | null;
-  error: string | null;
-  loading: boolean;
-  checkedAt: number | null;
-}
+export interface AlertsState { data: ActiveAlerts | null; error: string | null; loading: boolean; checkedAt: number | null }
 
 /** Polls `/api/alerts/active` for the chosen location every 60 s (and when the tab becomes visible). */
 export function useActiveAlerts(location: LatLng | null): AlertsState {
   const [state, setState] = useState<AlertsState>({ data: null, error: null, loading: false, checkedAt: null });
-  const lat = location?.lat;
-  const lng = location?.lng;
+  const lat = location ? Number(location.lat.toFixed(3)) : undefined;
+  const lng = location ? Number(location.lng.toFixed(3)) : undefined;
 
   useEffect(() => {
     if (lat === undefined || lng === undefined) {
@@ -89,7 +90,7 @@ export function useAlertsStatus(): { status: AlertsStatus | null; error: string 
 
 export interface NearestState { places: NearestPlace[]; error: string | null; loading: boolean }
 
-/** The nearest safe places for a hazard (3–5, sorted by distance). */
+/** The nearest safe places for a hazard (sorted by distance). */
 export function useNearestPlaces(location: LatLng | null, hazard: string | null, limit = 5): NearestState {
   const [state, setState] = useState<NearestState>({ places: [], error: null, loading: false });
   const lat = location?.lat;
@@ -107,4 +108,39 @@ export function useNearestPlaces(location: LatLng | null, hazard: string | null,
     return () => ctrl.abort();
   }, [lat, lng, hazard, limit]);
   return state;
+}
+
+export interface Optional<T> { data: T | null; loading: boolean; unavailable: boolean }
+
+/** A request whose endpoint may not exist yet: a 404 or a network error just hides the feature. */
+function useOptional<T>(key: string | null, load: (signal: AbortSignal) => Promise<T>): Optional<T> {
+  const [state, setState] = useState<Optional<T>>({ data: null, loading: false, unavailable: false });
+  useEffect(() => {
+    if (!key) { setState({ data: null, loading: false, unavailable: false }); return; }
+    const ctrl = new AbortController();
+    setState((s) => ({ ...s, loading: true }));
+    load(ctrl.signal)
+      .then((data) => setState({ data, loading: false, unavailable: false }))
+      .catch((e) => {
+        if (ctrl.signal.aborted) return;
+        setState({ data: null, loading: false, unavailable: !(e instanceof ApiError) || e.unavailable || e.status === 422 });
+      });
+    return () => ctrl.abort();
+    // `load` is rebuilt every render; `key` carries everything it depends on.
+  }, [key]);
+  return state;
+}
+
+/** "Upcoming": the hazard outlook for a point (next ~72 h). */
+export function useOutlook(location: LatLng | null): Optional<Outlook> {
+  const lat = location?.lat.toFixed(3);
+  const lng = location?.lng.toFixed(3);
+  return useOptional(lat && lng ? `${lat},${lng}` : null, (signal) => api.outlook(Number(lat), Number(lng), signal));
+}
+
+/** "Where to go": low-exposure areas and suitable places for a hazard. */
+export function useSafeAreas(location: LatLng | null, hazard: string | null): Optional<SafeAreas> {
+  const lat = location?.lat.toFixed(4);
+  const lng = location?.lng.toFixed(4);
+  return useOptional(lat && lng && hazard ? `${lat},${lng},${hazard}` : null, (signal) => api.safeAreas(Number(lat), Number(lng), hazard!, signal));
 }
