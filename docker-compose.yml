@@ -1,0 +1,26 @@
+# Local development database: PostgreSQL 16 + PostGIS 3.4.
+#   docker compose up -d db
+# Schema files in db/schema run once, on the first start of an empty volume.
+# To rebuild from scratch: docker compose down -v && docker compose up -d db
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: crimeradar-db
+    environment:
+      POSTGRES_DB: crimeradar
+      POSTGRES_USER: crimeradar
+      # Local development only. Override with POSTGRES_PASSWORD in a git-ignored .env file.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-crimeradar-dev}
+    ports:
+      - "${DB_PORT:-5433}:5432"
+    volumes:
+      - crimeradar-pg:/var/lib/postgresql/data
+      - ./db/schema:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crimeradar -d crimeradar"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  crimeradar-pg:

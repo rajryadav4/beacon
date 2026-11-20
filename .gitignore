@@ -13,3 +13,12 @@ __pycache__/
 
 # Submission bundles
 dist/
+
+# Showcase app: local env, Python venv, Node build output
+.env
+.env.*
+!.env.example
+.venv/
+node_modules/
+apps/web/dist/
+.pytest_cache/
