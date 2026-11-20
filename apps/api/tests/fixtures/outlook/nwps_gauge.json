@@ -1,0 +1,27 @@
+{
+ "lid": "RNTW1",
+ "name": "Cedar River (WA) at Renton",
+ "latitude": 47.482777777778,
+ "longitude": -122.20222222222,
+ "flood": {
+  "stageUnits": "ft",
+  "categories": {
+   "major": {
+    "stage": 16,
+    "flow": -9999
+   },
+   "moderate": {
+    "stage": 14.5,
+    "flow": -9999
+   },
+   "minor": {
+    "stage": 13,
+    "flow": -9999
+   },
+   "action": {
+    "stage": 10.4,
+    "flow": -9999
+   }
+  }
+ }
+}
