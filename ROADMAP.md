@@ -14,6 +14,20 @@
 | Safe routes (OSRM), danger alerts, sign-in, saved places, trips | `CrimeRadar/` web app + Java API |
 | Route recommendation rules: detour cap + 15% minimum gain + explanations | `CrimeRadar/src/main/java/crimeradar/service` (Trevor), plus the combined version in progress in the class repo |
 
+## Built so far (November 2026)
+
+| Area | Status |
+|---|---|
+| Phase 0 foundation: monorepo, PostGIS schema, data load, ML risk import, FastAPI, React + MapLibre | Done |
+| Phase 1 port: CrimeRadar UI and features (Explore, Play the day, Areas ranked, 3D skyline, Directions with search, 3 scored routes + Why?, Trip mode with danger alerts) | Done, except server accounts (places and history stay in the browser for now) |
+| Official alerts (NWS, USGS, FEMA IPAWS) + Seattle Fire live 911 incidents | Done |
+| Survival mode with on-map guidance to a safe place | Done |
+| Safe places (feature 5), hazard-aware, incl. underground stations for air raids | Done |
+| Hazard outlook: upcoming calamities from NASA EONET, GDACS, NOAA, USGS, Open-Meteo; worst/safest areas; where to go | Done |
+| Simulator ("digital twin") page with shareable scenarios and presenter mode | Done |
+| Hazard classifier trained on FEMA IPAWS alerts | In progress |
+| Free hosting config (Docker, Render, Neon, GitHub Actions) | Ready; needs accounts and a push |
+
 ## Advanced features
 
 Ranked by value for Beacon. ★ = build first.
@@ -24,7 +38,7 @@ Ranked by value for Beacon. ★ = build first.
 | 2 ★ | **Walk-me-home timer** | Set destination and ETA; contacts get an alert with your last location if you don't check in. Off-route warning; timer keeps running while you move | Trips, contacts, SOS |
 | 3 ★ | **Event-aware risk** | Higher risk near permitted events around start and end times | Special Events Permits (`dm95-f8w5`) + Street Closures |
 | 4 ★ | **Lighting-aware night routing** | At night, extra exposure on blocks with few streetlights or reported outages | Seattle City Light poles + Streetlight Repair Status |
-| 5 | **Safe havens** | Open police/fire stations, clinics and 24-hour places along the route; "nearest safe place" button | Real safety-resource locations |
+| 5 ✓ | **Safe havens** | Open police/fire stations, clinics and 24-hour places along the route; "nearest safe place" button | Real safety-resource locations |
 | 6 | **Personal risk profiles** | Crime types weighted by who travels: car prowls for drivers, bike theft for cyclists, person crime for night walkers | Per-group counts already in the data |
 | 7 | **Safest departure time** | "Leave 30 min earlier: 25% lower exposure" | ML risk per time band |
 | 8 | **Saved-place watch** | Alert when risk around Home or Work rises well above normal; weekly summary | Saved places + recent vs. 1-year counts |
@@ -32,6 +46,10 @@ Ranked by value for Beacon. ★ = build first.
 | 10 | **Model health dashboard** | Monthly predicted vs. actual, data freshness, model versions | Model runs + risk scores |
 | 11 | **Ask Beacon** | Plain-English questions answered from the database | LLM API (paid; optional) |
 | 12 | **Accessibility + multilingual** | Screen-reader route summaries, translated alerts for tourists | — |
+| 13 ✓ | **Official alerts + survival mode** | Government alerts for your location; when a severe one covers you, the app guides you on the map to a safe place | NWS CAP, USGS, FEMA IPAWS, Seattle Fire 911 |
+| 14 ✓ | **Hazard outlook** | Calamities that may be coming in the next ~72 h, worst and safest areas per hazard, where to go | NASA EONET, GDACS, tsunami.gov, NOAA, Open-Meteo, WA DNR / Seattle / FEMA hazard zones |
+| 15 ✓ | **Simulator (digital twin)** | Simulated calamities on a 3D Seattle with guidance and safe routes, shareable links, presenter mode | Same data as the app |
+| 16 | **Hazard classifier** | Reads free-text emergency messages and tells the kind of calamity and its severity | FEMA IPAWS archive |
 
 Not planned: community crime reports. Moderating crowd accusations is where competitors got into trouble.
 
@@ -42,10 +60,10 @@ Not planned: community crime reports. Moderating crowd accusations is where comp
 | Frontend | **React + TypeScript + Vite**, **MapLibre GL** | The current UI already uses MapLibre; components make the many new screens manageable |
 | API | **Python + FastAPI** | The pipeline and ML model are already Python; the model can be served directly; easy background jobs |
 | Database | **PostgreSQL + PostGIS** | Real spatial queries: route-to-block matching, streetlights near a route, events within a radius, nearest safe place |
-| Background jobs | Scheduled workers (APScheduler or cron) | SPD daily, Fire 911 every 5 min, events weekly, streetlights monthly |
+| Background jobs | Plain Python workers; GitHub Actions schedule when hosted | SPD daily, Fire 911 every 5 min, events weekly, streetlights monthly |
 | Routing | OSRM public server for development, self-hosted OSRM or Valhalla later | Free, no key; self-hosting avoids rate limits at the showcase |
 | Alerts | Web Push; SMS optional (paid, e.g. Twilio) | Check-in timer and saved-place alerts |
-| Hosting | Free tiers to start (static frontend host, container API host, managed Postgres with PostGIS) | Check current free-tier limits before choosing |
+| Hosting | Free: one Docker image on Render, Neon Postgres with PostGIS, GitHub Actions | All free and open source; see docs/DEPLOY.md |
 
 The Java/JSP/MySQL app stays in `CrimeRadar/` as the working reference until each part is ported.
 
