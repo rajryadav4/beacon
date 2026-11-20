@@ -1,0 +1,3030 @@
+{
+  "generatedAt": "2026-11-20T06:47:59Z",
+  "summary": {
+    "version": "hazard-20261120",
+    "trainedAt": "2026-11-20T06:47:59Z",
+    "trainedOn": "all",
+    "sklearn": "1.9.1",
+    "threshold": 0.5,
+    "classes": [
+      "air_quality",
+      "conflict",
+      "crime",
+      "earthquake",
+      "flood",
+      "hazmat",
+      "heat",
+      "storm",
+      "tsunami",
+      "volcano",
+      "wildfire",
+      "winter"
+    ],
+    "test": {
+      "period": "sent >= 2023-01-01",
+      "rows": 3810,
+      "macroF1Masked": 0.6886,
+      "macroF1Unmasked": 0.7036,
+      "macroF1UnmaskedModel": 0.7163,
+      "baselineMacroF1Masked": 0.4383,
+      "baselineMacroF1Unmasked": 0.4646,
+      "accuracyMasked": 0.9394,
+      "macroF1Snippets": 0.6104,
+      "severityMacroF1": 0.8268
+    },
+    "checkSet": {
+      "n": 20,
+      "correct": 14,
+      "correctAfterThreshold": 12
+    }
+  },
+  "data": {
+    "rawInfoBlocks": 60862,
+    "rawAlerts": 57952,
+    "englishInfoBlocks": 57952,
+    "unmappedCodes": {
+      "OTH": 377,
+      "SPS": 195,
+      "MEP": 39
+    },
+    "unmappedCodeEvents": {
+      "MEP": [
+        "Missing and Endangered Persons",
+        "Missing and Endangered Persons Emergency",
+        "missing and endangered persons"
+      ],
+      "OTH": [
+        "Dense Smoke Advisory",
+        "Freeze Warning",
+        "Heat Advisory",
+        "Red Flag Warning"
+      ],
+      "SPS": [
+        "Special Weather Statement"
+      ]
+    },
+    "droppedNoHazard": 624,
+    "labelled": 57328,
+    "labelSource": {
+      "same": 44486,
+      "event_name": 12842
+    },
+    "samplesBeforeDedupe": {
+      "full": 55974,
+      "wea": 11651
+    },
+    "sentRange": [
+      "2012-06-01",
+      "2026-11-18"
+    ],
+    "samplesAfterExactDedupe": {
+      "full": 48613,
+      "wea": 4415
+    },
+    "samplesAfterNearDedupe": {
+      "full": 40659,
+      "wea": 4245
+    },
+    "snippets": 39263,
+    "split": {
+      "validationRun": {
+        "train": "sent < 2022-01-01",
+        "evaluate": "2022-01-01 <= sent < 2023-01-01",
+        "trainRows": 67289,
+        "evalRows": 3401,
+        "evalShortRows": 3340
+      },
+      "testRun": {
+        "train": "sent < 2023-01-01",
+        "evaluate": "sent >= 2023-01-01",
+        "trainRows": 74701,
+        "testRows": 4935,
+        "testSnippets": 4531
+      }
+    },
+    "perClass": {
+      "earthquake": {
+        "total": 32,
+        "full": 14,
+        "wea": 18,
+        "train": 29,
+        "test": 3
+      },
+      "tsunami": {
+        "total": 63,
+        "full": 60,
+        "wea": 3,
+        "train": 62,
+        "test": 1
+      },
+      "flood": {
+        "total": 9729,
+        "full": 9670,
+        "wea": 59,
+        "train": 9026,
+        "test": 703
+      },
+      "storm": {
+        "total": 16701,
+        "full": 16614,
+        "wea": 87,
+        "train": 15115,
+        "test": 1586
+      },
+      "winter": {
+        "total": 5245,
+        "full": 5165,
+        "wea": 80,
+        "train": 4828,
+        "test": 417
+      },
+      "wildfire": {
+        "total": 2769,
+        "full": 2296,
+        "wea": 473,
+        "train": 2428,
+        "test": 341
+      },
+      "heat": {
+        "total": 1939,
+        "full": 1939,
+        "wea": 0,
+        "train": 1735,
+        "test": 204
+      },
+      "air_quality": {
+        "total": 909,
+        "full": 909,
+        "wea": 0,
+        "train": 868,
+        "test": 41
+      },
+      "hazmat": {
+        "total": 187,
+        "full": 117,
+        "wea": 70,
+        "train": 109,
+        "test": 78
+      },
+      "volcano": {
+        "total": 18,
+        "full": 16,
+        "wea": 2,
+        "train": 18,
+        "test": 0
+      },
+      "conflict": {
+        "total": 354,
+        "full": 174,
+        "wea": 180,
+        "train": 282,
+        "test": 72
+      },
+      "crime": {
+        "total": 2191,
+        "full": 1255,
+        "wea": 936,
+        "train": 1827,
+        "test": 364
+      },
+      "other": {
+        "total": 4767,
+        "full": 2430,
+        "wea": 2337,
+        "train": 3642,
+        "test": 1125
+      }
+    }
+  },
+  "params": {
+    "svc": {
+      "C": 0.5,
+      "class_weight": "balanced",
+      "max_iter": 5000
+    },
+    "calibration": "sigmoid, 3-fold",
+    "maxChars": 3000,
+    "nearDupCosine": 0.9,
+    "targetAcceptedAccuracy": 0.9,
+    "word": "1-2 grams, min_df 2, max_df 0.5, 200k",
+    "char": "char_wb 3-5, min_df 3, 300k",
+    "hazardHeadClasses": "12 specific hazards; 'other' only by abstention"
+  },
+  "validation": {
+    "macroF1": 0.6943,
+    "accuracy": 0.9518,
+    "n": 3401,
+    "short": {
+      "n": 3340,
+      "accuracy": 0.8725,
+      "macroF1": 0.6173
+    },
+    "threshold": 0.5,
+    "thresholdTableShortTexts": [
+      {
+        "threshold": 0.3,
+        "coverage": 0.9973,
+        "acceptedAccuracy": 0.8742
+      },
+      {
+        "threshold": 0.35,
+        "coverage": 0.9913,
+        "acceptedAccuracy": 0.8786
+      },
+      {
+        "threshold": 0.4,
+        "coverage": 0.9784,
+        "acceptedAccuracy": 0.8859
+      },
+      {
+        "threshold": 0.45,
+        "coverage": 0.9605,
+        "acceptedAccuracy": 0.894
+      },
+      {
+        "threshold": 0.5,
+        "coverage": 0.935,
+        "acceptedAccuracy": 0.9059
+      },
+      {
+        "threshold": 0.55,
+        "coverage": 0.9099,
+        "acceptedAccuracy": 0.9128
+      },
+      {
+        "threshold": 0.6,
+        "coverage": 0.8778,
+        "acceptedAccuracy": 0.9209
+      },
+      {
+        "threshold": 0.65,
+        "coverage": 0.8437,
+        "acceptedAccuracy": 0.9333
+      },
+      {
+        "threshold": 0.7,
+        "coverage": 0.8039,
+        "acceptedAccuracy": 0.943
+      },
+      {
+        "threshold": 0.75,
+        "coverage": 0.7569,
+        "acceptedAccuracy": 0.9525
+      },
+      {
+        "threshold": 0.8,
+        "coverage": 0.7,
+        "acceptedAccuracy": 0.9598
+      },
+      {
+        "threshold": 0.85,
+        "coverage": 0.6249,
+        "acceptedAccuracy": 0.9645
+      },
+      {
+        "threshold": 0.9,
+        "coverage": 0.491,
+        "acceptedAccuracy": 0.9744
+      },
+      {
+        "threshold": 0.95,
+        "coverage": 0.2728,
+        "acceptedAccuracy": 0.9824
+      }
+    ],
+    "thresholdTableAllTexts": [
+      {
+        "threshold": 0.3,
+        "coverage": 0.9982,
+        "acceptedAccuracy": 0.9529
+      },
+      {
+        "threshold": 0.35,
+        "coverage": 0.9953,
+        "acceptedAccuracy": 0.9557
+      },
+      {
+        "threshold": 0.4,
+        "coverage": 0.9915,
+        "acceptedAccuracy": 0.9582
+      },
+      {
+        "threshold": 0.45,
+        "coverage": 0.9868,
+        "acceptedAccuracy": 0.9604
+      },
+      {
+        "threshold": 0.5,
+        "coverage": 0.98,
+        "acceptedAccuracy": 0.9646
+      },
+      {
+        "threshold": 0.55,
+        "coverage": 0.9709,
+        "acceptedAccuracy": 0.9676
+      },
+      {
+        "threshold": 0.6,
+        "coverage": 0.958,
+        "acceptedAccuracy": 0.9724
+      },
+      {
+        "threshold": 0.65,
+        "coverage": 0.9488,
+        "acceptedAccuracy": 0.9755
+      },
+      {
+        "threshold": 0.7,
+        "coverage": 0.935,
+        "acceptedAccuracy": 0.9786
+      },
+      {
+        "threshold": 0.75,
+        "coverage": 0.9191,
+        "acceptedAccuracy": 0.9824
+      },
+      {
+        "threshold": 0.8,
+        "coverage": 0.8991,
+        "acceptedAccuracy": 0.985
+      },
+      {
+        "threshold": 0.85,
+        "coverage": 0.8712,
+        "acceptedAccuracy": 0.9906
+      },
+      {
+        "threshold": 0.9,
+        "coverage": 0.8253,
+        "acceptedAccuracy": 0.9957
+      },
+      {
+        "threshold": 0.95,
+        "coverage": 0.7268,
+        "acceptedAccuracy": 0.998
+      }
+    ]
+  },
+  "test": {
+    "maskedModel_maskedText": {
+      "n": 3810,
+      "accuracy": 0.9394,
+      "macroF1": 0.6886,
+      "macroF1Classes": [
+        "earthquake",
+        "tsunami",
+        "flood",
+        "storm",
+        "winter",
+        "wildfire",
+        "heat",
+        "air_quality",
+        "hazmat",
+        "conflict",
+        "crime"
+      ],
+      "weightedF1": 0.9312,
+      "perClass": {
+        "earthquake": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 3
+        },
+        "tsunami": {
+          "precision": 0.3333,
+          "recall": 1.0,
+          "f1": 0.5,
+          "support": 1
+        },
+        "flood": {
+          "precision": 0.9573,
+          "recall": 0.9886,
+          "f1": 0.9727,
+          "support": 703
+        },
+        "storm": {
+          "precision": 0.9572,
+          "recall": 0.9861,
+          "f1": 0.9714,
+          "support": 1586
+        },
+        "winter": {
+          "precision": 0.9693,
+          "recall": 0.9856,
+          "f1": 0.9774,
+          "support": 417
+        },
+        "wildfire": {
+          "precision": 0.8774,
+          "recall": 0.9443,
+          "f1": 0.9096,
+          "support": 341
+        },
+        "heat": {
+          "precision": 0.9951,
+          "recall": 1.0,
+          "f1": 0.9976,
+          "support": 204
+        },
+        "air_quality": {
+          "precision": 0.8065,
+          "recall": 0.6098,
+          "f1": 0.6944,
+          "support": 41
+        },
+        "hazmat": {
+          "precision": 0.8788,
+          "recall": 0.3718,
+          "f1": 0.5225,
+          "support": 78
+        },
+        "volcano": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 0
+        },
+        "conflict": {
+          "precision": 0.28,
+          "recall": 0.0972,
+          "f1": 0.1443,
+          "support": 72
+        },
+        "crime": {
+          "precision": 0.8867,
+          "recall": 0.8819,
+          "f1": 0.8843,
+          "support": 364
+        }
+      },
+      "confusion": {
+        "labels": [
+          "earthquake",
+          "tsunami",
+          "flood",
+          "storm",
+          "winter",
+          "wildfire",
+          "heat",
+          "air_quality",
+          "hazmat",
+          "volcano",
+          "conflict",
+          "crime"
+        ],
+        "rows": "true",
+        "columns": "predicted",
+        "matrix": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            695,
+            8,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            11,
+            1564,
+            10,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            5,
+            411,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            8,
+            2,
+            322,
+            1,
+            3,
+            0,
+            0,
+            2,
+            2
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            204,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            15,
+            0,
+            0,
+            0,
+            25,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            3,
+            6,
+            0,
+            21,
+            0,
+            3,
+            29,
+            0,
+            9,
+            7
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            2,
+            8,
+            11,
+            0,
+            10,
+            0,
+            0,
+            2,
+            0,
+            7,
+            32
+          ],
+          [
+            0,
+            0,
+            7,
+            17,
+            1,
+            9,
+            0,
+            0,
+            2,
+            0,
+            7,
+            321
+          ]
+        ]
+      }
+    },
+    "maskedModel_unmaskedText": {
+      "n": 3810,
+      "accuracy": 0.943,
+      "macroF1": 0.7036,
+      "macroF1Classes": [
+        "earthquake",
+        "tsunami",
+        "flood",
+        "storm",
+        "winter",
+        "wildfire",
+        "heat",
+        "air_quality",
+        "hazmat",
+        "conflict",
+        "crime"
+      ],
+      "weightedF1": 0.9355,
+      "perClass": {
+        "earthquake": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 3
+        },
+        "tsunami": {
+          "precision": 0.3333,
+          "recall": 1.0,
+          "f1": 0.5,
+          "support": 1
+        },
+        "flood": {
+          "precision": 0.9599,
+          "recall": 0.9886,
+          "f1": 0.9741,
+          "support": 703
+        },
+        "storm": {
+          "precision": 0.9612,
+          "recall": 0.9836,
+          "f1": 0.9723,
+          "support": 1586
+        },
+        "winter": {
+          "precision": 0.9624,
+          "recall": 0.9808,
+          "f1": 0.9715,
+          "support": 417
+        },
+        "wildfire": {
+          "precision": 0.8874,
+          "recall": 0.9707,
+          "f1": 0.9272,
+          "support": 341
+        },
+        "heat": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 204
+        },
+        "air_quality": {
+          "precision": 0.8529,
+          "recall": 0.7073,
+          "f1": 0.7733,
+          "support": 41
+        },
+        "hazmat": {
+          "precision": 0.9143,
+          "recall": 0.4103,
+          "f1": 0.5664,
+          "support": 78
+        },
+        "volcano": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 0
+        },
+        "conflict": {
+          "precision": 0.32,
+          "recall": 0.1111,
+          "f1": 0.1649,
+          "support": 72
+        },
+        "crime": {
+          "precision": 0.8901,
+          "recall": 0.8901,
+          "f1": 0.8901,
+          "support": 364
+        }
+      },
+      "confusion": {
+        "labels": [
+          "earthquake",
+          "tsunami",
+          "flood",
+          "storm",
+          "winter",
+          "wildfire",
+          "heat",
+          "air_quality",
+          "hazmat",
+          "volcano",
+          "conflict",
+          "crime"
+        ],
+        "rows": "true",
+        "columns": "predicted",
+        "matrix": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            695,
+            8,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            10,
+            1560,
+            16,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            8,
+            409,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            3,
+            0,
+            331,
+            0,
+            2,
+            0,
+            0,
+            2,
+            2
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            204,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            12,
+            0,
+            0,
+            0,
+            29,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            3,
+            5,
+            0,
+            20,
+            0,
+            3,
+            32,
+            0,
+            9,
+            6
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            2,
+            8,
+            11,
+            0,
+            10,
+            0,
+            0,
+            1,
+            0,
+            8,
+            32
+          ],
+          [
+            0,
+            0,
+            7,
+            16,
+            0,
+            9,
+            0,
+            0,
+            2,
+            0,
+            6,
+            324
+          ]
+        ]
+      }
+    },
+    "unmaskedModel_unmaskedText": {
+      "n": 3810,
+      "accuracy": 0.9499,
+      "macroF1": 0.7163,
+      "macroF1Classes": [
+        "earthquake",
+        "tsunami",
+        "flood",
+        "storm",
+        "winter",
+        "wildfire",
+        "heat",
+        "air_quality",
+        "hazmat",
+        "conflict",
+        "crime"
+      ],
+      "weightedF1": 0.9435,
+      "perClass": {
+        "earthquake": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 3
+        },
+        "tsunami": {
+          "precision": 0.3333,
+          "recall": 1.0,
+          "f1": 0.5,
+          "support": 1
+        },
+        "flood": {
+          "precision": 0.9628,
+          "recall": 0.9943,
+          "f1": 0.9783,
+          "support": 703
+        },
+        "storm": {
+          "precision": 0.9698,
+          "recall": 0.9918,
+          "f1": 0.9807,
+          "support": 1586
+        },
+        "winter": {
+          "precision": 0.9857,
+          "recall": 0.9928,
+          "f1": 0.9892,
+          "support": 417
+        },
+        "wildfire": {
+          "precision": 0.8913,
+          "recall": 0.9619,
+          "f1": 0.9252,
+          "support": 341
+        },
+        "heat": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "support": 204
+        },
+        "air_quality": {
+          "precision": 0.8788,
+          "recall": 0.7073,
+          "f1": 0.7838,
+          "support": 41
+        },
+        "hazmat": {
+          "precision": 0.8974,
+          "recall": 0.4487,
+          "f1": 0.5983,
+          "support": 78
+        },
+        "volcano": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 0
+        },
+        "conflict": {
+          "precision": 0.4,
+          "recall": 0.1667,
+          "f1": 0.2353,
+          "support": 72
+        },
+        "crime": {
+          "precision": 0.8877,
+          "recall": 0.8901,
+          "f1": 0.8889,
+          "support": 364
+        }
+      },
+      "confusion": {
+        "labels": [
+          "earthquake",
+          "tsunami",
+          "flood",
+          "storm",
+          "winter",
+          "wildfire",
+          "heat",
+          "air_quality",
+          "hazmat",
+          "volcano",
+          "conflict",
+          "crime"
+        ],
+        "rows": "true",
+        "columns": "predicted",
+        "matrix": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            699,
+            4,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            9,
+            1573,
+            4,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            3,
+            414,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            4,
+            0,
+            328,
+            0,
+            2,
+            0,
+            0,
+            2,
+            4
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            204,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            12,
+            0,
+            0,
+            0,
+            29,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            4,
+            4,
+            0,
+            18,
+            0,
+            2,
+            35,
+            0,
+            9,
+            6
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            2,
+            6,
+            7,
+            2,
+            10,
+            0,
+            0,
+            2,
+            0,
+            12,
+            31
+          ],
+          [
+            0,
+            0,
+            7,
+            15,
+            0,
+            9,
+            0,
+            0,
+            2,
+            0,
+            7,
+            324
+          ]
+        ]
+      }
+    },
+    "unmaskedModel_maskedText": {
+      "n": 3810,
+      "accuracy": 0.936,
+      "macroF1": 0.6909,
+      "macroF1Classes": [
+        "earthquake",
+        "tsunami",
+        "flood",
+        "storm",
+        "winter",
+        "wildfire",
+        "heat",
+        "air_quality",
+        "hazmat",
+        "conflict",
+        "crime"
+      ],
+      "weightedF1": 0.9283,
+      "perClass": {
+        "earthquake": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 3
+        },
+        "tsunami": {
+          "precision": 0.3333,
+          "recall": 1.0,
+          "f1": 0.5,
+          "support": 1
+        },
+        "flood": {
+          "precision": 0.9534,
+          "recall": 0.99,
+          "f1": 0.9714,
+          "support": 703
+        },
+        "storm": {
+          "precision": 0.9592,
+          "recall": 0.9786,
+          "f1": 0.9688,
+          "support": 1586
+        },
+        "winter": {
+          "precision": 0.9379,
+          "recall": 0.9784,
+          "f1": 0.9577,
+          "support": 417
+        },
+        "wildfire": {
+          "precision": 0.884,
+          "recall": 0.9384,
+          "f1": 0.9104,
+          "support": 341
+        },
+        "heat": {
+          "precision": 0.9951,
+          "recall": 1.0,
+          "f1": 0.9976,
+          "support": 204
+        },
+        "air_quality": {
+          "precision": 0.8621,
+          "recall": 0.6098,
+          "f1": 0.7143,
+          "support": 41
+        },
+        "hazmat": {
+          "precision": 0.8649,
+          "recall": 0.4103,
+          "f1": 0.5565,
+          "support": 78
+        },
+        "volcano": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 0
+        },
+        "conflict": {
+          "precision": 0.2692,
+          "recall": 0.0972,
+          "f1": 0.1429,
+          "support": 72
+        },
+        "crime": {
+          "precision": 0.8795,
+          "recall": 0.8819,
+          "f1": 0.8807,
+          "support": 364
+        }
+      },
+      "confusion": {
+        "labels": [
+          "earthquake",
+          "tsunami",
+          "flood",
+          "storm",
+          "winter",
+          "wildfire",
+          "heat",
+          "air_quality",
+          "hazmat",
+          "volcano",
+          "conflict",
+          "crime"
+        ],
+        "rows": "true",
+        "columns": "predicted",
+        "matrix": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            696,
+            7,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            13,
+            1552,
+            20,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            7,
+            408,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            1,
+            7,
+            4,
+            320,
+            1,
+            2,
+            0,
+            0,
+            2,
+            4
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            204,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            15,
+            0,
+            0,
+            0,
+            25,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            4,
+            5,
+            0,
+            19,
+            0,
+            2,
+            32,
+            0,
+            9,
+            7
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            2,
+            7,
+            9,
+            2,
+            10,
+            0,
+            0,
+            3,
+            0,
+            7,
+            32
+          ],
+          [
+            0,
+            0,
+            7,
+            16,
+            1,
+            9,
+            0,
+            0,
+            2,
+            0,
+            8,
+            321
+          ]
+        ]
+      }
+    },
+    "baseline_maskedText": {
+      "n": 3810,
+      "accuracy": 0.6811,
+      "macroF1": 0.4383,
+      "macroF1Classes": [
+        "earthquake",
+        "tsunami",
+        "flood",
+        "storm",
+        "winter",
+        "wildfire",
+        "heat",
+        "air_quality",
+        "hazmat",
+        "conflict",
+        "crime"
+      ],
+      "weightedF1": 0.6649,
+      "perClass": {
+        "earthquake": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 3
+        },
+        "tsunami": {
+          "precision": 0.3333,
+          "recall": 1.0,
+          "f1": 0.5,
+          "support": 1
+        },
+        "flood": {
+          "precision": 0.8448,
+          "recall": 0.9915,
+          "f1": 0.9123,
+          "support": 703
+        },
+        "storm": {
+          "precision": 0.7803,
+          "recall": 0.8644,
+          "f1": 0.8202,
+          "support": 1586
+        },
+        "winter": {
+          "precision": 0.3531,
+          "recall": 0.4988,
+          "f1": 0.4135,
+          "support": 417
+        },
+        "wildfire": {
+          "precision": 0.8468,
+          "recall": 0.3079,
+          "f1": 0.4516,
+          "support": 341
+        },
+        "heat": {
+          "precision": 0.9938,
+          "recall": 0.7843,
+          "f1": 0.8767,
+          "support": 204
+        },
+        "air_quality": {
+          "precision": 0.875,
+          "recall": 0.5122,
+          "f1": 0.6462,
+          "support": 41
+        },
+        "hazmat": {
+          "precision": 1.0,
+          "recall": 0.0256,
+          "f1": 0.05,
+          "support": 78
+        },
+        "volcano": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 0
+        },
+        "conflict": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 72
+        },
+        "crime": {
+          "precision": 0.9091,
+          "recall": 0.0824,
+          "f1": 0.1511,
+          "support": 364
+        }
+      },
+      "confusion": {
+        "labels": [
+          "earthquake",
+          "tsunami",
+          "flood",
+          "storm",
+          "winter",
+          "wildfire",
+          "heat",
+          "air_quality",
+          "hazmat",
+          "volcano",
+          "conflict",
+          "crime",
+          "other"
+        ],
+        "rows": "true",
+        "columns": "predicted",
+        "matrix": [
+          [
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            697,
+            0,
+            4,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2
+          ],
+          [
+            0,
+            0,
+            123,
+            1371,
+            57,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            33
+          ],
+          [
+            0,
+            0,
+            0,
+            185,
+            208,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            22
+          ],
+          [
+            0,
+            0,
+            0,
+            158,
+            40,
+            105,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            38
+          ],
+          [
+            0,
+            0,
+            0,
+            3,
+            41,
+            0,
+            160,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            10,
+            5,
+            4,
+            0,
+            21,
+            0,
+            0,
+            0,
+            0,
+            1
+          ],
+          [
+            0,
+            0,
+            0,
+            9,
+            9,
+            6,
+            0,
+            3,
+            2,
+            0,
+            0,
+            1,
+            48
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            2,
+            3,
+            4,
+            24,
+            5,
+            0,
+            0,
+            0,
+            0,
+            0,
+            2,
+            32
+          ],
+          [
+            0,
+            0,
+            2,
+            17,
+            198,
+            4,
+            0,
+            0,
+            0,
+            0,
+            0,
+            30,
+            113
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      }
+    },
+    "baseline_unmaskedText": {
+      "n": 3810,
+      "accuracy": 0.7181,
+      "macroF1": 0.4646,
+      "macroF1Classes": [
+        "earthquake",
+        "tsunami",
+        "flood",
+        "storm",
+        "winter",
+        "wildfire",
+        "heat",
+        "air_quality",
+        "hazmat",
+        "conflict",
+        "crime"
+      ],
+      "weightedF1": 0.6941,
+      "perClass": {
+        "earthquake": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 3
+        },
+        "tsunami": {
+          "precision": 0.3333,
+          "recall": 1.0,
+          "f1": 0.5,
+          "support": 1
+        },
+        "flood": {
+          "precision": 0.846,
+          "recall": 1.0,
+          "f1": 0.9166,
+          "support": 703
+        },
+        "storm": {
+          "precision": 0.7911,
+          "recall": 0.9218,
+          "f1": 0.8515,
+          "support": 1586
+        },
+        "winter": {
+          "precision": 0.4182,
+          "recall": 0.5516,
+          "f1": 0.4757,
+          "support": 417
+        },
+        "wildfire": {
+          "precision": 0.8571,
+          "recall": 0.3343,
+          "f1": 0.481,
+          "support": 341
+        },
+        "heat": {
+          "precision": 1.0,
+          "recall": 0.7843,
+          "f1": 0.8791,
+          "support": 204
+        },
+        "air_quality": {
+          "precision": 0.88,
+          "recall": 0.5366,
+          "f1": 0.6667,
+          "support": 41
+        },
+        "hazmat": {
+          "precision": 1.0,
+          "recall": 0.0513,
+          "f1": 0.0976,
+          "support": 78
+        },
+        "volcano": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 0
+        },
+        "conflict": {
+          "precision": 1.0,
+          "recall": 0.0278,
+          "f1": 0.0541,
+          "support": 72
+        },
+        "crime": {
+          "precision": 0.95,
+          "recall": 0.1044,
+          "f1": 0.1881,
+          "support": 364
+        }
+      },
+      "confusion": {
+        "labels": [
+          "earthquake",
+          "tsunami",
+          "flood",
+          "storm",
+          "winter",
+          "wildfire",
+          "heat",
+          "air_quality",
+          "hazmat",
+          "volcano",
+          "conflict",
+          "crime",
+          "other"
+        ],
+        "rows": "true",
+        "columns": "predicted",
+        "matrix": [
+          [
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            703,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            123,
+            1462,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            185,
+            230,
+            0,
+            0,
+            0,
+            0,
+            2,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            158,
+            40,
+            114,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            29
+          ],
+          [
+            0,
+            0,
+            0,
+            3,
+            41,
+            0,
+            160,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            10,
+            5,
+            4,
+            0,
+            22,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            9,
+            9,
+            6,
+            0,
+            3,
+            4,
+            0,
+            0,
+            1,
+            46
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            2,
+            3,
+            4,
+            24,
+            5,
+            0,
+            0,
+            0,
+            0,
+            2,
+            1,
+            31
+          ],
+          [
+            0,
+            0,
+            2,
+            17,
+            198,
+            4,
+            0,
+            0,
+            0,
+            0,
+            0,
+            38,
+            105
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      }
+    }
+  },
+  "testByTextKind": {
+    "full": {
+      "maskedModel_maskedText": {
+        "n": 3794,
+        "accuracy": 0.9396,
+        "macroF1": 0.6887
+      },
+      "maskedModel_unmaskedText": {
+        "n": 3794,
+        "accuracy": 0.9433,
+        "macroF1": 0.7038
+      },
+      "unmaskedModel_unmaskedText": {
+        "n": 3794,
+        "accuracy": 0.9502,
+        "macroF1": 0.7165
+      },
+      "baseline_maskedText": {
+        "n": 3794,
+        "accuracy": 0.6805,
+        "macroF1": 0.4376
+      },
+      "baseline_unmaskedText": {
+        "n": 3794,
+        "accuracy": 0.7174,
+        "macroF1": 0.4638
+      }
+    },
+    "wea": {
+      "maskedModel_maskedText": {
+        "n": 16,
+        "accuracy": 0.875,
+        "macroF1": 0.6667
+      },
+      "maskedModel_unmaskedText": {
+        "n": 16,
+        "accuracy": 0.875,
+        "macroF1": 0.6667
+      },
+      "unmaskedModel_unmaskedText": {
+        "n": 16,
+        "accuracy": 0.875,
+        "macroF1": 0.6667
+      },
+      "baseline_maskedText": {
+        "n": 16,
+        "accuracy": 0.8125,
+        "macroF1": 0.6078
+      },
+      "baseline_unmaskedText": {
+        "n": 16,
+        "accuracy": 0.875,
+        "macroF1": 0.6296
+      }
+    },
+    "snippet": {
+      "maskedModel_maskedText": {
+        "n": 3618,
+        "accuracy": 0.8698,
+        "macroF1": 0.6104
+      },
+      "baseline_maskedText": {
+        "n": 3618,
+        "accuracy": 0.387,
+        "macroF1": 0.3575
+      }
+    }
+  },
+  "abstention": {
+    "threshold": 0.5,
+    "coverage": 0.9761,
+    "acceptedAccuracy": 0.9546,
+    "withAbstainAsOther": {
+      "n": 3810,
+      "accuracy": 0.9318,
+      "macroF1": 0.6771
+    },
+    "snippets": {
+      "threshold": 0.5,
+      "coverage": 0.94,
+      "acceptedAccuracy": 0.8997
+    }
+  },
+  "genericCodes": {
+    "note": "test messages with generic codes (CEM, LAE, SPW, EVI, TOE); no hazard ground truth",
+    "n": 1125,
+    "byCode": {
+      "EVI": 299,
+      "LAE": 273,
+      "SPW": 229,
+      "CEM": 211,
+      "TOE": 113
+    },
+    "predictedAfterThreshold": {
+      "wildfire": 406,
+      "other": 251,
+      "crime": 209,
+      "storm": 123,
+      "flood": 56,
+      "conflict": 49,
+      "hazmat": 26,
+      "winter": 2,
+      "air_quality": 2,
+      "earthquake": 1
+    },
+    "examples": [
+      {
+        "code": "SPW",
+        "text": "[number] Shelter in Place Brewster Persons living in Brewster should shelter in Place due to an ammonia leak. Close all doors, windows and vents. Do not go ou",
+        "predicted": "hazmat",
+        "confidence": 0.694
+      },
+      {
+        "code": "LAE",
+        "text": "EAS flash flood warning for east central rock island county Turn around don't drown",
+        "predicted": "flood",
+        "confidence": 0.932
+      },
+      {
+        "code": "TOE",
+        "text": "Adams county 911 outage Currently all 911 emergency lines are down in Hastings and ADAMS COUNTY.For Emergencies dial [number] or [number]. Currently, al",
+        "predicted": "conflict",
+        "confidence": 0.766
+      },
+      {
+        "code": "TOE",
+        "text": "Waushara Co Sheriffs Office is experiencing 911 outage.In an emergency call [number]",
+        "predicted": "crime",
+        "confidence": 0.554
+      },
+      {
+        "code": "CEM",
+        "text": "CITY OF SILVER BAY TEMPORARY PUBLIC EMERGENCY NOTICE DO NOT USE WATER-",
+        "predicted": "other",
+        "confidence": 0.426
+      },
+      {
+        "code": "TOE",
+        "text": "URGENT MESSAGE. From Aiken County. AT&T customers attempting to dial 9-1-1 in the Aiken County and surrounding area are EXPERIENCING TECHNICAL DIFFICULTIES and ",
+        "predicted": "other",
+        "confidence": 0.369
+      },
+      {
+        "code": "EVI",
+        "text": "EVACUATION ORDER for East Norman EVACUATION ORDER for East Norman LEAVE this area NOW to avoid injury or death. Do not delay to pack belongings. Roads in the ar",
+        "predicted": "wildfire",
+        "confidence": 0.775
+      },
+      {
+        "code": "LAE",
+        "text": "CRASH I-85 NB BEFORE WINDER HWY (MM 128) This is a major travel alert from Georgia 511. All lanes are blocked on Northbound I-85 before SR 53, Winder Highway, e",
+        "predicted": "other",
+        "confidence": 0.315
+      },
+      {
+        "code": "EVI",
+        "text": "Shawn fire evacuation zones Evacuation orders for Shawn drive in the area of Andrea way in Happy Valey The Shasta County Sheriff's Office has issued mandatory e",
+        "predicted": "wildfire",
+        "confidence": 0.961
+      },
+      {
+        "code": "SPW",
+        "text": "Alert from AlertLACounty LACoFD: 12/2425 5:30 PM: Due to increasing water levels in the Cruthers Creek and Pallett Creek, a SHELTER IN PLACE order has been issu",
+        "predicted": "flood",
+        "confidence": 0.846
+      },
+      {
+        "code": "EVI",
+        "text": "Sheriff: Evacuation Order for Wildfire near Golden Acorn Casino 05/19/26 1330Hrs Sheriff: There is a Wildfire near Golden Acorn Casino. Evacuate immediately to ",
+        "predicted": "wildfire",
+        "confidence": 0.93
+      },
+      {
+        "code": "CEM",
+        "text": "Boil Water Notice Due to city of Maple Plain water issue a boil water notice is being put in place. Please boil water before consuming due to an issue with the ",
+        "predicted": "other",
+        "confidence": 0.459
+      }
+    ]
+  },
+  "severity": {
+    "model": {
+      "n": 4855,
+      "accuracy": 0.8443,
+      "macroF1": 0.8268,
+      "macroF1Classes": [
+        "Extreme",
+        "Severe",
+        "Moderate",
+        "Minor"
+      ],
+      "weightedF1": 0.8445,
+      "perClass": {
+        "Extreme": {
+          "precision": 0.8144,
+          "recall": 0.8555,
+          "f1": 0.8344,
+          "support": 1944
+        },
+        "Severe": {
+          "precision": 0.8735,
+          "recall": 0.8378,
+          "f1": 0.8553,
+          "support": 2564
+        },
+        "Moderate": {
+          "precision": 0.795,
+          "recall": 0.8601,
+          "f1": 0.8262,
+          "support": 293
+        },
+        "Minor": {
+          "precision": 0.973,
+          "recall": 0.6667,
+          "f1": 0.7912,
+          "support": 54
+        }
+      },
+      "confusion": {
+        "labels": [
+          "Extreme",
+          "Severe",
+          "Moderate",
+          "Minor"
+        ],
+        "rows": "true",
+        "columns": "predicted",
+        "matrix": [
+          [
+            1663,
+            274,
+            7,
+            0
+          ],
+          [
+            364,
+            2148,
+            51,
+            1
+          ],
+          [
+            12,
+            29,
+            252,
+            0
+          ],
+          [
+            3,
+            8,
+            7,
+            36
+          ]
+        ]
+      }
+    },
+    "baseline_majorityPerTrueHazard": {
+      "n": 4855,
+      "accuracy": 0.643,
+      "macroF1": 0.3529,
+      "macroF1Classes": [
+        "Extreme",
+        "Severe",
+        "Moderate",
+        "Minor"
+      ],
+      "weightedF1": 0.6127,
+      "perClass": {
+        "Extreme": {
+          "precision": 0.705,
+          "recall": 0.4635,
+          "f1": 0.5593,
+          "support": 1944
+        },
+        "Severe": {
+          "precision": 0.6221,
+          "recall": 0.8576,
+          "f1": 0.7211,
+          "support": 2564
+        },
+        "Moderate": {
+          "precision": 0.5238,
+          "recall": 0.0751,
+          "f1": 0.1313,
+          "support": 293
+        },
+        "Minor": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "support": 54
+        }
+      },
+      "confusion": {
+        "labels": [
+          "Extreme",
+          "Severe",
+          "Moderate",
+          "Minor"
+        ],
+        "rows": "true",
+        "columns": "predicted",
+        "matrix": [
+          [
+            901,
+            1043,
+            0,
+            0
+          ],
+          [
+            365,
+            2199,
+            0,
+            0
+          ],
+          [
+            8,
+            263,
+            22,
+            0
+          ],
+          [
+            4,
+            30,
+            20,
+            0
+          ]
+        ]
+      }
+    },
+    "trainDistribution": {
+      "Severe": 48222,
+      "Extreme": 15760,
+      "Moderate": 9145,
+      "Minor": 889
+    }
+  },
+  "checkSet": {
+    "testRunModel": {
+      "n": 20,
+      "correct": 12,
+      "correctAfterThreshold": 11,
+      "baselineCorrect": 7,
+      "rows": [
+        {
+          "text": "Air raid sirens, go to the nearest shelter now",
+          "expected": [
+            "conflict"
+          ],
+          "predicted": "hazmat",
+          "confidence": 0.465,
+          "afterThreshold": "other",
+          "severity": "Extreme",
+          "correct": false,
+          "correctAfterThreshold": false,
+          "baseline": "other",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Missile attack warning. Take shelter immediately and stay away from windows.",
+          "expected": [
+            "conflict"
+          ],
+          "predicted": "storm",
+          "confidence": 0.593,
+          "afterThreshold": "storm",
+          "severity": "Extreme",
+          "correct": false,
+          "correctAfterThreshold": false,
+          "baseline": "storm",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Gunfire reported at the mall, shelter in place and lock doors",
+          "expected": [
+            "conflict",
+            "crime"
+          ],
+          "predicted": "conflict",
+          "confidence": 0.426,
+          "afterThreshold": "other",
+          "severity": "Extreme",
+          "correct": true,
+          "correctAfterThreshold": false,
+          "baseline": "wildfire",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Strong shaking felt downtown. Drop, cover and hold on.",
+          "expected": [
+            "earthquake"
+          ],
+          "predicted": "storm",
+          "confidence": 0.435,
+          "afterThreshold": "other",
+          "severity": "Severe",
+          "correct": false,
+          "correctAfterThreshold": false,
+          "baseline": "other",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Large waves expected after the undersea quake. Move to high ground away from the beach.",
+          "expected": [
+            "tsunami"
+          ],
+          "predicted": "flood",
+          "confidence": 0.607,
+          "afterThreshold": "flood",
+          "severity": "Severe",
+          "correct": false,
+          "correctAfterThreshold": false,
+          "baseline": "other",
+          "baselineCorrect": false
+        },
+        {
+          "text": "River rising rapidly, evacuate low areas",
+          "expected": [
+            "flood"
+          ],
+          "predicted": "wildfire",
+          "confidence": 0.525,
+          "afterThreshold": "wildfire",
+          "severity": "Extreme",
+          "correct": false,
+          "correctAfterThreshold": false,
+          "baseline": "other",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Flash flooding on Main Street. Do not drive through water.",
+          "expected": [
+            "flood"
+          ],
+          "predicted": "flood",
+          "confidence": 0.985,
+          "afterThreshold": "flood",
+          "severity": "Severe",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "flood",
+          "baselineCorrect": true
+        },
+        {
+          "text": "Dam failure imminent. Downstream residents evacuate now.",
+          "expected": [
+            "flood"
+          ],
+          "predicted": "conflict",
+          "confidence": 0.371,
+          "afterThreshold": "other",
+          "severity": "Extreme",
+          "correct": false,
+          "correctAfterThreshold": false,
+          "baseline": "other",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Tornado on the ground near the highway. Take cover in a basement or inner room.",
+          "expected": [
+            "storm"
+          ],
+          "predicted": "storm",
+          "confidence": 0.766,
+          "afterThreshold": "storm",
+          "severity": "Extreme",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "storm",
+          "baselineCorrect": true
+        },
+        {
+          "text": "Hurricane force winds and storm surge expected tonight",
+          "expected": [
+            "storm",
+            "flood"
+          ],
+          "predicted": "storm",
+          "confidence": 0.972,
+          "afterThreshold": "storm",
+          "severity": "Extreme",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "flood",
+          "baselineCorrect": true
+        },
+        {
+          "text": "Heavy snow and ice, roads closed. Stay home and keep warm.",
+          "expected": [
+            "winter"
+          ],
+          "predicted": "winter",
+          "confidence": 0.751,
+          "afterThreshold": "winter",
+          "severity": "Extreme",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "winter",
+          "baselineCorrect": true
+        },
+        {
+          "text": "Blizzard conditions with zero visibility on the interstate",
+          "expected": [
+            "winter"
+          ],
+          "predicted": "winter",
+          "confidence": 0.663,
+          "afterThreshold": "winter",
+          "severity": "Extreme",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "winter",
+          "baselineCorrect": true
+        },
+        {
+          "text": "Wildfire spreading toward homes on the ridge, leave now",
+          "expected": [
+            "wildfire"
+          ],
+          "predicted": "wildfire",
+          "confidence": 0.886,
+          "afterThreshold": "wildfire",
+          "severity": "Extreme",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "wildfire",
+          "baselineCorrect": true
+        },
+        {
+          "text": "Temperatures over 110 degrees today. Drink water and stay out of the sun.",
+          "expected": [
+            "heat"
+          ],
+          "predicted": "heat",
+          "confidence": 0.811,
+          "afterThreshold": "heat",
+          "severity": "Severe",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "other",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Smoke from distant fires has made the air unhealthy. Limit time outdoors.",
+          "expected": [
+            "air_quality"
+          ],
+          "predicted": "air_quality",
+          "confidence": 0.948,
+          "afterThreshold": "air_quality",
+          "severity": "Moderate",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "wildfire",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Chemical leak at the rail yard. Stay indoors and close all windows.",
+          "expected": [
+            "hazmat"
+          ],
+          "predicted": "hazmat",
+          "confidence": 0.754,
+          "afterThreshold": "hazmat",
+          "severity": "Extreme",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "storm",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Gas plant explosion, evacuate everyone within one mile",
+          "expected": [
+            "hazmat"
+          ],
+          "predicted": "wildfire",
+          "confidence": 0.318,
+          "afterThreshold": "other",
+          "severity": "Extreme",
+          "correct": false,
+          "correctAfterThreshold": false,
+          "baseline": "other",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Ash falling from the volcano eruption, wear a mask and stay inside",
+          "expected": [
+            "volcano"
+          ],
+          "predicted": "conflict",
+          "confidence": 0.524,
+          "afterThreshold": "conflict",
+          "severity": "Extreme",
+          "correct": false,
+          "correctAfterThreshold": false,
+          "baseline": "volcano",
+          "baselineCorrect": true
+        },
+        {
+          "text": "Police searching for an armed suspect. Avoid the area.",
+          "expected": [
+            "crime"
+          ],
+          "predicted": "crime",
+          "confidence": 0.781,
+          "afterThreshold": "crime",
+          "severity": "Extreme",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "winter",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Missing child, 6 years old, last seen in a red sedan",
+          "expected": [
+            "crime"
+          ],
+          "predicted": "crime",
+          "confidence": 0.933,
+          "afterThreshold": "crime",
+          "severity": "Extreme",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "other",
+          "baselineCorrect": false
+        }
+      ]
+    },
+    "shippedModel": {
+      "n": 20,
+      "correct": 14,
+      "correctAfterThreshold": 12,
+      "baselineCorrect": 7,
+      "rows": [
+        {
+          "text": "Air raid sirens, go to the nearest shelter now",
+          "expected": [
+            "conflict"
+          ],
+          "predicted": "hazmat",
+          "confidence": 0.478,
+          "afterThreshold": "other",
+          "severity": "Extreme",
+          "correct": false,
+          "correctAfterThreshold": false,
+          "baseline": "other",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Missile attack warning. Take shelter immediately and stay away from windows.",
+          "expected": [
+            "conflict"
+          ],
+          "predicted": "storm",
+          "confidence": 0.532,
+          "afterThreshold": "storm",
+          "severity": "Extreme",
+          "correct": false,
+          "correctAfterThreshold": false,
+          "baseline": "storm",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Gunfire reported at the mall, shelter in place and lock doors",
+          "expected": [
+            "conflict",
+            "crime"
+          ],
+          "predicted": "crime",
+          "confidence": 0.432,
+          "afterThreshold": "other",
+          "severity": "Severe",
+          "correct": true,
+          "correctAfterThreshold": false,
+          "baseline": "wildfire",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Strong shaking felt downtown. Drop, cover and hold on.",
+          "expected": [
+            "earthquake"
+          ],
+          "predicted": "earthquake",
+          "confidence": 0.394,
+          "afterThreshold": "other",
+          "severity": "Severe",
+          "correct": true,
+          "correctAfterThreshold": false,
+          "baseline": "other",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Large waves expected after the undersea quake. Move to high ground away from the beach.",
+          "expected": [
+            "tsunami"
+          ],
+          "predicted": "flood",
+          "confidence": 0.564,
+          "afterThreshold": "flood",
+          "severity": "Extreme",
+          "correct": false,
+          "correctAfterThreshold": false,
+          "baseline": "other",
+          "baselineCorrect": false
+        },
+        {
+          "text": "River rising rapidly, evacuate low areas",
+          "expected": [
+            "flood"
+          ],
+          "predicted": "wildfire",
+          "confidence": 0.591,
+          "afterThreshold": "wildfire",
+          "severity": "Extreme",
+          "correct": false,
+          "correctAfterThreshold": false,
+          "baseline": "other",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Flash flooding on Main Street. Do not drive through water.",
+          "expected": [
+            "flood"
+          ],
+          "predicted": "flood",
+          "confidence": 0.978,
+          "afterThreshold": "flood",
+          "severity": "Severe",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "flood",
+          "baselineCorrect": true
+        },
+        {
+          "text": "Dam failure imminent. Downstream residents evacuate now.",
+          "expected": [
+            "flood"
+          ],
+          "predicted": "conflict",
+          "confidence": 0.501,
+          "afterThreshold": "conflict",
+          "severity": "Extreme",
+          "correct": false,
+          "correctAfterThreshold": false,
+          "baseline": "other",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Tornado on the ground near the highway. Take cover in a basement or inner room.",
+          "expected": [
+            "storm"
+          ],
+          "predicted": "storm",
+          "confidence": 0.822,
+          "afterThreshold": "storm",
+          "severity": "Extreme",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "storm",
+          "baselineCorrect": true
+        },
+        {
+          "text": "Hurricane force winds and storm surge expected tonight",
+          "expected": [
+            "storm",
+            "flood"
+          ],
+          "predicted": "storm",
+          "confidence": 0.981,
+          "afterThreshold": "storm",
+          "severity": "Extreme",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "flood",
+          "baselineCorrect": true
+        },
+        {
+          "text": "Heavy snow and ice, roads closed. Stay home and keep warm.",
+          "expected": [
+            "winter"
+          ],
+          "predicted": "winter",
+          "confidence": 0.815,
+          "afterThreshold": "winter",
+          "severity": "Extreme",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "winter",
+          "baselineCorrect": true
+        },
+        {
+          "text": "Blizzard conditions with zero visibility on the interstate",
+          "expected": [
+            "winter"
+          ],
+          "predicted": "winter",
+          "confidence": 0.598,
+          "afterThreshold": "winter",
+          "severity": "Extreme",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "winter",
+          "baselineCorrect": true
+        },
+        {
+          "text": "Wildfire spreading toward homes on the ridge, leave now",
+          "expected": [
+            "wildfire"
+          ],
+          "predicted": "wildfire",
+          "confidence": 0.894,
+          "afterThreshold": "wildfire",
+          "severity": "Extreme",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "wildfire",
+          "baselineCorrect": true
+        },
+        {
+          "text": "Temperatures over 110 degrees today. Drink water and stay out of the sun.",
+          "expected": [
+            "heat"
+          ],
+          "predicted": "heat",
+          "confidence": 0.822,
+          "afterThreshold": "heat",
+          "severity": "Severe",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "other",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Smoke from distant fires has made the air unhealthy. Limit time outdoors.",
+          "expected": [
+            "air_quality"
+          ],
+          "predicted": "air_quality",
+          "confidence": 0.942,
+          "afterThreshold": "air_quality",
+          "severity": "Moderate",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "wildfire",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Chemical leak at the rail yard. Stay indoors and close all windows.",
+          "expected": [
+            "hazmat"
+          ],
+          "predicted": "hazmat",
+          "confidence": 0.809,
+          "afterThreshold": "hazmat",
+          "severity": "Extreme",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "storm",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Gas plant explosion, evacuate everyone within one mile",
+          "expected": [
+            "hazmat"
+          ],
+          "predicted": "hazmat",
+          "confidence": 0.687,
+          "afterThreshold": "hazmat",
+          "severity": "Extreme",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "other",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Ash falling from the volcano eruption, wear a mask and stay inside",
+          "expected": [
+            "volcano"
+          ],
+          "predicted": "conflict",
+          "confidence": 0.534,
+          "afterThreshold": "conflict",
+          "severity": "Extreme",
+          "correct": false,
+          "correctAfterThreshold": false,
+          "baseline": "volcano",
+          "baselineCorrect": true
+        },
+        {
+          "text": "Police searching for an armed suspect. Avoid the area.",
+          "expected": [
+            "crime"
+          ],
+          "predicted": "crime",
+          "confidence": 0.733,
+          "afterThreshold": "crime",
+          "severity": "Extreme",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "winter",
+          "baselineCorrect": false
+        },
+        {
+          "text": "Missing child, 6 years old, last seen in a red sedan",
+          "expected": [
+            "crime"
+          ],
+          "predicted": "crime",
+          "confidence": 0.943,
+          "afterThreshold": "crime",
+          "severity": "Extreme",
+          "correct": true,
+          "correctAfterThreshold": true,
+          "baseline": "other",
+          "baselineCorrect": false
+        }
+      ]
+    }
+  }
+}
