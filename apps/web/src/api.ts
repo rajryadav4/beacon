@@ -35,7 +35,7 @@ export type RiskData = FeatureCollection<Polygon, {
 export interface Hazard { key: string; label: string; placeKinds: string[] }
 
 export interface SafePlaceProps {
-  id: string; name: string; kind: string; kindLabel: string;
+  id: string | number; name: string; kind: string; kindLabel: string;
   address: string | null; phone: string | null; openingHours: string | null; source: string | null;
 }
 export type SafePlacesData = FeatureCollection<Point, SafePlaceProps>;
@@ -43,7 +43,7 @@ export interface NearestPlace extends SafePlaceProps { lat: number; lng: number;
 export interface NearestPlaces { hazard: string; places: NearestPlace[] }
 
 export interface Alert {
-  id: string; source: string; event: string; hazard: string; hazardLabel: string;
+  id: string | number; source: string; event: string; hazard: string; hazardLabel: string;
   severity: string; urgency: string | null; certainty: string | null;
   headline: string | null; description: string | null; instruction: string | null;
   areaDesc: string | null; sender: string | null;
@@ -52,7 +52,7 @@ export interface Alert {
   /** Set only on locally simulated alerts (never from the API). */
   demo?: boolean;
 }
-export interface Incident { id: string; type: string; hazard: string; time: string | null; distanceKm: number | null }
+export interface Incident { id: string | number; type: string; hazard: string; time: string | null; distanceKm: number | null }
 export interface ActiveAlerts {
   location: { lat: number; lng: number } | null;
   alerts: Alert[];
