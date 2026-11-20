@@ -200,7 +200,9 @@ export default function App() {
       ? { top: phone ? 190 : 170, bottom: 40, left: 40, right: 60 }
       : phone ? { top: 50, bottom: Math.round(window.innerHeight * 0.52), left: 30, right: 50 }
         : { top: 60, bottom: 60, left: 400, right: 70 };
-    map.fitBounds([[w, s], [e, n]], { padding, maxZoom: 17, duration: 800 });
+    // In 3D, fit at a gentler pitch so buildings hide less of the route.
+    const pitch = map.getPitch() > 5 ? 35 : 0;
+    map.fitBounds([[w, s], [e, n]], { padding, maxZoom: 17, duration: 800, pitch, bearing: map.getBearing() });
   }, []);
 
   const navigate = useCallback((place: NearestPlace) => {

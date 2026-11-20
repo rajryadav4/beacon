@@ -75,6 +75,15 @@ npm --prefix apps/web install
 npm --prefix apps/web run dev
 ```
 
+### Web app notes
+
+- Tabs: **Map** (crime heatmap / ML risk grid, overlay toggles), **Alerts** (polled every 60 s for the chosen location, source freshness, survival mode and the *Demo: simulate an alert* control), **Safe places** (nearest places for a hazard, walking route from the public OSRM foot server).
+- Location is set only by a user action ("Use my location", "Pick on map", right-click or long-press). It is rounded before it is sent to `/api/alerts/active` and `/api/safe-places/nearest`.
+- Survival mode takes over the screen when `/api/alerts/active` returns `survival: true`, when turned on by hand, or for a local demo alert (marked DEMO).
+- 3D map: OpenFreeMap buildings, AWS Terrain Tiles, sky and a dark palette for evening/night and survival mode. The 2D/3D button sits under the zoom controls; phones and slow devices get a lighter setup, and no WebGL2 means 2D.
+- Open `http://localhost:5173/?mock=1` to use typed fake alerts and safe places (marked MOCK DATA) when the API endpoints are not running.
+- Code: `src/components/` (MapView, AlertsPanel, SafePlacesPanel, SurvivalMode, LocationControl, CrimeLayers), `src/lib/` (guidance, routing, hazards, mapScene, mock, demo, format), `src/hooks.ts`.
+
 ## Test
 
 ```bash

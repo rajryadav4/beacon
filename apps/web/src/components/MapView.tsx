@@ -402,6 +402,7 @@ export default function MapView(props: Props) {
     (map.getSource('route') as GeoJSONSource).setData(route
       ? { type: 'FeatureCollection', features: [{ type: 'Feature', properties: {}, geometry: route }] }
       : EMPTY);
+    sceneRef.current?.dimBuildings(Boolean(route));
   }, [ready, location, destination, route]);
 
   useEffect(() => {

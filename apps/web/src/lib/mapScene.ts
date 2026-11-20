@@ -105,8 +105,13 @@ export interface Scene {
   applyTheme: (theme: MapTheme) => void;
   setMode: (mode: ViewMode, opts: { buildingsHidden: boolean }) => void;
   setLowPower: (low: boolean) => void;
+  /** Make buildings see-through so a walking route behind them stays readable. */
+  dimBuildings: (dim: boolean) => void;
   terrainFailed: () => boolean;
 }
+
+const BUILDING_OPACITY: ExpressionSpecification = ['interpolate', ['linear'], ['zoom'], 13.5, 0, 14.6, 0.9];
+const BUILDING_OPACITY_DIM: ExpressionSpecification = ['interpolate', ['linear'], ['zoom'], 13.5, 0, 14.6, 0.45];
 
 /**
  * Add terrain, hillshade and 3D buildings to a loaded positron map.
@@ -144,7 +149,7 @@ export function setupScene(map: MlMap, opts: { lowPower: boolean; beforeLabels?:
         'fill-extrusion-color': BUILDING_COLOR.light,
         'fill-extrusion-height': ['interpolate', ['linear'], ['zoom'], 13.5, 0, 14.6, height],
         'fill-extrusion-base': ['interpolate', ['linear'], ['zoom'], 13.5, 0, 14.6, base],
-        'fill-extrusion-opacity': ['interpolate', ['linear'], ['zoom'], 13.5, 0, 14.6, 0.9],
+        'fill-extrusion-opacity': BUILDING_OPACITY,
       },
     }, opts.beforeLabels);
   }
@@ -192,6 +197,9 @@ export function setupScene(map: MlMap, opts: { lowPower: boolean; beforeLabels?:
       if (low === lowPower) return;
       lowPower = low;
       applyPower();
+    },
+    dimBuildings(dim) {
+      if (map.getLayer(BUILDINGS_LAYER)) map.setPaintProperty(BUILDINGS_LAYER, 'fill-extrusion-opacity', dim ? BUILDING_OPACITY_DIM : BUILDING_OPACITY);
     },
     terrainFailed: () => failed,
   };

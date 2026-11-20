@@ -85,7 +85,7 @@ export class ApiError extends Error {
 /** A short user-facing message for a failed request. */
 export function errorMessage(e: unknown, what: string): string {
   if (e instanceof ApiError && e.unavailable) {
-    return e.status === null ? `Can't reach the Beacon server for ${what}.` : `${what[0].toUpperCase()}${what.slice(1)} service is not available yet.`;
+    return e.status === null ? `Can't reach the Beacon server for ${what}.` : `${what[0].toUpperCase()}${what.slice(1)} service is not available right now.`;
   }
   return `Could not load ${what}${e instanceof Error && e.message ? ` (${e.message})` : ''}.`;
 }
