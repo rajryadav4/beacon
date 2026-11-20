@@ -26,3 +26,5 @@ apps/web/dist/
 
 # Agent worktrees
 .claude/worktrees/
+# Hazard outlook downloads (terrain tiles)
+data/hazard_cache/

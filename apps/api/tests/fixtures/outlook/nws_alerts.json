@@ -1,0 +1,412 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.af56db7796db80fd99b187f35fdf673a62903eaf.001.1",
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.af56db7796db80fd99b187f35fdf673a62903eaf.001.1",
+    "id": "urn:oid:2.49.0.1.840.0.af56db7796db80fd99b187f35fdf673a62903eaf.001.1",
+    "areaDesc": "Monona; Harrison; Shelby; Pottawattamie; Knox; Cedar; Thurston; Antelope; Pierce; Wayne; Boone; Madison; Stanton; Cuming; Burt; Platte; Colfax; Dodge; Washington; Butler; Saunders; Douglas; Sarpy; Seward; Lancaster; Cass; Otoe; Saline; Jefferson; Gage; Johnson",
+    "geocode": {
+     "SAME": [
+      "019133",
+      "019085",
+      "019165",
+      "019155",
+      "031107",
+      "031027",
+      "031173",
+      "031003",
+      "031139",
+      "031179",
+      "031011",
+      "031119",
+      "031167",
+      "031039",
+      "031021",
+      "031141",
+      "031037",
+      "031053",
+      "031177",
+      "031023",
+      "031155",
+      "031055",
+      "031153",
+      "031159",
+      "031109",
+      "031025",
+      "031131",
+      "031151",
+      "031095",
+      "031067",
+      "031097"
+     ],
+     "UGC": [
+      "IAZ043",
+      "IAZ055",
+      "IAZ056",
+      "IAZ069",
+      "NEZ011",
+      "NEZ012",
+      "NEZ015",
+      "NEZ016",
+      "NEZ017",
+      "NEZ018",
+      "NEZ030",
+      "NEZ031",
+      "NEZ032",
+      "NEZ033",
+      "NEZ034",
+      "NEZ042",
+      "NEZ043",
+      "NEZ044",
+      "NEZ045",
+      "NEZ050",
+      "NEZ051",
+      "NEZ052",
+      "NEZ053",
+      "NEZ065",
+      "NEZ066",
+      "NEZ067",
+      "NEZ068",
+      "NEZ078",
+      "NEZ088",
+      "NEZ089",
+      "NEZ090"
+     ]
+    },
+    "affectedZones": [
+     "https://api.weather.gov/zones/forecast/IAZ043",
+     "https://api.weather.gov/zones/forecast/IAZ055",
+     "https://api.weather.gov/zones/forecast/IAZ056",
+     "https://api.weather.gov/zones/forecast/IAZ069",
+     "https://api.weather.gov/zones/forecast/NEZ011",
+     "https://api.weather.gov/zones/forecast/NEZ012",
+     "https://api.weather.gov/zones/forecast/NEZ015",
+     "https://api.weather.gov/zones/forecast/NEZ016",
+     "https://api.weather.gov/zones/forecast/NEZ017",
+     "https://api.weather.gov/zones/forecast/NEZ018",
+     "https://api.weather.gov/zones/forecast/NEZ030",
+     "https://api.weather.gov/zones/forecast/NEZ031",
+     "https://api.weather.gov/zones/forecast/NEZ032",
+     "https://api.weather.gov/zones/forecast/NEZ033",
+     "https://api.weather.gov/zones/forecast/NEZ034",
+     "https://api.weather.gov/zones/forecast/NEZ042",
+     "https://api.weather.gov/zones/forecast/NEZ043",
+     "https://api.weather.gov/zones/forecast/NEZ044",
+     "https://api.weather.gov/zones/forecast/NEZ045",
+     "https://api.weather.gov/zones/forecast/NEZ050",
+     "https://api.weather.gov/zones/forecast/NEZ051",
+     "https://api.weather.gov/zones/forecast/NEZ052",
+     "https://api.weather.gov/zones/forecast/NEZ053",
+     "https://api.weather.gov/zones/forecast/NEZ065",
+     "https://api.weather.gov/zones/forecast/NEZ066",
+     "https://api.weather.gov/zones/forecast/NEZ067",
+     "https://api.weather.gov/zones/forecast/NEZ068",
+     "https://api.weather.gov/zones/forecast/NEZ078",
+     "https://api.weather.gov/zones/forecast/NEZ088",
+     "https://api.weather.gov/zones/forecast/NEZ089",
+     "https://api.weather.gov/zones/forecast/NEZ090"
+    ],
+    "sent": "2026-11-19T21:55:00-06:00",
+    "effective": "2026-11-19T21:55:00-06:00",
+    "onset": "2026-11-20T08:00:00-06:00",
+    "expires": "2026-11-20T15:00:00-06:00",
+    "ends": "2026-11-20T16:00:00-06:00",
+    "status": "Actual",
+    "messageType": "Alert",
+    "category": "Met",
+    "severity": "Moderate",
+    "certainty": "Likely",
+    "urgency": "Expected",
+    "event": "Wind Advisory",
+    "senderName": "NWS Omaha/Valley NE",
+    "headline": "Wind Advisory issued November 19 at 9:55PM CST until November 20 at 4:00PM CST by NWS Omaha/Valley NE",
+    "instruction": "Winds this strong can make driving difficult, especially for high\nprofile vehicles. Use extra caution."
+   }
+  },
+  {
+   "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.5fca50948eef6d127e52903cf4bdf0fb2c37360c.001.1",
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.5fca50948eef6d127e52903cf4bdf0fb2c37360c.001.1",
+    "id": "urn:oid:2.49.0.1.840.0.5fca50948eef6d127e52903cf4bdf0fb2c37360c.001.1",
+    "areaDesc": "Ruby Mountains and East Humboldt Range",
+    "geocode": {
+     "SAME": [
+      "032007",
+      "032033"
+     ],
+     "UGC": [
+      "NVZ034"
+     ]
+    },
+    "affectedZones": [
+     "https://api.weather.gov/zones/forecast/NVZ034"
+    ],
+    "sent": "2026-11-19T19:12:00-08:00",
+    "effective": "2026-11-19T19:12:00-08:00",
+    "onset": "2026-11-19T19:12:00-08:00",
+    "expires": "2026-11-20T03:15:00-08:00",
+    "ends": "2026-11-20T16:00:00-08:00",
+    "status": "Actual",
+    "messageType": "Update",
+    "category": "Met",
+    "severity": "Severe",
+    "certainty": "Likely",
+    "urgency": "Expected",
+    "event": "Winter Storm Warning",
+    "senderName": "NWS Elko NV",
+    "headline": "Winter Storm Warning issued November 19 at 7:12PM PST until November 20 at 4:00PM PST by NWS Elko NV",
+    "instruction": "If you must travel, keep an extra flashlight, food, and water in your\nvehicle in case of an emergency. The latest road conditions for the\nstate you are calling from can be obtained by calling 5 1 1.\n\nPersons should consider delaying all travel. If travel is absolutely\nnecessary, drive with extreme caution. Consider taking a winter storm\nkit along with you, including such items as tire chains, booster\ncables, flashlight, shovel, blankets and extra clothing. Also take\nwater, a first aid kit, and anything else that would help you survive\nin case you become stranded."
+   }
+  },
+  {
+   "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.8ffe855a1f79e58976dd74a82f49fed6a8266adb.002.1",
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.8ffe855a1f79e58976dd74a82f49fed6a8266adb.002.1",
+    "id": "urn:oid:2.49.0.1.840.0.8ffe855a1f79e58976dd74a82f49fed6a8266adb.002.1",
+    "areaDesc": "Manitou Island to Point Isabelle MI; Point Isabelle to Lower Entrance of Portage Canal MI; Portage Lake to Huron Island MI to Lower Entrance of Portage Canal To Huron Islands MI Including Keweenaw and Huron Bays; Huron Islands to Marquette MI",
+    "geocode": {
+     "SAME": [
+      "091245",
+      "091246",
+      "091247",
+      "091248"
+     ],
+     "UGC": [
+      "LSZ245",
+      "LSZ246",
+      "LSZ247",
+      "LSZ248"
+     ]
+    },
+    "affectedZones": [
+     "https://api.weather.gov/zones/forecast/LSZ245",
+     "https://api.weather.gov/zones/forecast/LSZ246",
+     "https://api.weather.gov/zones/forecast/LSZ247",
+     "https://api.weather.gov/zones/forecast/LSZ248"
+    ],
+    "sent": "2026-11-19T22:11:00-05:00",
+    "effective": "2026-11-19T22:11:00-05:00",
+    "onset": "2026-11-19T22:11:00-05:00",
+    "expires": "2026-11-20T01:00:00-05:00",
+    "ends": "2026-11-20T01:00:00-05:00",
+    "status": "Actual",
+    "messageType": "Update",
+    "category": "Met",
+    "severity": "Minor",
+    "certainty": "Likely",
+    "urgency": "Expected",
+    "event": "Small Craft Advisory",
+    "senderName": "NWS Marquette MI",
+    "headline": "Small Craft Advisory issued November 19 at 10:11PM EST until November 20 at 1:00AM EST by NWS Marquette MI",
+    "instruction": "Inexperienced mariners, especially those operating smaller\nvessels, should avoid navigating in hazardous conditions."
+   }
+  },
+  {
+   "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.94dfc2e2efa497f8078780fe9297bb4a54333cf4.001.1",
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -81.02,
+       28.45
+      ],
+      [
+       -80.98,
+       28.48
+      ],
+      [
+       -80.9,
+       28.38
+      ],
+      [
+       -80.89,
+       28.35
+      ],
+      [
+       -80.93,
+       28.37
+      ],
+      [
+       -80.98,
+       28.41
+      ],
+      [
+       -81.02,
+       28.45
+      ],
+      [
+       -81.02,
+       28.45
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.94dfc2e2efa497f8078780fe9297bb4a54333cf4.001.1",
+    "id": "urn:oid:2.49.0.1.840.0.94dfc2e2efa497f8078780fe9297bb4a54333cf4.001.1",
+    "areaDesc": "Orange, FL",
+    "geocode": {
+     "SAME": [
+      "012095"
+     ],
+     "UGC": [
+      "FLC095"
+     ]
+    },
+    "affectedZones": [
+     "https://api.weather.gov/zones/county/FLC095"
+    ],
+    "sent": "2026-11-19T20:46:00-05:00",
+    "effective": "2026-11-19T20:46:00-05:00",
+    "onset": "2026-11-19T20:46:00-05:00",
+    "expires": "2026-11-20T06:00:00-05:00",
+    "ends": "2026-11-20T06:00:00-05:00",
+    "status": "Actual",
+    "messageType": "Alert",
+    "category": "Met",
+    "severity": "Severe",
+    "certainty": "Likely",
+    "urgency": "Expected",
+    "event": "Flood Warning",
+    "senderName": "NWS Melbourne FL",
+    "headline": "Flood Warning issued November 19 at 8:46PM EST until November 20 at 6:00AM EST by NWS Melbourne FL",
+    "instruction": "Turn around, don't drown when encountering flooded roads. Most flood\ndeaths occur in vehicles.\n\nBe especially cautious at night when it is harder to recognize the\ndangers of flooding."
+   }
+  },
+  {
+   "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.5f6585eb92c50fd0b137216a08ccb385063b914c.001.1",
+   "type": "Feature",
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       -81.39,
+       28.9
+      ],
+      [
+       -81.5,
+       29.08
+      ],
+      [
+       -81.42,
+       29.1
+      ],
+      [
+       -81.31,
+       28.93
+      ],
+      [
+       -81.39,
+       28.9
+      ],
+      [
+       -81.39,
+       28.9
+      ]
+     ]
+    ]
+   },
+   "properties": {
+    "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.5f6585eb92c50fd0b137216a08ccb385063b914c.001.1",
+    "id": "urn:oid:2.49.0.1.840.0.5f6585eb92c50fd0b137216a08ccb385063b914c.001.1",
+    "areaDesc": "Lake, FL; Volusia, FL",
+    "geocode": {
+     "SAME": [
+      "012069",
+      "012127"
+     ],
+     "UGC": [
+      "FLC069",
+      "FLC127"
+     ]
+    },
+    "affectedZones": [
+     "https://api.weather.gov/zones/county/FLC069",
+     "https://api.weather.gov/zones/county/FLC127"
+    ],
+    "sent": "2026-11-19T20:45:00-05:00",
+    "effective": "2026-11-19T20:45:00-05:00",
+    "onset": "2026-11-19T20:45:00-05:00",
+    "expires": "2026-11-20T11:00:00-05:00",
+    "ends": null,
+    "status": "Actual",
+    "messageType": "Update",
+    "category": "Met",
+    "severity": "Severe",
+    "certainty": "Observed",
+    "urgency": "Immediate",
+    "event": "Flood Warning",
+    "senderName": "NWS Melbourne FL",
+    "headline": "Flood Warning issued November 19 at 8:45PM EST by NWS Melbourne FL",
+    "instruction": "Turn around, don't drown when encountering flooded roads. Most flood\ndeaths occur in vehicles.\n\nMotorists should not attempt to drive around barricades or drive cars\nthrough flooded areas.\n\nCaution is urged when walking near riverbanks.\n\nAdditional information is available at www.weather.gov.\n\nThe next statement will be issued Friday morning at 1100 AM EST."
+   }
+  },
+  {
+   "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.1b7044468976ba620b25b82bd61a3e69832af899.001.1",
+   "type": "Feature",
+   "geometry": null,
+   "properties": {
+    "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.1b7044468976ba620b25b82bd61a3e69832af899.001.1",
+    "id": "urn:oid:2.49.0.1.840.0.1b7044468976ba620b25b82bd61a3e69832af899.001.1",
+    "areaDesc": "Inland Palm Beach County; Metro Palm Beach County; Inland Broward County; Metro Broward County; Inland Miami-Dade County; Metropolitan Miami Dade; Coastal Palm Beach County; Coastal Broward County; Coastal Miami Dade County; Far South Miami-Dade County",
+    "geocode": {
+     "SAME": [
+      "012099",
+      "012011",
+      "012086"
+     ],
+     "UGC": [
+      "FLZ067",
+      "FLZ068",
+      "FLZ071",
+      "FLZ072",
+      "FLZ073",
+      "FLZ074",
+      "FLZ168",
+      "FLZ172",
+      "FLZ173",
+      "FLZ174"
+     ]
+    },
+    "affectedZones": [
+     "https://api.weather.gov/zones/forecast/FLZ067",
+     "https://api.weather.gov/zones/forecast/FLZ068",
+     "https://api.weather.gov/zones/forecast/FLZ071",
+     "https://api.weather.gov/zones/forecast/FLZ072",
+     "https://api.weather.gov/zones/forecast/FLZ073",
+     "https://api.weather.gov/zones/forecast/FLZ074",
+     "https://api.weather.gov/zones/forecast/FLZ168",
+     "https://api.weather.gov/zones/forecast/FLZ172",
+     "https://api.weather.gov/zones/forecast/FLZ173",
+     "https://api.weather.gov/zones/forecast/FLZ174"
+    ],
+    "sent": "2026-11-19T15:18:00-05:00",
+    "effective": "2026-11-19T15:18:00-05:00",
+    "onset": "2026-11-19T15:18:00-05:00",
+    "expires": "2026-11-20T07:00:00-05:00",
+    "ends": "2026-11-20T07:00:00-05:00",
+    "status": "Actual",
+    "messageType": "Update",
+    "category": "Met",
+    "severity": "Severe",
+    "certainty": "Possible",
+    "urgency": "Future",
+    "event": "Flood Watch",
+    "senderName": "NWS Miami FL",
+    "headline": "Flood Watch issued November 19 at 3:18PM EST until November 20 at 7:00AM EST by NWS Miami FL",
+    "instruction": "You should monitor later forecasts and be prepared to take action\nshould Flash Flood Warnings be issued."
+   }
+  }
+ ]
+}

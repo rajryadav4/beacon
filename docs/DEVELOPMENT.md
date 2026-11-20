@@ -95,6 +95,12 @@ npm --prefix apps/web run build
 ```
 
 The API tests run against the local database, so start it and load the data first.
+With only the schema loaded (as in CI), set `BEACON_TEST_DATA=schema` to skip the tests that need the full data.
+
+## Deploy
+
+One Docker image (`Dockerfile`) serves the API and the built web app; free hosting on Render and Neon, with
+GitHub Actions for CI and data refresh: see [DEPLOY.md](DEPLOY.md).
 
 ## API (Phase 0)
 
@@ -150,6 +156,112 @@ An official list as GeoJSON points (a file or an http(s) URL, such as an ArcGIS 
 
 The caller's coordinates are never stored or logged: `/nearest` responses are `Cache-Control: no-store`, and its
 query string is dropped from the uvicorn access log (a reverse proxy in front of the API must do the same).
+
+## Hazard outlook
+
+Beacon looks ahead about 72 hours for natural hazards in the region, shows which areas are worst and safest for each
+hazard, and points people to safer ground. It uses only free, open data and open-source software; no API key is
+needed. Tables are in `db/schema/005_hazard_outlook.sql`, and both scripts apply that file themselves.
+
+Hazard zones, terrain and exposure per grid cell (run again when the sources or safe places change; about 10 min):
+
+```bash
+.venv/bin/python pipeline/import_hazard_zones.py
+```
+
+The outlook, one pass or a loop (every 30 min by default; `--bbox west,south,east,north` for another region):
+
+```bash
+.venv/bin/python pipeline/outlook_worker.py --once
+```
+
+On a python.org build of Python on macOS, prefix both with `SSL_CERT_FILE=$(.venv/bin/python -m certifi)`.
+Optional: set `FIRMS_MAP_KEY` (a free NASA key) to add FIRMS satellite fire detections. Without it that source shows
+as `skipped`.
+
+### Where is worst and safest: zones and exposure
+
+| Source | What | Level | License |
+|---|---|---|---|
+| WA DNR tsunami models (via City of Seattle GIS) | Seattle Fault M7.5 (2022) and Cascadia L1 inundation | > 6 ft high, 1-6 ft moderate, < 1 ft low | Public data, as is |
+| City of Seattle Environmentally Critical Areas | Liquefaction-prone areas | high | City of Seattle open data, as is |
+| City of Seattle ECA | Known landslides; potential slide areas; 40 %+ steep slopes (merged per ~1 km tile) | high; moderate; moderate | City of Seattle open data, as is |
+| City of Seattle ECA | Flood-prone areas (FEMA zones plus 100 ft) | moderate | City of Seattle open data, as is |
+| FEMA National Flood Hazard Layer | A/AE/AO/VE (1 % a year, "100-year"); shaded X (0.2 %, "500-year"); levee-protected X | high; moderate; low | US public domain |
+| USGS volcano hazard zones (via WA Geological Survey, City of Seattle) | Mount Rainier lahars and post-lahar sediment (the Duwamish valley) | high; moderate | US public domain / public data |
+| AWS Terrain Tiles (terrarium, zoom 13, ~13 m) | Elevation and slope per cell | | Open data; USGS 3DEP, SRTM, ETOPO1 and others ([attribution](https://github.com/tilezen/joerd/blob/master/docs/attribution.md)) |
+
+Zones are clipped to the grid box and stored simplified to about 2 m; `hazard_zone_footprints` keeps one dissolved
+outline per kind (about 10 m) so an outlook item can be drawn over, say, the tsunami inundation zones. Which zone kinds count for which hazard is in `hazard_zone_kinds`: landslide areas
+count for `flood` (heavy rain triggers most Seattle landslides) and for `earthquake`, with liquefaction.
+
+Exposure is scored for `tsunami`, `flood`, `earthquake` and `volcano` on every land cell (cells more than half open
+water are skipped). The formula is in `pipeline/hazard_scoring.py`:
+
+- **Zone** `Z = 1.0 × high share + 0.6 × moderate share + 0.3 × low share` of the cell. Shares are cumulative, so a
+  higher level wins where zones overlap; when two sources map the same hazard (FEMA and the city's flood-prone areas),
+  the larger share of one source is used, not the sum.
+- **Terrain** `T`: lowland `L` is 1 at sea level and 0 at 20 m (median land elevation of the cell), and counts only
+  within 500 m of a mapped zone of that hazard, fading out at 1 km. Slope `S` is 0 at 10° and 1 at 30° (90th percentile
+  of pixel slopes). Tsunami and volcano use `L`, flood uses `max(L, S)`, earthquake uses `S`.
+- **Access** `A`: straight-line distance to the nearest suitable safe place for the hazard (`hazard_place_kinds`),
+  0 at the door and 1 at 3 km or more.
+- `score = round(100 × (0.75 Z + 0.25 T) × (0.85 + 0.15 A))`; level `high` ≥ 50, `moderate` ≥ 20, otherwise `low`.
+  `factors` holds every input, so the map can explain a cell.
+
+A score compares cells with each other for one hazard. It is not a probability that anything happens there.
+
+### What may be coming: outlook sources and thresholds
+
+Levels: `watch` (possible), `likely` (expected, or a forecast crosses an official threshold), `imminent` (an official
+warning, or already happening). A model forecast alone never goes above `likely`, and its confidence is `low`.
+
+| Source | Rule | License |
+|---|---|---|
+| NASA EONET open events (last 10 days) | Wildfire within 40 km (inside the area: imminent), volcano within 350 km (ash), severe storm within 300 km, flood within 50 km: watch. Prescribed fires are skipped | NASA open data |
+| GDACS | Tropical cyclone within 1000 km, flood within 100 km, volcano within 350 km, wildfire within 50 km; Orange: watch, Red: likely. Earthquakes and droughts skipped | Free public alerts, credit GDACS (EC JRC, UN OCHA) |
+| NOAA tsunami.gov (NTWC Atom feed + CAP) | Warning: imminent, advisory: likely, watch: watch, when the CAP area names Washington or Puget Sound; drawn over the mapped inundation zones. Information statements never alert | US public domain |
+| NWS alerts for the region's zones | Watches and outlooks: watch; advisories: likely; warnings: imminent within 12 h of onset, else likely. Only `Future`/`Expected` urgency (Beacon's alerts feed covers `Immediate`); marine-only alerts skipped | US public domain |
+| NWS river forecasts (NWPS) | Gauges within ~10 km with official flood categories: observed at or above minor flood stage: imminent; forecast crest above it within 72 h: likely; at action stage: watch. Area: mapped flood zones within 6 km | US public domain |
+| NOAA SPC convective outlooks, days 1-3 | Marginal and Slight: watch; Enhanced, Moderate, High: likely (general thunder skipped) | US public domain |
+| NOAA WPC excessive rainfall outlooks, days 1-3 | Marginal (5 %+) and Slight (15 %+): watch; Moderate (40 %+) and High (70 %+): likely | US public domain |
+| Open-Meteo forecast (9 points over the area) | Wind: NWS Western Region Wind Advisory (31 mph sustained or 46 mph gusts): watch; High Wind Warning (40 / 58 mph): likely. Heat: NWS heat index Extreme Caution (feels like 90 °F+): watch; Danger (103 °F+): likely. Landslides: USGS Seattle cumulative threshold `P3 ≥ 3.5 − 0.67 × P15` inches (Chleborad 2003): watch, plus the intensity-duration threshold `I ≥ 82.73 × D^−1.13` mm/h (Godt et al. 2006): likely; drawn over the mapped landslide areas | Data CC BY 4.0; free API for non-commercial use (self-host the AGPL server otherwise) |
+| Open-Meteo air quality (CAMS) | 24-hour mean PM2.5 against the EPA AQI breakpoints: Unhealthy for Sensitive Groups (35.5 µg/m³+): watch; Unhealthy (55.5+): likely | CC BY 4.0, contains modified Copernicus Atmosphere Monitoring Service information |
+| USGS earthquakes | Recent activity only (count and largest quake in `/api/outlook/sources`). After an M5+ within 150 km in the past 7 days: an "aftershocks possible" watch | US public domain |
+| NASA FIRMS (optional, `FIRMS_MAP_KEY`) | VIIRS hotspots within 40 km (low-confidence pixels skipped): watch, inside the area: likely | NASA open data, free key |
+
+Every source's last fetch, status, message and license is in `hazard_sources`. A failing source keeps its previous
+items until they expire. Other free sources were checked and left out on purpose: NASA POWER (past weather only, no
+forecast), NASA GIBS (imagery, nothing to detect from), NHC (tropical cyclones; GDACS covers the rare Pacific storm),
+USGS Water Services (NWPS already carries the USGS gauge readings, with official flood stages).
+
+### API
+
+| Endpoint | Returns |
+|---|---|
+| `GET /api/outlook?lat&lng` | `{"location": {lat, lng, cellId, inRegion, exposure: [{hazard, hazardLabel, score, level}]}, "outlook": [{id, hazard, hazardLabel, level, title, summary, validFrom, validTo, confidence, sources: [{name, url, observed}], distanceKm}], "updatedAt", "disclaimer"}`: items whose area covers the point or lies within 25 km, most serious first |
+| `GET /api/outlook/areas?bbox=w,s,e,n` | GeoJSON MultiPolygons of the current outlook items (`id, hazard, hazardLabel, level, title, summary, validFrom, validTo, confidence`) |
+| `GET /api/hazard-zones?hazard=tsunami&bbox=w,s,e,n&kind=` | GeoJSON zone polygons (simplified to ~5 m) with `id, hazard, kind, level, name, source`. Pass the map viewport as `bbox`: the whole city's flood and landslide zones are about 6 MB |
+| `GET /api/hazard-grid?hazard=flood` | GeoJSON cell polygons with `cellId, score, level, factors` (tsunami, flood, earthquake, volcano), for a worst-to-safest layer |
+| `GET /api/safe-areas?lat&lng&hazard=flood&limit=3` | `{hazard, hazardLabel, location, advice, areas: [{cellId, lat, lng, distanceM, score, level, reason}], places: [... /safe-places/nearest fields + score, level, reason], note, disclaimer}`. Areas are the nearest cells with score ≤ 10 and no zone overlap (tsunami and volcano also 15 m+ above sea level, flood 5 m+), at least 400 m apart; places are suitable safe places inside such cells. Hazards without a grid return places only |
+| `GET /api/outlook/sources` | Every zone, terrain and outlook source: last fetch, status, message, item count, license, attribution |
+
+Point queries (`/api/outlook` and `/api/safe-areas`) are `Cache-Control: no-store`; their query strings are dropped
+from the uvicorn access log and never stored.
+
+### Honest limits
+
+- **Earthquakes cannot be predicted.** Beacon never says one is coming. For earthquakes it shows preparedness
+  (liquefaction and landslide zones, exposure) and recent USGS activity; the only earthquake outlook item is the
+  aftershock notice after a large quake, which is what USGS itself publishes.
+- The outlook is not an official warning. It relays official products and applies simple published thresholds to
+  free model forecasts; people must follow local officials and emergency alerts.
+- Exposure is relative and only as good as the maps: the city layers stop at the Seattle city limits (cells outside
+  rely on FEMA, the tsunami models and terrain; `cell_terrain.in_city` marks this), zone maps are modelled scenarios,
+  and 13 m terrain cannot see seawalls, levees or buildings.
+- Distances are straight lines, not routes; a safe area across water or a freeway is not always reachable.
+- Open-Meteo forecasts are a single model blend sampled at 9 points; heat uses apparent temperature, not the full NWS
+  HeatRisk product.
 
 ## Database notes
 

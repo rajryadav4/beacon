@@ -1,0 +1,21 @@
+# Allow-list: the image needs only the web app source, the API and (when it
+# has been trained) the hazard classifier. Everything else stays out of the
+# build context: data/ (crime CSV), node_modules, .venv, .env files, .git,
+# .claude/ (agent worktrees), CrimeRadar/ (Java app and its build), ml/output, ...
+*
+
+!apps/web/
+apps/web/node_modules/
+apps/web/dist/
+
+!apps/api/requirements.txt
+!apps/api/app/
+
+# Hazard classifier (git-ignored, optional): included only if it exists at build time.
+!ml/hazard/output/
+
+**/__pycache__/
+**/*.pyc
+**/.DS_Store
+**/.env
+**/.env.*

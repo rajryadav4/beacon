@@ -1,0 +1,191 @@
+{
+ "title": "EONET Events",
+ "events": [
+  {
+   "id": "EONET_T1",
+   "title": "Wildfire Test Ridge, King, Washington",
+   "description": null,
+   "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_T1",
+   "closed": null,
+   "categories": [
+    {
+     "id": "wildfires",
+     "title": "wildfires"
+    }
+   ],
+   "sources": [
+    {
+     "id": "IRWIN",
+     "url": "https://irwin.doi.gov/observer/incidents/2026-WACOF-002229"
+    }
+   ],
+   "geometry": [
+    {
+     "magnitudeValue": null,
+     "magnitudeUnit": null,
+     "date": "2026-11-19T18:00:00Z",
+     "type": "Point",
+     "coordinates": [
+      -122.05,
+      47.7
+     ]
+    }
+   ]
+  },
+  {
+   "id": "EONET_T2",
+   "title": "Prescribed Fire Test RX, King, Washington",
+   "description": null,
+   "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_T2",
+   "closed": null,
+   "categories": [
+    {
+     "id": "wildfires",
+     "title": "wildfires"
+    }
+   ],
+   "sources": [
+    {
+     "id": "IRWIN",
+     "url": "https://irwin.doi.gov/observer/incidents/2026-WACOF-002229"
+    }
+   ],
+   "geometry": [
+    {
+     "magnitudeValue": null,
+     "magnitudeUnit": null,
+     "date": "2026-11-19T18:00:00Z",
+     "type": "Point",
+     "coordinates": [
+      -122.3,
+      47.6
+     ]
+    }
+   ]
+  },
+  {
+   "id": "EONET_T3",
+   "title": "Wildfire Far Away, Malheur, Oregon",
+   "description": null,
+   "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_T3",
+   "closed": null,
+   "categories": [
+    {
+     "id": "wildfires",
+     "title": "wildfires"
+    }
+   ],
+   "sources": [
+    {
+     "id": "IRWIN",
+     "url": "https://irwin.doi.gov/observer/incidents/2026-WACOF-002229"
+    }
+   ],
+   "geometry": [
+    {
+     "magnitudeValue": null,
+     "magnitudeUnit": null,
+     "date": "2026-11-19T18:00:00Z",
+     "type": "Point",
+     "coordinates": [
+      -117.9,
+      43.6
+     ]
+    }
+   ]
+  },
+  {
+   "id": "EONET_T4",
+   "title": "Rainier Volcano, United States",
+   "description": null,
+   "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_T4",
+   "closed": null,
+   "categories": [
+    {
+     "id": "volcanoes",
+     "title": "volcanoes"
+    }
+   ],
+   "sources": [
+    {
+     "id": "IRWIN",
+     "url": "https://irwin.doi.gov/observer/incidents/2026-WACOF-002229"
+    }
+   ],
+   "geometry": [
+    {
+     "magnitudeValue": null,
+     "magnitudeUnit": null,
+     "date": "2026-11-19T00:00:00Z",
+     "type": "Point",
+     "coordinates": [
+      -121.76,
+      46.853
+     ]
+    }
+   ]
+  },
+  {
+   "id": "EONET_T5",
+   "title": "Wildfire Old Smoke, Snohomish, Washington",
+   "description": null,
+   "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_T5",
+   "closed": null,
+   "categories": [
+    {
+     "id": "wildfires",
+     "title": "wildfires"
+    }
+   ],
+   "sources": [
+    {
+     "id": "IRWIN",
+     "url": "https://irwin.doi.gov/observer/incidents/2026-WACOF-002229"
+    }
+   ],
+   "geometry": [
+    {
+     "magnitudeValue": null,
+     "magnitudeUnit": null,
+     "date": "2026-08-01T00:00:00Z",
+     "type": "Point",
+     "coordinates": [
+      -122.2,
+      47.85
+     ]
+    }
+   ]
+  },
+  {
+   "id": "EONET_T6",
+   "title": "Wildfire Inside, King, Washington",
+   "description": null,
+   "link": "https://eonet.gsfc.nasa.gov/api/v3/events/EONET_T6",
+   "closed": null,
+   "categories": [
+    {
+     "id": "wildfires",
+     "title": "wildfires"
+    }
+   ],
+   "sources": [
+    {
+     "id": "IRWIN",
+     "url": "https://irwin.doi.gov/observer/incidents/2026-WACOF-002229"
+    }
+   ],
+   "geometry": [
+    {
+     "magnitudeValue": null,
+     "magnitudeUnit": null,
+     "date": "2026-11-20T01:00:00Z",
+     "type": "Point",
+     "coordinates": [
+      -122.33,
+      47.6
+     ]
+    }
+   ]
+  }
+ ]
+}
