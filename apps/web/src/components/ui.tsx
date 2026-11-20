@@ -9,7 +9,7 @@ const PATHS: Record<string, ReactNode> = {
   locate: <><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="7.5" /><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3" /></>,
   crosshair: <><circle cx="12" cy="12" r="9" /><path d="M12 3v4M12 17v4M3 12h4M17 12h4" /><circle cx="12" cy="12" r="1.2" fill="currentColor" /></>,
   nav: <polygon points="3 11 22 2 13 21 11 13 3 11" />,
-  arrow: <path d="M12 2 20 21 12 16.5 4 21Z" fill="currentColor" stroke="none" />,
+  arrow: <><path d="M12 21V4" strokeWidth={2.8} /><path d="m5 11 7-7 7 7" strokeWidth={2.8} /></>,
   swap: <><path d="m21 16-4 4-4-4" /><path d="M17 20V4" /><path d="m3 8 4-4 4 4" /><path d="M7 4v16" /></>,
   star: <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />,
   home: <path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z" />,

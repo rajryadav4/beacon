@@ -112,7 +112,7 @@ export default function AlertsView(props: Props) {
         </div>
         {demoActive && <button className="link" type="button" onClick={props.onClearDemo}>Clear the demo alert</button>}
         <p className="hint">DEMO shows survival mode with a fake alert for the hazard above. It stays in this browser and is always marked DEMO.</p>
-        <a className="btn btn-ghost btn-sm test-link" href="/simulator"><Icon name="test" className="icon-sm" />Test Beacon: alert simulator</a>
+        <a className="btn btn-ghost btn-sm test-link" href="/simulator.html"><Icon name="test" className="icon-sm" />Test Beacon: alert simulator</a>
       </div>
     </section>
   );

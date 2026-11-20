@@ -54,7 +54,9 @@ export default function SurvivalView({ hazard, hazardLabel, alert, otherAlerts, 
     id: `a${a.cellId}`, lat: a.lat, lng: a.lng, name: 'Safer area', detail: a.reason, distanceM: a.distanceM, reason: a.reason, area: true,
   })), [safeAreas.data]);
 
-  const target = choice ?? targets[0] ?? null;
+  // High ground nearby beats a shelter far away (tsunami, flood): take a safer area when it is under half the walk.
+  const nearArea = areas[0] && (!targets[0] || areas[0].distanceM < targets[0].distanceM * 0.5) ? areas[0] : null;
+  const target = choice ?? nearArea ?? targets[0] ?? null;
   const start = rerouteFrom ?? location;
   const key = target && start ? `${start.lat.toFixed(5)},${start.lng.toFixed(5)}>${target.id}` : null;
 

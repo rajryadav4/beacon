@@ -58,8 +58,8 @@ export default function NavChip({ info, survival }: { info: NavInfo; survival?: 
   return (
     <Floating>
       <div className={`nav-chip${survival ? ' is-survival' : ''}${info.offRoute ? ' is-off' : ''}`} role="status" aria-live="polite">
-        <span className="nav-arrow" aria-hidden="true" style={{ transform: `rotate(${info.heading - mapBearing}deg)` }}>
-          <Icon name="arrow" className="icon" />
+        <span className="nav-arrow" aria-hidden="true">
+          <span className="nav-glyph" style={{ transform: `rotate(${info.heading - mapBearing}deg)` }}><Icon name="arrow" className="icon" /></span>
         </span>
         <div className="nav-text">
           <b>{info.offRoute ? 'Off the route: head back to the line' : `Head ${compassWord(info.heading)}`}</b>

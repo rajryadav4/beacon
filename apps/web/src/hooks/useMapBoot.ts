@@ -37,7 +37,15 @@ export function useMapBoot(container: RefObject<HTMLDivElement | null>) {
       if (import.meta.env.DEV) (window as unknown as { beacon: unknown }).beacon = { ctrl, model };
       const made = ctrl;
       // Keep the boot screen until the first map frame is ready (no black flash).
-      made.whenReady(() => { if (!abort.signal.aborted) setBooted({ ctrl: made, model, live: data.live, landmarks }); });
+      // (At most 3.5 s: a slow tile server should not hold the whole app.)
+      let done = false;
+      const show = () => {
+        if (done || abort.signal.aborted) return;
+        done = true;
+        setBooted({ ctrl: made, model, live: data.live, landmarks });
+      };
+      made.whenReady(show);
+      window.setTimeout(show, 3500);
     })().catch((e) => {
       if (abort.signal.aborted) return;
       console.warn('Beacon could not start', e);

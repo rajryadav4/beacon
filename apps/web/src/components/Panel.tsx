@@ -60,6 +60,13 @@ export default function Panel({ view, onView, alerts, children }: Props) {
         </p>
       )}
       {view !== 'trip' && (
+        <a className="test-cta" href="/simulator.html">
+          <span className="test-ico" aria-hidden="true"><Icon name="test" className="icon-sm" /></span>
+          <span><b>Test Beacon</b> try a simulated calamity</span>
+          <Icon name="chevron" className="icon-sm chev" />
+        </a>
+      )}
+      {view !== 'trip' && (
         <div className="tabs" role="tablist" aria-label="Views">
           {TABS.map((t) => (
             <button key={t.key} className="tab" role="tab" type="button" aria-selected={view === t.key} tabIndex={view === t.key ? 0 : -1}

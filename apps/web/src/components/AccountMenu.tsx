@@ -107,7 +107,7 @@ export default function AccountMenu({ open, onClose, onTrip }: { open: boolean; 
         </p>
       </div>
       <div className="menu-section">
-        <a className="btn btn-secondary btn-block" href="/simulator"><Icon name="test" className="icon-sm" />Test Beacon (alert simulator)</a>
+        <a className="btn btn-secondary btn-block" href="/simulator.html"><Icon name="test" className="icon-sm" />Test Beacon (alert simulator)</a>
       </div>
     </div>
   );
