@@ -2,33 +2,7 @@
 
 import type { FeatureCollection, Geometry, Point, Polygon } from 'geojson';
 import { MOCK, mockApi } from './lib/mock';
-
-export type BandKey = 'night' | 'morning' | 'afternoon' | 'evening';
-export type RiskLevel = 'low' | 'elevated' | 'high';
-
-export interface Band { id: number; key: BandKey; label: string; hours: string }
-export interface CrimeGroup { id: number; key: string; label: string; severity: number }
-
-export interface Meta {
-  generatedAt: string | null;
-  source: { name: string; id: string; url: string; importedAt: string | null } | null;
-  dataRange: { from: string | null; to: string | null };
-  totals: { incidents?: number; located?: number; excluded?: number; unknownTime?: number };
-  bands: Band[];
-  groups: CrimeGroup[];
-  risk: { unit: string; quantiles: Record<string, number> | null; levels: { elevated: number; high: number } | null };
-  model: {
-    version: string;
-    algorithm: string;
-    trainedOn: string | null;
-    metrics: { hotspotCapture10: number; spearman: number; poissonDeviance: number } | null;
-  } | null;
-}
-
-export type HeatmapData = FeatureCollection<Point, { cellId: number; count: number; weight: number }>;
-export type RiskData = FeatureCollection<Polygon, {
-  cellId: number; risk: number; level: RiskLevel; neighborhood: string | null;
-}> & { model: string | null; band: number };
+import type { GridFile, HoodsFile, MapMeta } from './lib/risk';
 
 // ---- Hazards, safe places and alerts (Beacon) ----
 
@@ -65,13 +39,33 @@ export type AlertAreas = FeatureCollection<Geometry, {
   id: string; event: string; hazard: string; severity: string; headline: string | null; expires: string | null;
 }>;
 
-/** Per-source freshness. The shape is normalised by `sourceFreshness()` in AlertsPanel. */
+/** Per-source freshness. The shape is normalised by `sourceFreshness()` in the alerts view. */
 export type AlertsStatus = Record<string, unknown>;
 
-export interface HazardClassification {
-  hazard: string; hazardLabel: string; confidence: number; severity: string | null;
-  scores: Record<string, number>; model: string;
+// ---- Hazard outlook (apps/api/app/routers/outlook.py) ----
+
+export interface OutlookItem {
+  id: string | number; hazard: string; hazardLabel: string; level: string; title: string; summary: string | null;
+  validFrom: string | null; validTo: string | null; confidence: string | null;
+  sources: { name: string | null; url: string | null; observed: string | null }[]; distanceKm: number;
 }
+export interface Outlook {
+  location: { inRegion: boolean; exposure: { hazard: string; hazardLabel: string; score: number; level: string }[] };
+  outlook: OutlookItem[];
+  updatedAt: string | null;
+  disclaimer: string;
+}
+export type HazardGrid = FeatureCollection<Polygon, { cellId: number; score: number; level: string }> & { note?: string };
+export type HazardZones = FeatureCollection<Geometry, { id: string | number; hazard: string; kind: string; level: string; name: string | null }>;
+export interface SafeArea { cellId: number; lat: number; lng: number; distanceM: number; score: number; level: string; reason: string }
+export interface SafeAreaPlace extends NearestPlace { reason: string }
+export interface SafeAreas {
+  hazard: string; hazardLabel: string; advice: string | null;
+  location: { inRegion: boolean; score: number | null; level: string | null };
+  areas: SafeArea[]; places: SafeAreaPlace[]; note: string; disclaimer: string;
+}
+/** Hazards with an exposure grid (worst-to-safest layer). */
+export const SCORED_HAZARDS = ['tsunami', 'flood', 'earthquake', 'volcano'];
 
 /** Bounding box [west, south, east, north]. */
 export type BBox = [number, number, number, number];
@@ -107,23 +101,63 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 
 const getJson = <T>(path: string, signal?: AbortSignal) => request<T>(path, { signal });
 
+let paths: Promise<Set<string> | null> | null = null;
+/**
+ * Does the API have this endpoint? Read once from FastAPI's /openapi.json, so optional features
+ * (the hazard outlook, built separately) are hidden instead of calling a missing endpoint.
+ * If the list cannot be read, assume yes and let the request fail gracefully.
+ */
+export async function supports(path: string): Promise<boolean> {
+  if (MOCK) return true;
+  paths ??= fetch('/openapi.json')
+    .then((r) => (r.ok ? r.json() : null))
+    .then((j: { paths?: Record<string, unknown> } | null) => (j?.paths ? new Set(Object.keys(j.paths)) : null))
+    .catch(() => null);
+  const known = await paths;
+  return known === null || known.has(path);
+}
+
+/** GET an optional endpoint: a 404 without a request when the API does not have it. */
+async function optional<T>(path: string, query: string, signal?: AbortSignal): Promise<T> {
+  if (!(await supports(path))) throw new ApiError('not available', 404);
+  return getJson<T>(`${path}?${query}`, signal);
+}
+
 /** Round coordinates before sending them: alerts only need ~100 m, nearest places ~10 m. */
 const round = (v: number, digits: number) => v.toFixed(digits);
+const bboxParam = (bbox: BBox, digits = 4) => bbox.map((v) => v.toFixed(digits)).join(',');
+
+export interface MapData { meta: MapMeta; grid: GridFile; hoods: HoodsFile; live: boolean }
+export interface Landmark { name: string; category?: string; lat: number; lng: number }
 
 export const api = {
-  meta: (signal?: AbortSignal) => getJson<Meta>('/api/meta', signal),
-  heatmap: (band: BandKey | 'all', groups: string[], signal?: AbortSignal) => {
-    const params = new URLSearchParams({ band });
-    if (groups.length) params.set('groups', groups.join(','));
-    return getJson<HeatmapData>(`/api/heatmap?${params}`, signal);
+  /**
+   * Crime map data in the class-app shape. The three parts must come from ONE source (the grid's nbIndex
+   * points into the neighborhoods list), so if any API call fails, all three come from the bundled copies.
+   */
+  async mapData(signal?: AbortSignal): Promise<MapData> {
+    try {
+      const [meta, grid, hoods] = await Promise.all([
+        getJson<MapMeta>('/api/meta', signal), getJson<GridFile>('/api/grid', signal), getJson<HoodsFile>('/api/neighborhoods', signal),
+      ]);
+      if (!grid.cells?.length || !meta.risk?.levels) throw new Error('empty map data');
+      return { meta, grid, hoods, live: true };
+    } catch (e) {
+      if (signal?.aborted) throw e;
+      const [meta, grid, hoods] = await Promise.all([
+        getJson<MapMeta>('/data/meta.json', signal), getJson<GridFile>('/data/grid.json', signal), getJson<HoodsFile>('/data/neighborhoods.json', signal),
+      ]);
+      return { meta, grid, hoods, live: false };
+    }
   },
-  risk: (band: BandKey, signal?: AbortSignal) => getJson<RiskData>(`/api/risk?band=${band}`, signal),
+  landmarks: (signal?: AbortSignal) => getJson<{ places: Landmark[] }>('/data/places.json', signal)
+    .then((d) => d.places ?? []).catch(() => [] as Landmark[]),
 
   hazards: (signal?: AbortSignal) => MOCK ? mockApi.hazards()
     : getJson<{ hazards: Hazard[] }>('/api/hazards', signal),
   safePlaces: (bbox: BBox, kinds: string[], signal?: AbortSignal) => {
     if (MOCK) return mockApi.safePlaces(bbox, kinds);
-    const params = new URLSearchParams({ bbox: bbox.map((v) => v.toFixed(5)).join(',') });
+    const params = new URLSearchParams({ bbox: bboxParam(bbox, 5) });
     if (kinds.length) params.set('kinds', kinds.join(','));
     return getJson<SafePlacesData>(`/api/safe-places?${params}`, signal);
   },
@@ -138,10 +172,16 @@ export const api = {
     return getJson<ActiveAlerts>(`/api/alerts/active?${params}`, signal);
   },
   alertAreas: (bbox: BBox, signal?: AbortSignal) => MOCK ? mockApi.alertAreas(bbox)
-    : getJson<AlertAreas>(`/api/alerts?bbox=${bbox.map((v) => v.toFixed(4)).join(',')}`, signal),
+    : getJson<AlertAreas>(`/api/alerts?bbox=${bboxParam(bbox)}`, signal),
   alertsStatus: (signal?: AbortSignal) => MOCK ? mockApi.alertsStatus()
     : getJson<AlertsStatus>('/api/alerts/status', signal),
-  classifyHazard: (text: string, signal?: AbortSignal) => request<HazardClassification>('/api/hazard/classify', {
-    method: 'POST', signal, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }),
-  }),
+
+  outlook: (lat: number, lng: number, signal?: AbortSignal) => MOCK ? mockApi.outlook()
+    : optional<Outlook>('/api/outlook', `lat=${round(lat, 3)}&lng=${round(lng, 3)}`, signal),
+  hazardGrid: (hazard: string, signal?: AbortSignal) => MOCK ? mockApi.hazardGrid(hazard)
+    : optional<HazardGrid>('/api/hazard-grid', `hazard=${encodeURIComponent(hazard)}`, signal),
+  hazardZones: (hazard: string, bbox: BBox, signal?: AbortSignal) => MOCK ? mockApi.hazardZones(hazard, bbox)
+    : optional<HazardZones>('/api/hazard-zones', `hazard=${encodeURIComponent(hazard)}&bbox=${bboxParam(bbox)}`, signal),
+  safeAreas: (lat: number, lng: number, hazard: string, signal?: AbortSignal) => MOCK ? mockApi.safeAreas(lat, lng, hazard)
+    : optional<SafeAreas>('/api/safe-areas', `lat=${round(lat, 4)}&lng=${round(lng, 4)}&hazard=${encodeURIComponent(hazard)}`, signal),
 };

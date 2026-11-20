@@ -3,7 +3,8 @@
 // Everything here is fake and the UI marks it "MOCK DATA".
 
 import type {
-  ActiveAlerts, AlertAreas, AlertsStatus, BBox, Hazard, NearestPlaces, SafePlacesData,
+  ActiveAlerts, AlertAreas, AlertsStatus, BBox, Hazard, HazardGrid, HazardZones, NearestPlaces, Outlook, SafeAreas,
+  SafePlacesData,
 } from '../api';
 import { FALLBACK_HAZARDS, KIND_LABEL } from './hazards';
 
@@ -107,4 +108,60 @@ export const mockApi = {
       { source: 'ipaws', label: 'FEMA IPAWS (mock)', ok: false, lastSuccess: iso(-95), error: 'timeout (mock)' },
     ],
   }),
+
+  outlook: () => delay<Outlook>({
+    location: { inRegion: true, exposure: [{ hazard: 'flood', hazardLabel: 'Flood', score: 34, level: 'moderate' }] },
+    outlook: [{
+      id: 'mock-rain-1', hazard: 'flood', hazardLabel: 'Flood', level: 'possible',
+      title: 'Heavy rain possible Thursday night (mock)',
+      summary: 'Open-Meteo forecasts 45 mm of rain in 24 h. Low-lying streets and steep slopes may be affected. (mock data)',
+      validFrom: iso(60 * 20), validTo: iso(60 * 44), confidence: 'medium',
+      sources: [{ name: 'Open-Meteo (mock)', url: 'https://open-meteo.com/', observed: iso(-30) }], distanceKm: 0,
+    }],
+    updatedAt: iso(-12),
+    disclaimer: 'Mock outlook for UI work. Not an official warning.',
+  }),
+
+  /** Fake worst-to-safest grid: exposure falls with distance from the waterfront (mock). */
+  hazardGrid: (hazard: string) => {
+    const features: HazardGrid['features'] = [];
+    for (let row = 40; row < 110; row += 1) {
+      for (let col = 20; col < 70; col += 1) {
+        const lat = 47.48 + row * 0.002;
+        const lng = -122.46 + col * 0.003;
+        const score = Math.max(0, Math.min(100, Math.round(100 - Math.hypot((lng + 122.345) * 70, (lat - 47.61) * 50) * 9)));
+        if (score < 3) continue;
+        features.push({
+          type: 'Feature',
+          geometry: { type: 'Polygon', coordinates: [[[lng, lat], [lng + 0.003, lat], [lng + 0.003, lat + 0.002], [lng, lat + 0.002], [lng, lat]]] },
+          properties: { cellId: row * 100 + col, score, level: score >= 50 ? 'high' : score >= 20 ? 'moderate' : 'low' },
+        });
+      }
+    }
+    return delay<HazardGrid>({ type: 'FeatureCollection', features, note: `Mock ${hazard} exposure.` });
+  },
+
+  hazardZones: (hazard: string, [w, s, e, n]: BBox) => delay<HazardZones>({
+    type: 'FeatureCollection',
+    features: [{
+      type: 'Feature',
+      geometry: { type: 'Polygon', coordinates: [[[Math.max(w, -122.36), Math.max(s, 47.595)], [Math.min(e, -122.335), Math.max(s, 47.595)],
+        [Math.min(e, -122.345), Math.min(n, 47.625)], [Math.max(w, -122.37), Math.min(n, 47.625)], [Math.max(w, -122.36), Math.max(s, 47.595)]]] },
+      properties: { id: 'mock-zone-1', hazard, kind: 'tsunami_inundation', level: 'high', name: 'Waterfront zone (mock)' },
+    }],
+  }),
+
+  safeAreas: (lat: number, lng: number, hazard: string) => delay<SafeAreas>({
+    hazard, hazardLabel: FALLBACK_HAZARDS.find((h) => h.key === hazard)?.label ?? hazard,
+    advice: 'Go on foot to high ground away from the water. (mock)',
+    location: { inRegion: true, score: 62, level: 'high' },
+    areas: [
+      { cellId: 1, lat: lat + 0.006, lng: lng + 0.009, distanceM: Math.round(distanceM(lat, lng, lat + 0.006, lng + 0.009)), score: 4, level: 'low', reason: 'High ground outside the mapped zones (mock)' },
+      { cellId: 2, lat: lat + 0.011, lng: lng + 0.004, distanceM: Math.round(distanceM(lat, lng, lat + 0.011, lng + 0.004)), score: 6, level: 'low', reason: 'Gentle slope, ground about 60 m above sea level (mock)' },
+    ],
+    places: [],
+    note: 'Distances are straight-line, not routes. (mock)',
+    disclaimer: 'Mock data.',
+  }),
 };
+
