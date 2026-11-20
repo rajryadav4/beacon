@@ -58,7 +58,8 @@ def test_hazards_cover_every_key(client):
 
 
 def test_hazard_guidance(guidance):
-    assert guidance["conflict"][:3] == ["bomb_shelter", "bunker", "shelter"]
+    assert guidance["conflict"][:4] == ["bomb_shelter", "bunker", "underground_station", "shelter"]
+    assert all("social_shelter" not in kinds for kinds in guidance.values())
     assert guidance["earthquake"][:2] == ["assembly_point", "emergency_hub"]
     assert guidance["crime"][0] == "police"
     assert guidance["hazmat"][0] == "shelter"
@@ -221,10 +222,16 @@ def load_importer():
     ({"amenity": "shelter", "shelter_type": "picnic_shelter"}, None),
     ({"amenity": "shelter", "shelter_type": "gazebo"}, None),
     ({"amenity": "shelter"}, None),
+    ({"amenity": "social_facility", "social_facility": "shelter"}, "social_shelter"),
+    ({"emergency": "shelter"}, "shelter"),
+    ({"railway": "station", "station": "subway", "name": "Westlake"}, "underground_station"),
+    ({"public_transport": "station", "location": "underground"}, "underground_station"),
+    ({"railway": "station", "station": "light_rail"}, None),
+    ({"railway": "station", "station": "light_rail", "level": "-1"}, "underground_station"),
+    ({"railway": "station", "station": "light_rail", "name": "Beacon Hill"}, "underground_station"),
+    ({"railway": "station", "station": "monorail", "name": "Westlake Center"}, None),
     ({"military": "bunker"}, None),
     ({"building": "bunker", "access": "yes"}, "bunker"),
-    ({"amenity": "social_facility", "social_facility": "shelter"}, "shelter"),
-    ({"emergency": "shelter"}, "shelter"),
 ])
 def test_osm_classification(tags, kind):
     assert load_importer().classify_osm(tags) == kind

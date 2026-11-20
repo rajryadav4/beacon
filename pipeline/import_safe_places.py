@@ -30,6 +30,7 @@ On a python.org build of Python on macOS, set SSL_CERT_FILE=$(python -m certifi)
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import re
 import ssl
@@ -46,13 +47,14 @@ SCHEMA = ROOT / "db" / "schema" / "003_safe_places.sql"
 USER_AGENT = "beacon-dev/0.1 (+https://github.com/rajryadav4/beacon)"
 SEATTLE_BBOX = (47.48, -122.46, 47.75, -122.22)  # south, west, north, east (the crime grid box)
 
-KINDS = ("shelter", "bomb_shelter", "bunker", "assembly_point", "emergency_hub",
-         "hospital", "police", "fire_station", "community_centre")
+KINDS = ("shelter", "bomb_shelter", "bunker", "underground_station", "assembly_point", "emergency_hub",
+         "hospital", "police", "fire_station", "community_centre", "social_shelter")
 KIND_LABELS = {
     "shelter": "Shelter", "bomb_shelter": "Bomb shelter", "bunker": "Bunker",
     "assembly_point": "Emergency assembly point", "emergency_hub": "Emergency hub",
     "hospital": "Hospital", "police": "Police station", "fire_station": "Fire station",
     "community_centre": "Community centre",
+    "underground_station": "Underground station", "social_shelter": "Social services shelter",
 }
 
 # Public Overpass instances, tried in order. Override with --overpass-url.
@@ -82,6 +84,8 @@ def overpass_query(bbox: tuple[float, float, float, float], timeout: int) -> str
   nwr["military"="bunker"]({b});
   nwr["building"="bunker"]({b});
   nwr["social_facility"="shelter"]({b});
+  nwr["railway"="station"]({b});
+  nwr["public_transport"="station"]["location"="underground"]({b});
 );
 out center tags;"""
 
@@ -105,10 +109,47 @@ def classify_osm(tags: dict) -> str | None:
     if tags.get("military") == "bunker" or tags.get("building") == "bunker":
         # Most bunkers are historic or military; only ones open to the public count.
         return "bunker" if access in PUBLIC_ACCESS else None
-    if tags.get("social_facility") == "shelter" or tags.get("emergency") == "shelter" \
-            or amenity == "refugee_site":
+    if tags.get("emergency") == "shelter" or amenity == "refugee_site":
         return "shelter"
+    if tags.get("social_facility") == "shelter":
+        return "social_shelter"  # homeless / supportive housing: listed, never a disaster refuge
+    if is_underground_station(tags):
+        return "underground_station"
     return None  # plain amenity=shelter (bus stop, picnic, gazebo, weather) and the rest
+
+
+UNDERGROUND_CSV = ROOT / "pipeline" / "underground_stations.csv"
+
+
+def load_known_underground(path=UNDERGROUND_CSV) -> frozenset[str]:
+    """Station names known to be underground (pipeline/underground_stations.csv)."""
+    if not path.exists():
+        return frozenset()
+    lines = [ln for ln in path.read_text(encoding="utf-8").splitlines() if ln and not ln.startswith("#")]
+    return frozenset(row["name"].strip() for row in csv.DictReader(lines))
+
+
+KNOWN_UNDERGROUND = load_known_underground()
+
+
+def _below_ground(value: str | None) -> bool:
+    try:
+        return value is not None and float(value.split(";")[0]) < 0
+    except ValueError:
+        return False
+
+
+def is_underground_station(tags: dict) -> bool:
+    """A rail or metro station below ground: subway, location=underground, a negative
+    level (not layer: layer is drawing order), or a name in pipeline/underground_stations.csv."""
+    if tags.get("railway") != "station" and tags.get("public_transport") != "station":
+        return False
+    if tags.get("station") in ("monorail", "funicular"):
+        return False
+    return (tags.get("station") == "subway"
+            or (tags.get("location") or "").lower() == "underground"
+            or _below_ground(tags.get("level"))
+            or tags.get("name") in KNOWN_UNDERGROUND)
 
 
 def osm_address(tags: dict) -> str | None:

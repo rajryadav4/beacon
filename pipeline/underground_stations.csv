@@ -1,0 +1,12 @@
+city,name,note
+# Rail stations known to be underground, for cities where OpenStreetMap does not tag them as such.
+# Matched by exact OSM name on railway=station / public_transport=station (the city column is informational).
+# Seattle: Sound Transit Link stations in tunnels (Downtown Seattle Transit Tunnel, University Link, Northgate Link, Beacon Hill tunnel).
+seattle,Westlake,Downtown Seattle Transit Tunnel
+seattle,Symphony,Downtown Seattle Transit Tunnel (formerly University Street)
+seattle,Pioneer Square,Downtown Seattle Transit Tunnel
+seattle,Capitol Hill,University Link tunnel
+seattle,University of Washington,University Link tunnel
+seattle,U District,Northgate Link tunnel
+seattle,Roosevelt,Northgate Link tunnel
+seattle,Beacon Hill,Beacon Hill tunnel

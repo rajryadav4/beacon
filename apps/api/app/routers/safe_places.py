@@ -32,8 +32,12 @@ KIND_LABELS = {
     "police": "Police station",
     "fire_station": "Fire station",
     "community_centre": "Community centre",
+    "underground_station": "Underground station",
+    "social_shelter": "Social services shelter",
 }
 KINDS = tuple(KIND_LABELS)
+# Shown only when asked for by name: social-service shelters are not public disaster refuges.
+DEFAULT_KINDS = [k for k in KINDS if k != "social_shelter"]
 MAX_FEATURES = 2000       # /safe-places: places closest to the bbox center win
 MAX_NEAREST = 20          # /safe-places/nearest?limit=
 PREFERRED_RADIUS_M = 2000  # better-ranked kinds win only within this distance (~25 min walk)
@@ -64,6 +68,10 @@ def parse_kinds(value: str | None) -> list[str] | None:
         elif part:
             raise HTTPException(422, f"unknown place kind '{part}'; use {', '.join(KINDS)}")
     return sorted(set(kinds)) or None
+
+
+def kinds_or_default(value: str | None) -> list[str]:
+    return parse_kinds(value) or DEFAULT_KINDS
 
 
 @router.get("/hazards")
@@ -120,7 +128,7 @@ def safe_places(
         )::text
     """
     params = {"w": west, "s": south, "e": east, "n": north, "cx": (west + east) / 2, "cy": (south + north) / 2,
-              "kinds": parse_kinds(kinds), "cap": MAX_FEATURES, "labels": Jsonb(KIND_LABELS)}
+              "kinds": kinds_or_default(kinds), "cap": MAX_FEATURES, "labels": Jsonb(KIND_LABELS)}
     with pool.connection() as conn:
         text = conn.execute(sql, params).fetchone()[0]
     return Response(content=text, media_type="application/json", headers=CACHE)
@@ -171,7 +179,7 @@ def nearest(
                  dist, place_id
         LIMIT %(limit)s
     """
-    params = {"lat": lat, "lng": lng, "hazard": hazard, "all": list(KINDS), "limit": limit,
+    params = {"lat": lat, "lng": lng, "hazard": hazard, "all": DEFAULT_KINDS, "limit": limit,
               "radius": PREFERRED_RADIUS_M}
     with pool.connection() as conn:
         rows = conn.execute(sql, params).fetchall()
