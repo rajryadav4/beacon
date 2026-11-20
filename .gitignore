@@ -10,3 +10,6 @@ CrimeRadar/src/main/java/routing.properties
 # ML: trained model binaries (rebuilt by ml/train_risk_model.py)
 ml/output/*.joblib
 __pycache__/
+
+# Submission bundles
+dist/

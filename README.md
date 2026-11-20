@@ -140,6 +140,23 @@ mysql -u root -p < sql/milestone3_business_queries.sql
 The original incident search page is still at <http://localhost:8080/CrimeRadar/findincidents>.
 Route recommendations: the **Safe routes** screen, or `GET /recommendroutes` for testing (see below).
 
+### Milestone 4 JSP pages (CRUD + route risk score)
+
+Server-rendered JSP pages with Bootstrap 5 and a shared navbar (`WEB-INF/jspf/header.jspf`):
+
+| Page | URL | What it does |
+|---|---|---|
+| Incidents | `/findincidents` | Read: 50 most recent incidents in a neighborhood |
+| Users | `/findusers?q=` | Read: search users by name or email, with Update / Delete links |
+| Create user | `/usercreate` | Create: insert into `AppUsers` (password stored as SHA-256) |
+| Update user | `/userupdate?userid=N` | Update: change a user's display name |
+| Delete user | `/userdelete?userid=N` | Delete: confirmation page, then one transaction that removes the user's contacts and SOS alerts and detaches their route recommendations |
+| Route risk ranking | `/saferoutes` | Milestone 1 advanced feature: rank all routes by risk score |
+| Route breakdown | `/routedetail?routeid=N` | Each segment's share of a route's risk |
+
+Screenshots with a narrative for each workflow are in
+[`docs/CrimeRadar-Milestone4.pdf`](docs/CrimeRadar-Milestone4.pdf).
+
 ## Key findings
 
 | Question | Finding |
@@ -178,6 +195,15 @@ Raj's exposure scoring:
 The browser decides at once (also offline). With the backend running, `POST api/routes/recommend`
 gives the server's decision, which replaces it. Tests: `node tools/check_route_rules.mjs` and the
 JUnit tests in `CrimeRadar/src/test` (`mvn test`). Design: [`project-plan/04-recommendation-engine.md`](project-plan/04-recommendation-engine.md).
+
+### Milestone 1 route risk score (JSP pages)
+
+The original advanced feature (Q11 in
+[`milestone3_business_queries.sql`](sql/milestone3_business_queries.sql)):
+`Risk = Σ over segments (segment km × neighborhood incidents per day)`.
+`RouteRiskDao` runs it live for `/saferoutes` (about 140 ms for all 5,000 routes). Unlike Q11, the
+window ends at the newest incident in the data rather than `NOW()`, so scores don't shrink as the
+data ages. The page offers a 30, 90 or 365-day window and ranks by total risk or risk per km.
 
 ## Team
 

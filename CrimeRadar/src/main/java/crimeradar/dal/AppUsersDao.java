@@ -93,6 +93,17 @@ public class AppUsersDao {
 		return getList(SELECT_COLUMNS + "WHERE DisplayName=? ORDER BY UserId;", displayName);
 	}
 
+	/**
+	 * Users whose display name or email contains the given text, newest first. An empty search
+	 * returns the most recently created users.
+	 */
+	public List<AppUsers> searchAppUsers(String text, int limit) throws SQLException {
+		String pattern = "%" + (text == null ? "" : text.trim()) + "%";
+		return getList(SELECT_COLUMNS
+			+ "WHERE DisplayName LIKE ? OR Email LIKE ? ORDER BY UserId DESC LIMIT ?;",
+			pattern, pattern, limit);
+	}
+
 	public AppUsers updateDisplayName(AppUsers appUser, String newDisplayName)
 			throws SQLException {
 		String updateAppUser = "UPDATE AppUsers SET DisplayName=? WHERE UserId=?;";
@@ -171,7 +182,7 @@ public class AppUsersDao {
 		}
 	}
 
-	private List<AppUsers> getList(String query, Object param) throws SQLException {
+	private List<AppUsers> getList(String query, Object... params) throws SQLException {
 		List<AppUsers> appUsers = new ArrayList<AppUsers>();
 		Connection connection = null;
 		PreparedStatement selectStmt = null;
@@ -179,7 +190,9 @@ public class AppUsersDao {
 		try {
 			connection = connectionManager.getConnection();
 			selectStmt = connection.prepareStatement(query);
-			selectStmt.setObject(1, param);
+			for (int i = 0; i < params.length; i++) {
+				selectStmt.setObject(i + 1, params[i]);
+			}
 			results = selectStmt.executeQuery();
 			while (results.next()) {
 				appUsers.add(new AppUsers(
