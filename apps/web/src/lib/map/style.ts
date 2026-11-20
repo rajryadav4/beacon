@@ -81,7 +81,6 @@ export function heatColor(ramp: Record<string, string>): ExpressionSpecification
 }
 
 export const BUILDING_OPACITY: ExpressionSpecification = ['interpolate', ['linear'], ['zoom'], 13.5, 0, 14.6, 0.82];
-export const BUILDING_OPACITY_DIM: ExpressionSpecification = ['interpolate', ['linear'], ['zoom'], 13.5, 0, 14.6, 0.4];
 
 export function skyFor(p: Palette, dark: boolean) {
   return {
@@ -142,6 +141,11 @@ export function prepareStyle(styleJson: StyleSpecification, dark: boolean): Styl
         'fill-extrusion-opacity': 0.62,
         'fill-extrusion-vertical-gradient': true,
       },
+    },
+    // Flat risk blocks behind routes (Directions): extrusions would hide the route lines.
+    {
+      id: 'cr-grid-flat', type: 'fill', source: 'cr-grid', layout: { visibility: 'none' },
+      paint: { 'fill-color': ['match', ['get', 'level'], 'high', LEVEL_COLOR.high, 'elevated', LEVEL_COLOR.elevated, LEVEL_COLOR.low], 'fill-opacity': 0.3 },
     },
     {
       id: 'cr-heat', type: 'heatmap', source: 'cr-cells',

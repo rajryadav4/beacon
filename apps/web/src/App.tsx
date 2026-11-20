@@ -110,6 +110,7 @@ export default function App() {
   const [showAreas, setShowAreas] = useState(true);
   const [hazardLayer, setHazardLayer] = useState<string | null>(null);
   const overlays = useOverlays(ctrl, {
+    placesMinZoom: view === 'places' || survival.on ? 11.5 : 14.5,
     showPlaces: showPlaces && (view !== 'explore' || survival.on), showAreas: showAreas || survival.on, hazardLayer,
     alertsKey: survival.alerts.map((a) => String(a.id)).join(','),
   });

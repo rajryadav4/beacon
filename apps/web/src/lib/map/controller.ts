@@ -14,7 +14,7 @@ import { isPhone, reducedMotion } from '../format';
 import type { LatLng, Pt } from '../geo';
 import { labelPoints, pillOffsets } from './labels';
 import {
-  BUILDING_OPACITY, BUILDING_OPACITY_DIM, HEAT_DARK, HEAT_LIGHT, PALETTE, ROLE_COLOR, ROLE_ORDER, TERRAIN_SOURCE,
+  HEAT_DARK, HEAT_LIGHT, PALETTE, ROLE_COLOR, ROLE_ORDER, TERRAIN_SOURCE,
   heatColor, paintFor, prepareStyle, skyFor, type Role,
 } from './style';
 
@@ -300,16 +300,18 @@ export class MapController {
     });
   }
 
-  setLayer(name: 'heat' | 'grid' | 'none') {
+  /** 'grid' = risk blocks as 3D columns (Explore); 'flat' = flat blocks behind routes (Directions). */
+  setLayer(name: 'heat' | 'grid' | 'flat' | 'none') {
     this.show('cr-heat', name === 'heat');
     this.show('cr-grid', name === 'grid');
+    this.show('cr-grid-flat', name === 'flat');
   }
 
   /** 3D: tilt the camera, raise the risk blocks into a skyline, show 3D buildings and terrain. */
   set3D(on: boolean, animate = true) {
     this.is3D = on;
     this.whenReady(() => {
-      this.map.setLayoutProperty('cr-buildings-3d', 'visibility', on ? 'visible' : 'none');
+      this.applyBuildings();
       this.map.setTerrain(on && !this.terrainFailed ? { source: TERRAIN_SOURCE, exaggeration: isPhone() ? 1 : 1.3 } : null);
       if (animate) this.map.easeTo({ pitch: on ? 58 : 0, bearing: on ? -20 : 0, duration: reducedMotion() ? 0 : 1600 });
     });
@@ -322,14 +324,26 @@ export class MapController {
     });
   }
 
+  private buildingsHidden = { skyline: false, route: false };
+
   /** The risk skyline and the 3D buildings are never shown together: the skyline wins. */
   hideBuildings(hidden: boolean) {
-    this.show('cr-buildings-3d', !hidden && this.is3D);
+    this.buildingsHidden.skyline = hidden;
+    this.applyBuildings();
   }
 
-  /** See-through buildings so a route behind them stays readable. */
+  /**
+   * 3D buildings hide route lines behind them (even see-through ones), so they step aside while a route
+   * is on the map; the terrain and the tilt stay.
+   */
   dimBuildings(dim: boolean) {
-    this.whenReady(() => this.map.setPaintProperty('cr-buildings-3d', 'fill-extrusion-opacity', dim ? BUILDING_OPACITY_DIM : BUILDING_OPACITY));
+    this.buildingsHidden.route = dim;
+    this.applyBuildings();
+  }
+
+  private applyBuildings() {
+    const { skyline, route } = this.buildingsHidden;
+    this.show('cr-buildings-3d', this.is3D && !skyline && !route);
   }
 
   /** Pulsing radar blips on the riskiest blocks (Explore). */
@@ -385,7 +399,10 @@ export class MapController {
       return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [ring] }, properties: { level: c.level, h: Math.min(900, 30 + (Number(c.risk) || 0) * 9) } };
     });
     this.setData('cr-grid', feats);
-    this.whenReady(() => this.map.setPaintProperty('cr-grid', 'fill-extrusion-opacity', opts.faint ? 0.2 : opts.subtle ? 0.36 : 0.62));
+    this.whenReady(() => {
+      this.map.setPaintProperty('cr-grid', 'fill-extrusion-opacity', opts.faint ? 0.2 : opts.subtle ? 0.36 : 0.62);
+      this.map.setPaintProperty('cr-grid-flat', 'fill-opacity', opts.faint ? 0.14 : opts.subtle ? 0.3 : 0.5);
+    });
   }
 
   /** Highlight one neighborhood's blocks (Areas ranked). */

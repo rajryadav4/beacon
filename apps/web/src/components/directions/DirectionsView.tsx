@@ -94,7 +94,7 @@ export default function DirectionsView({ dir, setDir, onStart, hazard, focusTo }
       if (level !== 'low') cells.push({ bounds: model.bounds(cell.id), level, risk });
     }
     ctrl.setGrid(cells, routes.length ? { faint: true } : { subtle: true });
-    ctrl.setLayer('grid');
+    ctrl.setLayer('flat');
   }, [ctrl, model, dep.band, mode, routes.length]);
 
   useEffect(() => { ctrl.setEndpoints(from, to, to?.kind === 'safe'); }, [ctrl, from, to]);

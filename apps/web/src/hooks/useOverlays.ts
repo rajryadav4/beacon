@@ -8,9 +8,9 @@ import type { MapController } from '../lib/map/controller';
 
 const PLACES_MIN_ZOOM = 11.5;
 
-interface Opts { showPlaces: boolean; showAreas: boolean; hazardLayer: string | null; alertsKey: string }
+interface Opts { placesMinZoom?: number; showPlaces: boolean; showAreas: boolean; hazardLayer: string | null; alertsKey: string }
 
-export function useOverlays(ctrl: MapController | null, { showPlaces, showAreas, hazardLayer, alertsKey }: Opts) {
+export function useOverlays(ctrl: MapController | null, { placesMinZoom = PLACES_MIN_ZOOM, showPlaces, showAreas, hazardLayer, alertsKey }: Opts) {
   const [view, setView] = useState<{ bbox: BBox; zoom: number } | null>(null);
   const [placesError, setPlacesError] = useState<string | null>(null);
   const [layerState, setLayerState] = useState<LayerState>('idle');
@@ -31,7 +31,7 @@ export function useOverlays(ctrl: MapController | null, { showPlaces, showAreas,
   // Safe places (zoomed in only; there are thousands).
   useEffect(() => {
     if (!ctrl) return;
-    if (!view || !showPlaces || view.zoom < PLACES_MIN_ZOOM) { ctrl.setSafePlaces(null); return; }
+    if (!view || !showPlaces || view.zoom < placesMinZoom) { ctrl.setSafePlaces(null); return; }
     const c = new AbortController();
     const timer = window.setTimeout(() => {
       api.safePlaces(view.bbox, [], c.signal)
@@ -39,7 +39,7 @@ export function useOverlays(ctrl: MapController | null, { showPlaces, showAreas,
         .catch((e) => { if (!c.signal.aborted) setPlacesError(errorMessage(e, 'safe places')); });
     }, 350);
     return () => { window.clearTimeout(timer); c.abort(); };
-  }, [ctrl, view, showPlaces]);
+  }, [ctrl, view, showPlaces, placesMinZoom]);
 
   // Official alert areas, refreshed with the alerts poll.
   useEffect(() => {
@@ -86,6 +86,6 @@ export function useOverlays(ctrl: MapController | null, { showPlaces, showAreas,
   }, []);
 
   const placesNote = !showPlaces ? 'Safe places are hidden on the map.'
-    : placesError ?? (view && view.zoom < PLACES_MIN_ZOOM ? 'Zoom in to see safe places on the map.' : null);
+    : placesError ?? (view && view.zoom < placesMinZoom ? 'Zoom in to see safe places on the map.' : null);
   return { view, placesNote, layerState };
 }
