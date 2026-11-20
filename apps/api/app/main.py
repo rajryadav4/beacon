@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from . import privacy, web
 from .db import pool
-from .routers import alerts, map_data, outlook, safe_places, simulate
+from .routers import alerts, hazard, map_data, outlook, safe_places, simulate
 
 
 privacy.install()
@@ -35,6 +35,7 @@ app.include_router(safe_places.router, prefix="/api")
 app.include_router(alerts.router, prefix="/api")
 app.include_router(outlook.router, prefix="/api")
 app.include_router(simulate.router, prefix="/api")
+app.include_router(hazard.router, prefix="/api")
 
 
 @app.get("/api/health")

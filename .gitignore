@@ -28,3 +28,6 @@ apps/web/dist/
 .claude/worktrees/
 # Hazard outlook downloads (terrain tiles)
 data/hazard_cache/
+# Hazard classifier: downloaded IPAWS alerts and trained model (ml/hazard)
+data/ipaws/
+ml/hazard/output/*.joblib
