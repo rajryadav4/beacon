@@ -100,7 +100,7 @@ export function useTripRunner(plan: TripPlan | null, danger: DangerAlerts): Trip
       const p = measure(pos, d, offRoute);
       map.setTraveler(pos, p.heading);
       if (plan.survival) {
-        if (now - lastFollow > 1500) { lastFollow = now; map.follow(pos, undefined, 0.42); }
+        if (now - lastFollow > 1500) { lastFollow = now; map.follow(pos, undefined, 0.04); } // the sheet is small while walking
       } else if (!reducedMotion()) {
         map.panIfNeeded(pos);
       }
@@ -123,7 +123,7 @@ export function useTripRunner(plan: TripPlan | null, danger: DangerAlerts): Trip
       }
     };
 
-    if (plan.survival) map.flyTo(coords[0][0], coords[0][1], 16.2, 0.42);
+    if (plan.survival) map.flyTo(coords[0][0], coords[0][1], 16.2, 0.04);
     else map.fit(coords);
     map.setTraveler(coords[0], measure(coords[0], 0, false).heading);
     setProgress(measure(coords[0], 0, false, !plan.simulate));
