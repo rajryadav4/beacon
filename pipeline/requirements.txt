@@ -1,0 +1,10 @@
+# Postgres load and ML risk import (pipeline/load_postgres.py, pipeline/import_risk.py)
+psycopg[binary]>=3.2
+# Fetch on python.org builds of Python that lack a CA bundle: SSL_CERT_FILE=$(python -m certifi)
+certifi
+# Model training and the class app's static data (ml/train_risk_model.py, pipeline/build_ui_data.py)
+pandas>=2.2
+numpy
+scipy
+scikit-learn>=1.6
+joblib
