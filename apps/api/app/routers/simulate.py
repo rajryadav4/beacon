@@ -445,9 +445,6 @@ def simulate(req: SimulateRequest, response: Response) -> dict:
         if hazard == "tsunami" and status != "outside" and first is not None and route["durationS"] / 60 > first:
             steps.insert(0, "The first wave may arrive before you reach high ground. If the water is coming, "
                             "go up now: the third floor or higher of a sturdy concrete building.")
-        if hazard == "conflict" and status == "inside_severe" and route["durationS"] > 180:
-            steps.insert(1, "The shelter is more than 3 minutes away: if sirens are sounding, take cover in the "
-                            "nearest basement or inner stairwell first, then move when there is a lull.")
         if not route["avoidsDanger"]:
             steps.append("No route fully avoids the danger zone: keep to the route shown and move quickly through it.")
     timeline.sort(key=lambda x: x[0])
