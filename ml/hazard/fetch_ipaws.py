@@ -134,7 +134,8 @@ def run_plan(name: str, base_filter: str, cap: int, rng: random.Random) -> list[
 
 
 def param(info: dict, name: str) -> str | None:
-    for p in info.get("parameters") or []:
+    # The archive renamed `parameters` to `parameter` for messages sent from 2023 on.
+    for p in info.get("parameters") or info.get("parameter") or []:
         if p.get("name") == name:
             return p.get("value")
     return None
