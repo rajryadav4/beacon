@@ -77,12 +77,29 @@ npm --prefix apps/web run dev
 
 ### Web app notes
 
-- Tabs: **Map** (crime heatmap / ML risk grid, overlay toggles), **Alerts** (polled every 60 s for the chosen location, source freshness, survival mode and the *Demo: simulate an alert* control), **Safe places** (nearest places for a hazard, walking route from the public OSRM foot server).
-- Location is set only by a user action ("Use my location", "Pick on map", right-click or long-press). It is rounded before it is sent to `/api/alerts/active` and `/api/safe-places/nearest`.
-- Survival mode takes over the screen when `/api/alerts/active` returns `survival: true`, when turned on by hand, or for a local demo alert (marked DEMO).
-- 3D map: OpenFreeMap buildings, AWS Terrain Tiles, sky and a dark palette for evening/night and survival mode. The 2D/3D button sits under the zoom controls; phones and slow devices get a lighter setup, and no WebGL2 means 2D.
-- Open `http://localhost:5173/?mock=1` to use typed fake alerts and safe places (marked MOCK DATA) when the API endpoints are not running.
-- Code: `src/components/` (MapView, AlertsPanel, SafePlacesPanel, SurvivalMode, LocationControl, CrimeLayers), `src/lib/` (guidance, routing, hazards, mapScene, mock, demo, format), `src/hooks.ts`.
+The main page uses the CrimeRadar class app's design and features (`CrimeRadar/src/main/webapp/`), ported to React:
+
+- **Explore**: GPU heatmap by time of day and crime type, *Play the day*, the risk grid and the **3D risk skyline**,
+  stat tiles, the 58 areas ranked by danger index (click one to highlight it on the map), radar blips on the riskiest
+  blocks. The map and the whole app turn to the midnight palette for evening and night.
+- **Directions**: From / To with Photon place search, *My location* and *pick on map* on each field, Home / Work /
+  favourites, *Nearest safe place*; walk / bike / car; leave now or at a time. Up to 3 OSRM routes scored with the risk
+  grid at the time of travel (green = recommended, orange = moderate, red = most dangerous), the recommendation rules
+  and a *Why?* per route. **Trip mode** gives turn-by-turn guidance and danger alerts (banner, sound, vibration);
+  *Simulate* plays the trip.
+- **Alerts**: official alerts with freshness, the *Upcoming* hazard outlook, the hazard map (worst to safest + zones),
+  survival mode and its *DEMO*. **Safe places**: nearest places and *Where to go* safe areas, each with *Route*.
+- **Survival mode** is map-first: your position, the danger area, the chosen safe place or safer area, the bold walking
+  route, a direction arrow with distance and time, the next turn, and the instructions in a collapsible sheet
+  (phone) or side panel (desktop). *Navigate* follows the device (watchPosition only while navigating).
+- Places, preferences and trip history stay in the browser (localStorage). Location is set only by a user action and
+  is rounded before it is sent to the API.
+- Crime data comes from `GET /api/meta`, `/api/grid` and `/api/neighborhoods` (the class contract); if the API is down,
+  the bundled copy in `public/data/` is used. Optional endpoints (the hazard outlook) are read from `/openapi.json`, so
+  a missing one is hidden, never called.
+- Open `http://localhost:5173/?mock=1` for typed fake alerts, safe places and outlook data (marked MOCK DATA).
+- Code: `src/components/` (explore, directions, trip, alerts, places, survival, Panel), `src/hooks/`, `src/lib/`
+  (risk, recommend, routing, places, plan, danger, geo, clock, storage) and `src/lib/map/` (the map engine and style).
 
 ## Test
 
