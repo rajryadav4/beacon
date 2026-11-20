@@ -166,7 +166,7 @@ WITH b AS (SELECT ST_MakeEnvelope(%s, %s, %s, %s, 4326) AS env)
 SELECT json_build_object('type', 'FeatureCollection', 'features', coalesce(json_agg(json_build_object(
     'type', 'Feature',
     'id', a.alert_id,
-    'geometry', ST_AsGeoJSON(coalesce(ST_SimplifyPreserveTopology(a.geom, 0.001), a.point::geometry), 5)::json,
+    'geometry', ST_AsGeoJSON(coalesce(ST_Multi(ST_SimplifyPreserveTopology(a.geom, 0.001)), a.point::geometry), 5)::json,
     'properties', json_build_object('id', a.alert_id, 'event', a.event, 'hazard', a.hazard,
                                     'severity', a.severity, 'headline', a.headline, 'expires', a.expires)
 ) ORDER BY a.alert_id), '[]'::json))::text
