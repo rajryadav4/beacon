@@ -14,6 +14,8 @@ API route wins no matter when its router is included:
     /api/unknown         -> the API's JSON 404
 
 WEB_DIST overrides the folder (default: apps/web/dist in the repository).
+install() also gzips responses over 1 kB (the heatmap and risk grid are about
+0.5-1 MB of JSON, the map library about 1 MB of JavaScript).
 """
 
 from __future__ import annotations
@@ -23,6 +25,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.exception_handlers import http_exception_handler
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse
 from starlette.exceptions import HTTPException
 
@@ -47,6 +50,8 @@ def resolve(dist: Path, url_path: str) -> Path | None:
 
 
 def install(app: FastAPI) -> bool:
+    """Gzip responses and serve the web app if it has been built; True when it is served."""
+    app.add_middleware(GZipMiddleware, minimum_size=1000)
     dist = web_dist()
     index = dist / "index.html"
     if not index.is_file():

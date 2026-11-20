@@ -71,6 +71,20 @@ def test_no_files_outside_dist(client):
     assert "outside dist" not in client.get("/%2e%2e/secret.txt").text
 
 
+def test_gzip(tmp_path, monkeypatch):
+    monkeypatch.setenv("WEB_DIST", str(tmp_path / "nothing"))
+    big = "x" * 5000
+    app = FastAPI()
+
+    @app.get("/api/big")
+    def big_json():
+        return {"big": big}
+
+    web.install(app)
+    r = TestClient(app).get("/api/big", headers={"Accept-Encoding": "gzip"})
+    assert r.headers["content-encoding"] == "gzip" and r.json() == {"big": big}
+
+
 def test_not_installed_without_dist(tmp_path, monkeypatch):
     monkeypatch.setenv("WEB_DIST", str(tmp_path / "nothing"))
     assert web.install(FastAPI()) is False
