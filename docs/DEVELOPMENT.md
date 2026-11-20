@@ -95,6 +95,12 @@ npm --prefix apps/web run build
 ```
 
 The API tests run against the local database, so start it and load the data first.
+With only the schema loaded (as in CI), set `BEACON_TEST_DATA=schema` to skip the tests that need the full data.
+
+## Deploy
+
+One Docker image (`Dockerfile`) serves the API and the built web app; free hosting on Render and Neon, with
+GitHub Actions for CI and data refresh: see [DEPLOY.md](DEPLOY.md).
 
 ## API (Phase 0)
 
