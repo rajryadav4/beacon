@@ -1,0 +1,23 @@
+# Render Blueprint: Beacon as one free Docker web service (docs/DEPLOY.md).
+# The database is external (Neon or Supabase free Postgres with PostGIS).
+# Free services sleep after 15 minutes without traffic; the next request
+# waits about a minute while the service starts again.
+services:
+  - type: web
+    name: beacon
+    runtime: docker
+    plan: free
+    region: oregon  # match the Neon region (AWS US West 2, Oregon)
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      # Postgres connection string, pasted once when the Blueprint is created. Never commit it.
+      - key: DATABASE_URL
+        sync: false
+      # The web app is served from the same origin, so CORS is only needed for
+      # other front ends (comma-separated origins).
+      - key: CORS_ORIGINS
+        value: http://localhost:5173

@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from . import privacy
+from . import privacy, web
 from .db import pool
 from .routers import alerts, map_data, safe_places
 
@@ -40,3 +40,7 @@ def health() -> dict:
     with pool.connection() as conn:
         conn.execute("SELECT 1")
     return {"status": "ok", "database": "ok"}
+
+
+# The built web app, when apps/web/dist (or WEB_DIST) exists: the Docker image serves both.
+web.install(app)
