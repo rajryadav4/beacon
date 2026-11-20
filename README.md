@@ -31,7 +31,11 @@ New app on **React + TypeScript + MapLibre**, a **Python FastAPI** API, and **Po
 
 The full list of 12 features and the phases are in [ROADMAP.md](ROADMAP.md).
 
-## Running the current app
+## Running the new app
+
+Phase 0 of the new stack is in `apps/web` (React + MapLibre) and `apps/api` (FastAPI), on PostgreSQL + PostGIS from `docker-compose.yml`. It serves the crime heatmap and the ML risk grid. Setup, data load and test commands: [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+
+## Running the class app
 
 See [docs/CLASS_PROJECT.md](docs/CLASS_PROJECT.md) for the database setup and how to run the Java app, or run the UI on its own data without a server:
 
