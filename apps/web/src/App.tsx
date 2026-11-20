@@ -13,7 +13,7 @@ import { walkingRoute } from './lib/routing';
 import AlertsPanel from './components/AlertsPanel';
 import CrimeLayers from './components/CrimeLayers';
 import LocationControl, { requestGps, type UserLocation } from './components/LocationControl';
-import MapView, { type Layer } from './components/MapView';
+import MapView, { type Layer, type MapTheme, type ViewMode } from './components/MapView';
 import SafePlacesPanel, { type RouteState } from './components/SafePlacesPanel';
 import SurvivalMode, { type SurvivalView } from './components/SurvivalMode';
 
@@ -45,6 +45,7 @@ export default function App() {
   const [band, setBand] = useState<BandKey | 'all'>('all');
   const [groups, setGroups] = useState<string[]>([]);   // empty = every group
   const [extrude, setExtrude] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('3d');
   const [heatmap, setHeatmap] = useState<HeatmapData | null>(null);
   const [risk, setRisk] = useState<RiskData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -148,7 +149,7 @@ export default function App() {
   const topHazard = demoAlert?.hazard ?? alertsState.data?.topHazard ?? alerts[0]?.hazard ?? null;
 
   // Announce new alerts to screen readers.
-  const seen = useRef<Set<string>>(new Set());
+  const seen = useRef<Set<string | number>>(new Set());
   const [announcement, setAnnouncement] = useState('');
   useEffect(() => {
     const fresh = alerts.filter((a) => !seen.current.has(a.id));
@@ -163,8 +164,8 @@ export default function App() {
   const [dismissedKey, setDismissedKey] = useState<string | null>(null);
   const [survivalView, setSurvivalView] = useState<SurvivalView>('info');
   // Auto survival is keyed by the alerts that caused it, so "I'm safe" lasts until a new alert arrives.
-  const autoKey = demoAlert ? demoAlert.id
-    : alertsState.data?.survival ? `api:${alerts.map((a) => a.id).sort().join(',')}` : null;
+  const autoKey = demoAlert ? String(demoAlert.id)
+    : alertsState.data?.survival ? `api:${alerts.map((a) => String(a.id)).sort().join(',')}` : null;
   const survivalOn = manualHazard !== null || (autoKey !== null && autoKey !== dismissedKey);
   const survivalHazard = manualHazard ?? topHazard ?? 'other';
   const survivalAlert = manualHazard
@@ -235,6 +236,9 @@ export default function App() {
 
   const topAlert = alerts[0];
   const survivalCovering = survivalOn && survivalView === 'info';
+  // Dark map for the evening and night bands and in survival mode.
+  const shownBand = layer === 'risk' ? riskBand : layer === 'heatmap' ? band : 'all';
+  const theme: MapTheme = survivalOn || shownBand === 'evening' || shownBand === 'night' ? 'dark' : 'light';
 
   return (
     <div className={`app${survivalOn ? ' in-survival' : ''}`}>
@@ -242,7 +246,7 @@ export default function App() {
 
       <div className="app-content" inert={survivalCovering}>
         <MapView
-          layer={layer} heatmap={heatmap} risk={risk} extrude={extrude}
+          layer={survivalOn ? 'none' : layer} heatmap={heatmap} risk={risk} extrude={extrude}
           safePlaces={safePlaces} showPlaces={showPlaces}
           alertAreas={alertAreas} showAlerts={showAlerts}
           location={location}
@@ -251,6 +255,7 @@ export default function App() {
           pickMode={pickMode} onPick={onPick}
           onViewChange={onViewChange}
           onMapReady={(m) => { mapRef.current = m; }}
+          theme={theme} viewMode={viewMode} onViewMode={setViewMode}
         />
 
         {!survivalOn && (

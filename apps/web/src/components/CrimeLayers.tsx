@@ -95,6 +95,7 @@ export default function CrimeLayers(p: Props) {
           </ul>
           <label className="toggle">
             <input type="checkbox" checked={p.extrude} onChange={(e) => p.onExtrude(e.target.checked)} /> 3D skyline
+            <small className="hint">replaces the 3D buildings</small>
           </label>
           <p className="note">Expected severity-weighted reported incidents per year in each ~225 m block during this time of day.</p>
         </section>

@@ -202,7 +202,7 @@ section h2 {
 .kind-legend { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; font-size: 12px; }
 .kind-legend li { display: flex; align-items: center; gap: 6px; }
 .route-sum { margin: 0 0 6px; font-weight: 600; font-size: 13.5px; }
-.turns { margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.4; max-height: 220px; overflow-y: auto; }
+.turns { margin: 0; padding-left: 26px; font-size: 13px; line-height: 1.4; max-height: 220px; overflow-y: auto; }
 .turns li { margin-bottom: 4px; }
 .turns li small { color: var(--muted); margin-left: 6px; }
 .fresh strong { color: var(--text); }
@@ -266,7 +266,7 @@ section h2 {
 .sv-foot { margin: 6px 0 0; font-size: 15px; color: #ced4da; }
 .survival .route { margin-top: 12px; }
 .survival .route-sum { font-size: 20px; }
-.survival .turns { font-size: 18px; max-height: none; padding-left: 26px; }
+.survival .turns { font-size: 18px; max-height: none; padding-left: 36px; }
 .survival .turns li small { color: #ced4da; }
 .survival .note { color: #ced4da; font-size: 15px; }
 .survival .error { color: #ffa8a8; }
@@ -282,6 +282,10 @@ section h2 {
 .survival-bar .sv-btn { min-height: 48px; flex: 1; font-size: 16px; }
 .in-survival .maplibregl-ctrl-top-right { top: 150px; }
 
+/* 2D / 3D map control */
+.view-mode-ctrl button { font: 700 12px/29px Inter, system-ui, sans-serif; width: 29px; height: 29px; padding: 0; color: #212529; }
+.view-mode-ctrl[hidden] { display: none; }
+
 /* Phone: the panel becomes a bottom sheet. */
 @media (max-width: 640px) {
   .panel {
@@ -290,11 +294,13 @@ section h2 {
     right: 0;
     bottom: 0;
     width: auto;
-    max-height: 55dvh;
+    max-height: 48dvh;
     border-radius: 16px 16px 0 0;
     padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
   }
   .brand p { display: none; }
+  /* Keep the scale and attribution above the bottom sheet. */
+  .app:not(.in-survival) .maplibregl-ctrl-bottom-right { bottom: 48dvh; }
   .survival h1 { font-size: 30px; }
   .sv-instr { font-size: 21px; }
 }
