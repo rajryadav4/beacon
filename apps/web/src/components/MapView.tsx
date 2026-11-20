@@ -5,11 +5,15 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 // maplibre-gl 6 loads its worker relative to its own module URL, which breaks under a bundler.
 // Let Vite bundle the worker (with its shared chunk) and hand maplibre the URL.
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
-import type { HeatmapData, RiskData } from '../api';
+import type { LineString } from 'geojson';
+import type { AlertAreas, BBox, HeatmapData, RiskData, SafePlacesData } from '../api';
+import { KIND_COLOR, OTHER_KIND_COLOR } from '../lib/hazards';
+import { SEVERITY_COLOR, formatTime } from '../lib/format';
+import type { LatLng } from '../lib/routing';
 
 maplibregl.setWorkerUrl(workerUrl);
 
-export type Layer = 'heatmap' | 'risk';
+export type Layer = 'heatmap' | 'risk' | 'none';
 
 // OpenFreeMap: free vector tiles, no API key (the same style as the class app).
 const STYLE_URL = 'https://tiles.openfreemap.org/styles/positron';
@@ -20,12 +24,25 @@ export const LEVEL_COLOR = { low: '#0ca30c', elevated: '#ec835a', high: '#e5484d
 const HEAT_RAMP = [0.15, '#ffe39a', 0.35, '#ffb55c', 0.55, '#f9773f', 0.75, '#e03b3b', 1.0, '#9d174d'];
 
 const EMPTY: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
+const LONG_PRESS_MS = 550;
 
 interface Props {
   layer: Layer;
   heatmap: HeatmapData | null;
   risk: RiskData | null;
   extrude: boolean;
+  safePlaces: SafePlacesData | null;
+  showPlaces: boolean;
+  alertAreas: AlertAreas | null;
+  showAlerts: boolean;
+  location: LatLng | null;
+  destination: LatLng | null;
+  route: LineString | null;
+  /** When true, the next click on the map sets the location. */
+  pickMode: boolean;
+  /** Click in pick mode, long-press (touch) or right-click: "I'm here". */
+  onPick: (p: LatLng) => void;
+  onViewChange?: (bbox: BBox, zoom: number) => void;
   onMapReady?: (map: MlMap) => void;
 }
 
@@ -35,10 +52,33 @@ function quantile(values: number[], q: number): number {
   return sorted[Math.min(sorted.length - 1, Math.floor(q * sorted.length))] || 1;
 }
 
-export default function MapView({ layer, heatmap, risk, extrude, onMapReady }: Props) {
+const matchColor = (prop: string, colors: Record<string, string>, fallback: string) =>
+  ['match', ['get', prop], ...Object.entries(colors).flat(), fallback] as unknown as maplibregl.ExpressionSpecification;
+
+/** Popup body built from text nodes (API strings are never parsed as HTML). */
+function popupNode(title: string, lines: (string | null | undefined)[]) {
+  const root = document.createElement('div');
+  const strong = document.createElement('strong');
+  strong.textContent = title;
+  root.append(strong);
+  for (const line of lines) {
+    if (line) root.append(document.createElement('br'), document.createTextNode(line));
+  }
+  return root;
+}
+
+const pointFeature = (p: LatLng | null): GeoJSON.FeatureCollection => p
+  ? { type: 'FeatureCollection', features: [{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [p.lng, p.lat] } }] }
+  : EMPTY;
+
+export default function MapView(props: Props) {
+  const { layer, heatmap, risk, extrude, safePlaces, showPlaces, alertAreas, showAlerts, location, destination, route, pickMode } = props;
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MlMap | null>(null);
   const [ready, setReady] = useState(false);
+  // Latest props for the map event handlers, which are registered once.
+  const live = useRef(props);
+  live.current = props;
 
   // Create the map once.
   useEffect(() => {
@@ -48,19 +88,31 @@ export default function MapView({ layer, heatmap, risk, extrude, onMapReady }: P
       style: STYLE_URL,
       center: SEATTLE,
       zoom: 11.3,
-      minZoom: 9,
+      minZoom: 3,
       maxZoom: 18,
-      attributionControl: { compact: true },
+      attributionControl: { compact: true, customAttribution: 'Safe places &copy; OpenStreetMap contributors' },
     });
     mapRef.current = map;
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
     map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-right');
 
     map.on('load', () => {
-      map.addSource('heat', { type: 'geojson', data: EMPTY });
-      map.addSource('risk', { type: 'geojson', data: EMPTY });
+      for (const id of ['heat', 'risk', 'alerts', 'places', 'route', 'me', 'dest']) {
+        map.addSource(id, { type: 'geojson', data: EMPTY });
+      }
 
       const firstSymbol = map.getStyle().layers.find((l) => l.type === 'symbol')?.id;
+
+      // Official alert areas (polygons), or points for earthquakes.
+      const sevColor = matchColor('severity', SEVERITY_COLOR, SEVERITY_COLOR.Unknown);
+      map.addLayer({
+        id: 'alerts-fill', type: 'fill', source: 'alerts', filter: ['==', ['geometry-type'], 'Polygon'],
+        paint: { 'fill-color': sevColor, 'fill-opacity': 0.14 },
+      }, firstSymbol);
+      map.addLayer({
+        id: 'alerts-line', type: 'line', source: 'alerts', filter: ['==', ['geometry-type'], 'Polygon'],
+        paint: { 'line-color': sevColor, 'line-width': 2, 'line-dasharray': [2, 1.5] },
+      }, firstSymbol);
 
       map.addLayer({
         id: 'heat',
@@ -104,11 +156,56 @@ export default function MapView({ layer, heatmap, risk, extrude, onMapReady }: P
         },
       });
 
-      const popup = new maplibregl.Popup({ closeButton: false, offset: 6 });
+      // Earthquake points, the walking route, safe places, then the user's location on top.
+      map.addLayer({
+        id: 'alerts-point', type: 'circle', source: 'alerts', filter: ['==', ['geometry-type'], 'Point'],
+        paint: {
+          'circle-color': sevColor, 'circle-opacity': 0.25, 'circle-stroke-color': sevColor, 'circle-stroke-width': 2,
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 8, 14, 30],
+        },
+      });
+      map.addLayer({
+        id: 'route-casing', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#ffffff', 'line-width': 9 },
+      });
+      map.addLayer({
+        id: 'route', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#1864ab', 'line-width': 5 },
+      });
+      map.addLayer({
+        id: 'places', type: 'circle', source: 'places',
+        paint: {
+          'circle-color': matchColor('kind', KIND_COLOR, OTHER_KIND_COLOR),
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 4.5, 16, 8],
+          'circle-stroke-color': '#ffffff', 'circle-stroke-width': 1.5,
+        },
+      });
+      map.addLayer({
+        id: 'places-label', type: 'symbol', source: 'places', minzoom: 14.5,
+        layout: {
+          'text-field': ['get', 'name'], 'text-font': ['Noto Sans Regular'], 'text-size': 11,
+          'text-offset': [0, 1.1], 'text-anchor': 'top', 'text-optional': true,
+        },
+        paint: { 'text-color': '#343a40', 'text-halo-color': '#ffffff', 'text-halo-width': 1.4 },
+      });
+      map.addLayer({
+        id: 'dest', type: 'circle', source: 'dest',
+        paint: { 'circle-radius': 11, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#1864ab', 'circle-stroke-width': 3 },
+      });
+      map.addLayer({
+        id: 'me-halo', type: 'circle', source: 'me',
+        paint: { 'circle-radius': 16, 'circle-color': '#1c7ed6', 'circle-opacity': 0.18 },
+      });
+      map.addLayer({
+        id: 'me', type: 'circle', source: 'me',
+        paint: { 'circle-radius': 7, 'circle-color': '#1c7ed6', 'circle-stroke-color': '#ffffff', 'circle-stroke-width': 2.5 },
+      });
+
+      const popup = new maplibregl.Popup({ closeButton: false, offset: 6, maxWidth: '260px' });
       for (const id of ['risk-fill', 'risk-3d']) {
         map.on('click', id, (e) => {
           const f = e.features?.[0];
-          if (!f) return;
+          if (!f || live.current.pickMode) return;
           const p = f.properties as { risk: number; level: string; neighborhood: string | null; cellId: number };
           popup.setLngLat(e.lngLat).setHTML(
             `<strong>${p.neighborhood ?? 'Block'}</strong><br/>` +
@@ -116,15 +213,60 @@ export default function MapView({ layer, heatmap, risk, extrude, onMapReady }: P
             `<small>cell ${p.cellId}</small>`,
           ).addTo(map);
         });
-        map.on('mouseenter', id, () => { map.getCanvas().style.cursor = 'pointer'; });
-        map.on('mouseleave', id, () => { map.getCanvas().style.cursor = ''; });
       }
+      map.on('click', 'places', (e) => {
+        const f = e.features?.[0];
+        if (!f || live.current.pickMode) return;
+        const p = f.properties as Record<string, string | null>;
+        popup.setLngLat((f.geometry as GeoJSON.Point).coordinates as [number, number])
+          .setDOMContent(popupNode(p.name ?? 'Safe place', [p.kindLabel, p.address, p.phone, p.openingHours && `Hours: ${p.openingHours}`]))
+          .addTo(map);
+      });
+      for (const id of ['alerts-fill', 'alerts-point']) {
+        map.on('click', id, (e) => {
+          const f = e.features?.[0];
+          if (!f || live.current.pickMode) return;
+          const p = f.properties as Record<string, string | null>;
+          popup.setLngLat(e.lngLat)
+            .setDOMContent(popupNode(p.event ?? 'Alert', [p.headline, p.severity, p.expires && `Expires ${formatTime(p.expires)}`]))
+            .addTo(map);
+        });
+      }
+      for (const id of ['risk-fill', 'risk-3d', 'places', 'alerts-point']) {
+        map.on('mouseenter', id, () => { if (!live.current.pickMode) map.getCanvas().style.cursor = 'pointer'; });
+        map.on('mouseleave', id, () => { if (!live.current.pickMode) map.getCanvas().style.cursor = ''; });
+      }
+
+      // Set "I'm here": click in pick mode, right-click, or long-press on a touch screen.
+      const pick = (lngLat: maplibregl.LngLat) => live.current.onPick({ lat: lngLat.lat, lng: lngLat.lng });
+      map.on('click', (e) => { if (live.current.pickMode) pick(e.lngLat); });
+      map.on('contextmenu', (e) => { e.preventDefault(); pick(e.lngLat); });
+      let pressTimer: number | undefined;
+      let pressStart: maplibregl.Point | null = null;
+      const cancelPress = () => { window.clearTimeout(pressTimer); pressStart = null; };
+      map.on('touchstart', (e) => {
+        cancelPress();
+        if (e.originalEvent.touches.length !== 1) return;
+        pressStart = e.point;
+        const lngLat = e.lngLat;
+        pressTimer = window.setTimeout(() => { pressStart = null; pick(lngLat); }, LONG_PRESS_MS);
+      });
+      map.on('touchmove', (e) => { if (pressStart && pressStart.dist(e.point) > 10) cancelPress(); });
+      map.on('touchend', cancelPress);
+      map.on('touchcancel', cancelPress);
+
+      const reportView = () => {
+        const b = map.getBounds();
+        live.current.onViewChange?.([b.getWest(), b.getSouth(), b.getEast(), b.getNorth()], map.getZoom());
+      };
+      map.on('moveend', reportView);
+      reportView();
+
       setReady(true);
-      onMapReady?.(map);
+      live.current.onMapReady?.(map);
     });
 
     return () => { map.remove(); mapRef.current = null; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Heatmap data: scale weights by the 98th percentile so a few hot cells do not flatten the rest.
@@ -145,6 +287,34 @@ export default function MapView({ layer, heatmap, risk, extrude, onMapReady }: P
     (map.getSource('risk') as GeoJSONSource).setData(risk ?? EMPTY);
   }, [ready, risk]);
 
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !map) return;
+    (map.getSource('places') as GeoJSONSource).setData(showPlaces && safePlaces ? safePlaces : EMPTY);
+  }, [ready, safePlaces, showPlaces]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !map) return;
+    (map.getSource('alerts') as GeoJSONSource).setData(showAlerts && alertAreas ? alertAreas : EMPTY);
+  }, [ready, alertAreas, showAlerts]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !map) return;
+    (map.getSource('me') as GeoJSONSource).setData(pointFeature(location));
+    (map.getSource('dest') as GeoJSONSource).setData(pointFeature(destination));
+    (map.getSource('route') as GeoJSONSource).setData(route
+      ? { type: 'FeatureCollection', features: [{ type: 'Feature', properties: {}, geometry: route }] }
+      : EMPTY);
+  }, [ready, location, destination, route]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !map) return;
+    map.getCanvas().style.cursor = pickMode ? 'crosshair' : '';
+  }, [ready, pickMode]);
+
   // Layer visibility and 3D.
   useEffect(() => {
     const map = mapRef.current;
@@ -156,5 +326,8 @@ export default function MapView({ layer, heatmap, risk, extrude, onMapReady }: P
     map.easeTo({ pitch: layer === 'risk' && extrude ? 55 : 0, duration: 600 });
   }, [ready, layer, extrude]);
 
-  return <div ref={container} className="map" role="region" aria-label="Map of Seattle" />;
+  return (
+    <div ref={container} className="map" role="region"
+      aria-label="Map. Right-click or long-press to set your location." />
+  );
 }
