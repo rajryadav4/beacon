@@ -23,3 +23,7 @@ node_modules/
 apps/web/dist/
 .pytest_cache/
 .claude/launch.json
+
+# Hazard classifier: downloaded IPAWS alerts and trained model (ml/hazard)
+data/ipaws/
+ml/hazard/output/*.joblib
