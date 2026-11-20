@@ -40,7 +40,7 @@ public final class RecommendationService {
                     "No valid routes available for the selected travel mode.",
                     new ComparisonMetrics(0, 0, 0, 0, 0, null), warnings);
         }
-        RouteOption fastest = routes.getFirst();
+        RouteOption fastest = routes.get(0);
         double budget = settings.detourLimits().get(mode).allowedAdditionalSeconds(fastest.durationSeconds());
         List<RouteOption> eligible = practicalRoutes(routes, fastest, budget);
         RouteOption lowest = lowestScoredRoute(eligible);
@@ -61,14 +61,16 @@ public final class RecommendationService {
         RouteOption recommended = fastest;
         String explanation;
         if (!validScore(fastest.historicalExposureScore())) {
-            explanation = "Selected the fastest valid route because historical exposure could not be evaluated against it.";
+            explanation = "Recommended the fastest route because its crime exposure could not be evaluated.";
         } else if (offersMeaningfulImprovement(fastest, lowest)) {
             recommended = lowest;
             explanation = String.format(Locale.ROOT,
-                    "Selected a route with %.1f%% lower historical exposure and %.0f additional seconds, within the detour limit.",
-                    improvement(fastest, lowest) * 100, lowest.durationSeconds() - fastest.durationSeconds());
+                    "This %s route adds %s to the fastest option (%s instead of %s) and has %d%% lower crime exposure.",
+                    mode.label(), minutes(lowest.durationSeconds() - fastest.durationSeconds()),
+                    minutes(lowest.durationSeconds()), minutes(fastest.durationSeconds()),
+                    Math.round(improvement(fastest, lowest) * 100));
         } else {
-            explanation = "Selected the fastest route; no scored practical alternative offers a meaningful historical exposure improvement.";
+            explanation = fastestExplanation(mode, routes, eligible, fastest, lowest, budget);
         }
         Double reduction = validScore(fastest.historicalExposureScore())
                 && validScore(recommended.historicalExposureScore())
@@ -85,6 +87,54 @@ public final class RecommendationService {
                 new ComparisonMetrics(routes.size(), eligible.size(), budget, additional,
                         additional / fastest.durationSeconds(), reduction),
                 warnings);
+    }
+
+    /** Why the fastest route was kept, in plain words. The fastest route has a valid score here. */
+    private String fastestExplanation(TravelMode mode, List<RouteOption> routes, List<RouteOption> eligible,
+            RouteOption fastest, RouteOption lowest, double budget) {
+        if (routes.size() == 1) {
+            return "Only one " + mode.label() + " route was found for this trip, so it is recommended.";
+        }
+        boolean allScored = true;
+        boolean allZero = true;
+        for (RouteOption route : routes) {
+            Double score = route.historicalExposureScore();
+            allScored &= validScore(score);
+            allZero &= validScore(score) && score == 0;
+        }
+        if (allScored && allZero) {
+            return "No crime is predicted along any of these routes, so the fastest route is recommended.";
+        }
+        RouteOption lowestOverall = lowestScoredRoute(routes);
+        if (lowestOverall != null && !eligible.contains(lowestOverall)
+                && offersMeaningfulImprovement(fastest, lowestOverall)) {
+            return String.format(Locale.ROOT,
+                    "The fastest route is recommended. A route with %d%% lower crime exposure exists, "
+                            + "but it takes %s, over your limit of %s.",
+                    Math.round(improvement(fastest, lowestOverall) * 100), minutes(lowestOverall.durationSeconds()),
+                    minutes(fastest.durationSeconds() + budget));
+        }
+        if (lowest != null && lowest != fastest
+                && lowest.historicalExposureScore() < fastest.historicalExposureScore()) {
+            return String.format(Locale.ROOT,
+                    "The fastest route is recommended. Other routes within your time limit are only %d%% lower "
+                            + "in crime exposure, below the %d%% needed to be worth a detour.",
+                    Math.round(improvement(fastest, lowest) * 100),
+                    Math.round(settings.meaningfulImprovementFraction() * 100));
+        }
+        for (RouteOption route : eligible) {
+            if (!validScore(route.historicalExposureScore())) {
+                return "The fastest route is recommended. Some other routes within your time limit could not be "
+                        + "scored, and none of the scored ones has lower crime exposure.";
+            }
+        }
+        return "The fastest route also has the lowest crime exposure, so there is no reason to detour.";
+    }
+
+    /** Minutes for people: "12 min", "under 1 min". */
+    static String minutes(double seconds) {
+        long rounded = Math.round(seconds / 60.0);
+        return rounded < 1 ? "under 1 min" : rounded + " min";
     }
 
     private static List<RouteOption> practicalRoutes(List<RouteOption> routes, RouteOption fastest, double budget) {
@@ -191,7 +241,7 @@ public final class RecommendationService {
                 || route.geometry().size() < 2) {
             return false;
         }
-        Coordinate first = route.geometry().getFirst();
+        Coordinate first = route.geometry().get(0);
         for (Coordinate coordinate : route.geometry()) {
             if (!first.equals(coordinate)) {
                 return true;

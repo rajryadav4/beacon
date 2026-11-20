@@ -9,7 +9,6 @@
 </head>
 <body>
 	<h1>Crime Radar</h1>
-	<p><a href="recommend">Recommend a safer route</a></p>
 
 	<form action="findincidents" method="get">
 		<label for="neighborhoodid">Neighborhood</label>

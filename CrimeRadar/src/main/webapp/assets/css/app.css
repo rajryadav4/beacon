@@ -405,6 +405,7 @@ body.theme-night .map-vignette { background: radial-gradient(120% 100% at 62% 45
 .route-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--route-color); }
 .route-card[aria-pressed="true"] { border: 2px solid var(--route-color); box-shadow: 0 0 0 4px color-mix(in srgb, var(--route-color) 22%, transparent), var(--shadow-sm); }
 .route-top { display: flex; align-items: center; gap: 12px; }
+.route-why { margin: 4px 0 2px; padding: 8px 10px; border-radius: 10px; background: var(--brand-weak); color: var(--text); font-size: 13px; line-height: 1.4; }
 .route-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: -2px; }
 .tag.tag-role { color: #fff; background: var(--route-color); box-shadow: 0 3px 10px color-mix(in srgb, var(--route-color) 35%, transparent); }
 .tag.tag-mid { color: #2b1d00; }

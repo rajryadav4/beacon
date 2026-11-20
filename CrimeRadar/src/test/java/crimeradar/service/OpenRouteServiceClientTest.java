@@ -1,6 +1,6 @@
 package crimeradar.service;
 
-import com.google.gson.JsonParser;
+import crimeradar.util.Json;
 import com.sun.net.httpserver.HttpServer;
 import crimeradar.model.*;
 import org.junit.jupiter.api.*;
@@ -30,7 +30,7 @@ class OpenRouteServiceClientTest {
 
     @BeforeEach void startServer() throws Exception {
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        executor = Executors.newVirtualThreadPerTaskExecutor(); server.setExecutor(executor);
+        executor = Executors.newCachedThreadPool(); server.setExecutor(executor);
         server.createContext("/directions/", exchange -> {
             int call = calls.incrementAndGet();
             path.set(exchange.getRequestURI().getPath());
@@ -58,6 +58,11 @@ class OpenRouteServiceClientTest {
         return new RouteRequest(new Coordinate(-122.33, 47.60), new Coordinate(-122.32, 47.62), mode,
                 LocalDateTime.of(2026, 11, 18, 17, 0));
     }
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> obj(Object o) { return (Map<String, Object>) o; }
+    @SuppressWarnings("unchecked")
+    private static List<Object> arr(Object o) { return (List<Object>) o; }
+    private static double num(Object o) { return ((Number) o).doubleValue(); }
     private static String validResponse() {
         return """
                 {"type":"FeatureCollection","metadata":{"attribution":"ORS; OSM"},"features":[
@@ -72,19 +77,19 @@ class OpenRouteServiceClientTest {
         var result = client().generateRoutes(request(mode));
         assertEquals("/directions/" + mode.orsProfile() + "/geojson", path.get());
         assertEquals("test-key", auth.get());
-        var sent = JsonParser.parseString(body.get()).getAsJsonObject();
-        assertEquals(-122.33, sent.getAsJsonArray("coordinates").get(0).getAsJsonArray().get(0).getAsDouble());
-        assertEquals(3, sent.getAsJsonObject("alternative_routes").get("target_count").getAsInt());
-        assertEquals("fastest", sent.get("preference").getAsString());
-        assertFalse(sent.has("departure"));
+        Map<String, Object> sent = obj(Json.parse(body.get()));
+        assertEquals(-122.33, num(arr(arr(sent.get("coordinates")).get(0)).get(0)));
+        assertEquals(3, num(obj(sent.get("alternative_routes")).get("target_count")));
+        assertEquals("fastest", sent.get("preference"));
+        assertFalse(sent.containsKey("departure"));
         assertEquals(2, result.routes().size());
-        var route = result.routes().getFirst();
+        var route = result.routes().get(0);
         assertEquals(mode, route.travelMode()); assertEquals(1234.5, route.distanceMeters()); assertEquals(650.2, route.durationSeconds());
-        assertEquals(new Coordinate(-122.33, 47.60), route.geometry().getFirst());
+        assertEquals(new Coordinate(-122.33, 47.60), route.geometry().get(0));
         assertNull(route.historicalExposureScore());
         assertTrue(result.warnings().stream().anyMatch(w -> w.contains("Check road conditions")));
         assertTrue(result.warnings().stream().anyMatch(w -> w.contains("without live traffic")));
-        assertEquals(route.routeId(), client().generateRoutes(request(mode)).routes().getFirst().routeId());
+        assertEquals(route.routeId(), client().generateRoutes(request(mode)).routes().get(0).routeId());
     }
     @ParameterizedTest @ValueSource(ints = {400, 401, 403, 404, 422, 429, 500})
     void nonSuccessDoesNotRetryOrLeakProviderBody(int code) {

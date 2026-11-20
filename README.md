@@ -102,7 +102,7 @@ MySQL --> Java servlets (/api) --> browser UI (Leaflet) --> OSRM routes, Photon 
 | [`sql/crime_radar_all.sql`](sql/crime_radar_all.sql) | Builds the `CrimeRadar` database: tables, loads and cleans the SPD CSV (last 4 years), sample rows for the supporting tables, row counts |
 | [`sql/app_tables.sql`](sql/app_tables.sql) | App layer: crime groups, grid cells, summary tables, ML risk, users' places, preferences and trips |
 | [`sql/milestone3_business_queries.sql`](sql/milestone3_business_queries.sql) | The 11 business-insight queries (Milestone 3) |
-| [`CrimeRadar/`](CrimeRadar) | Java web app (Eclipse Dynamic Web Project): JDBC data layer, `/api` servlets, the UI in `src/main/webapp`, and the server-side route recommender (`crimeradar.recommendation`, `/recommend`) |
+| [`CrimeRadar/`](CrimeRadar) | Java web app (Eclipse Dynamic Web Project): JDBC data layer, `/api` servlets, route recommender (`crimeradar.service`), and the UI in `src/main/webapp` |
 | [`pipeline/`](pipeline) | Data download and static map data for the UI |
 | [`ml/`](ml) | Risk model training, output and model card |
 | [`scripts/`](scripts) | Build, database setup, Tomcat run and data sync (PowerShell) |
@@ -138,7 +138,7 @@ mysql -u root -p < sql/milestone3_business_queries.sql
 ```
 
 The original incident search page is still at <http://localhost:8080/CrimeRadar/findincidents>.
-The server-side route recommender is at <http://localhost:8080/CrimeRadar/recommend> (see below).
+Route recommendations: the **Safe routes** screen, or `GET /recommendroutes` for testing (see below).
 
 ## Key findings
 
@@ -160,23 +160,24 @@ The server-side route recommender is at <http://localhost:8080/CrimeRadar/recomm
 - About half of the crimes against persons have no public location, and 8.6% of reports have no time of day.
 - Risk scores are a decision aid, not a guarantee. They must not be used to stigmatize neighborhoods.
 
-## Server-side route recommender (`/recommend`)
+## Advanced feature: safer route recommendations
 
-A Java version of safer-route recommendations, separate from the app's **Safe routes** screen
-(which scores routes in the browser with the ML risk grid and OSRM). It recommends **the safest
-reasonable route**:
+CrimeRadar recommends **the safest reasonable route**, not the lowest-crime route at any cost.
+One recommender, built from Trevor's rules and interfaces, Purvesha's ML risk model and app, and
+Raj's exposure scoring:
 
-1. Up to 3 real street routes for the chosen mode (walking, cycling or driving) from openrouteservice.
-2. Each route is scored by reported crime along its streets (about 270 m grid cells from incident
-   coordinates, queried from MySQL), at the time of day the traveller reaches each part.
-3. A slower route is suggested only if it fits the detour limit (walking: the smaller of 25% or
-   5 extra minutes) **and** has at least 15% lower crime exposure. Otherwise, the fastest route.
+1. Up to 3 real street routes for the chosen mode (walk, bike or car) from OSRM.
+2. Each route's **crime exposure** = the sum over 25 m steps of (km × ML-predicted risk of that
+   block), using the time band in which the traveller reaches each step.
+3. A slower route is suggested only if it fits the detour limit (Balanced walking: the smaller of
+   25% or 5 extra minutes) **and** its exposure is lower by the preset's minimum gain (15%).
+   Otherwise, the fastest route. The user's **Route choice** picks Fastest, Balanced or Safer limits.
 4. Every result is explained, for example: *"This walking route adds 2 min to the fastest option
    (14 min instead of 12 min) and has 44% lower crime exposure."*
 
-It needs a free openrouteservice key in `CrimeRadar/src/main/java/routing.properties` (copy
-`routing.properties.example`; git-ignored). Offline tests: run `crimeradar.tools.RecommendationEngineTest`.
-Design and rules: [`project-plan/04-recommendation-engine.md`](project-plan/04-recommendation-engine.md).
+The browser decides at once (also offline). With the backend running, `POST api/routes/recommend`
+gives the server's decision, which replaces it. Tests: `node tools/check_route_rules.mjs` and the
+JUnit tests in `CrimeRadar/src/test` (`mvn test`). Design: [`project-plan/04-recommendation-engine.md`](project-plan/04-recommendation-engine.md).
 
 ## Team
 

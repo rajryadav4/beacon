@@ -4,11 +4,22 @@ import { $, h, fmt, debounce, levelBadge, ring, toast, seattleClock, bandOfHour,
 import { ROLE_COLOR, ROLE_LABEL } from './mapview.js';
 import { svg, iconEl, KIND_ICON, MODE_ICON, BAND_ICON } from './icons.js';
 import { fetchRoutes, searchPlaces, getPosition, inSeattle, DEMO_START, haversine } from './geo.js';
-import { account } from './api.js';
+import { account, routing, getMode } from './api.js';
+import { recommend, preferenceFromWeight } from './recommend.js';
 
 const MODES = ['walk', 'bike', 'car'];
 const MODE_VERB = { walk: 'walking', bike: 'biking', car: 'driving' };
 const LEVEL_WORD = { low: 'Lower', elevated: 'Elevated', high: 'High' };
+
+/** At most `max` points of a polyline (keeps the first and last), to keep the request small. */
+function thin(coords, max) {
+  if (coords.length <= max) return coords;
+  const step = (coords.length - 1) / (max - 1);
+  const out = [];
+  for (let i = 0; i < max - 1; i++) out.push(coords[Math.round(i * step)]);
+  out.push(coords[coords.length - 1]);
+  return out;
+}
 
 /** Accessible combobox for a place input (keyboard, screen reader, mouse). */
 class PlaceBox {
@@ -152,6 +163,9 @@ export class Directions {
     this.fromSeq = 0; // counts start changes, so a late GPS answer never replaces the visitor's choice
     this.active = false; // true while the Directions view is on screen (only then it draws on the map)
     this.lastStart = 0;
+    this.decisionSeq = 0; // the newest server decision wins
+    this.decisionCtrl = null;
+    this.explanation = '';
   }
 
   mount() {
@@ -467,6 +481,9 @@ export class Directions {
     ++this.req;
     if (this.ctrl) this.ctrl.abort();
     this.ctrl = null;
+    ++this.decisionSeq; // a late server decision must not redraw routes that are gone
+    if (this.decisionCtrl) this.decisionCtrl.abort();
+    this.decisionCtrl = null;
   }
 
   async plan() {
@@ -512,36 +529,62 @@ export class Directions {
   rescore(fit = false) {
     this.drawContext();
     if (!this.raw.length) return;
-    const band = this.departure().band;
-    const scored = this.raw.map((r) => ({ ...r, score: this.model.scoreRoute(r.coords, this.mode, band), tags: [] }));
-    const w = Math.min(1, Math.max(0, Number(this.prefs.safetyWeight ?? 0.7)));
-    const maxAdj = Math.max(...scored.map((s) => s.score.adjusted), 1e-9);
-    const maxDur = Math.max(...scored.map((s) => s.duration), 1);
-    for (const s of scored) s.rank = w * (s.score.adjusted / maxAdj) + (1 - w) * (s.duration / maxDur);
-    const safest = scored.reduce((a, b) => (b.score.adjusted < a.score.adjusted - 1e-9 || (Math.abs(b.score.adjusted - a.score.adjusted) < 1e-9 && b.duration < a.duration) ? b : a));
-    const fastest = scored.reduce((a, b) => (b.duration < a.duration ? b : a));
-    scored.sort((a, b) => a.rank - b.rank);
-    // Roles for the map colors: the recommended route is green; of the others, the riskier one is red
-    // (most dangerous) and the other one is orange (moderate). With 2 routes, the other one is red only
-    // if it is riskier than the recommended route.
-    const [best, ...others] = scored;
+    const d = this.departure();
+    const scored = this.raw.map((r, i) => {
+      const exp = this.model.routeExposure(r.coords, r.duration, d.hour, d.minute);
+      return { ...r, id: `R${i + 1}`, score: this.model.scoreRoute(r.coords, this.mode, d.band), exposure: exp.exposure, tags: [] };
+    });
+    const preference = preferenceFromWeight(Number(this.prefs.safetyWeight ?? 0.7));
+    // 1) Instant decision in the browser (the only one in offline mode).
+    this.applyDecision(scored, recommend(scored, this.mode, preference), fit);
+    // 2) The server's decision replaces it when the backend runs (same rules, the server is the reference).
+    if (getMode() !== 'server') return;
+    const seq = ++this.decisionSeq;
+    if (this.decisionCtrl) this.decisionCtrl.abort();
+    this.decisionCtrl = new AbortController();
+    const payload = {
+      mode: this.mode, departAt: d.iso, preference,
+      routes: scored.map((s) => ({ id: s.id, duration: s.duration, distance: s.distance, coords: thin(s.coords, 4000) })),
+    };
+    routing.recommend(payload, this.decisionCtrl.signal)
+      .then((server) => { if (seq === this.decisionSeq && server && server.recommendedId) this.applyDecision(scored, server, false); })
+      .catch(() => { /* keep the browser's decision */ });
+  }
+
+  /** Orders the routes (recommended first), sets map roles and tags from a decision, then redraws. */
+  applyDecision(scored, decision, fit) {
+    const byId = new Map((decision.routes || []).map((r) => [r.id, r]));
+    const list = scored.map((s) => {
+      const r = byId.get(s.id) || {};
+      return { ...s, exposure: r.exposure ?? null, withinLimit: r.withinLimit !== false, vsFastest: r.vsFastestPercent ?? null, tags: [] };
+    });
+    const best = list.find((s) => s.id === decision.recommendedId) || list.reduce((a, b) => (b.duration < a.duration ? b : a));
+    const fastest = list.reduce((a, b) => (b.duration < a.duration ? b : a));
+    const known = list.filter((s) => s.exposure !== null);
+    const safest = known.length ? known.reduce((a, b) => (b.exposure < a.exposure || (b.exposure === a.exposure && b.duration < a.duration) ? b : a)) : null;
+    // Recommended first, the rest quickest first. Colors: of the others, the one with most exposure is red.
+    const others = list.filter((s) => s !== best).sort((a, b) => a.duration - b.duration);
     best.role = 'best';
+    const risk = (s) => (s.exposure !== null ? s.exposure : s.score.adjusted);
     if (others.length === 1) {
-      others[0].role = others[0].score.adjusted > best.score.adjusted ? 'worst' : 'mid';
+      others[0].role = risk(others[0]) > risk(best) ? 'worst' : 'mid';
     } else if (others.length >= 2) {
-      const byRisk = [...others].sort((a, b) => b.score.adjusted - a.score.adjusted);
+      const byRisk = [...others].sort((a, b) => risk(b) - risk(a));
       byRisk[0].role = 'worst';
       for (const s of byRisk.slice(1)) s.role = 'mid';
     }
-    for (const s of scored) s.tags.push(ROLE_LABEL[s.role]);
-    if (scored.length > 1) {
-      safest.tags.push('Safest');
+    const routes = [best, ...others];
+    for (const s of routes) s.tags.push(ROLE_LABEL[s.role]);
+    if (routes.length > 1) {
       fastest.tags.push('Fastest');
+      if (safest) safest.tags.push('Least crime exposure');
+      for (const s of routes) if (!s.withinLimit) s.tags.push('Over your time limit');
     }
-    for (const s of scored) s.choice = s === safest ? 'safest' : s === fastest ? 'fastest' : 'balanced';
-    const keep = this.routes[this.selected] && scored.findIndex((s) => s.coords === this.routes[this.selected].coords);
-    this.routes = scored;
-    this.selected = !fit && keep >= 0 ? keep : 0;
+    for (const s of routes) s.choice = s === safest ? 'safest' : s === fastest ? 'fastest' : 'balanced';
+    const keep = !fit && this.routes[this.selected] ? routes.findIndex((s) => s.coords === this.routes[this.selected].coords) : -1;
+    this.routes = routes;
+    this.explanation = decision.explanation || '';
+    this.selected = keep >= 0 ? keep : 0;
     this.renderRoutes();
     this.draw(fit);
   }
@@ -590,7 +633,10 @@ export class Directions {
     const cards = this.routes.map((r, i) => this.card(r, i, d, bandLabel));
     const caption = h('p', { class: 'hint', style: { margin: '0 0 2px' } },
       `${this.routes.length} route${this.routes.length > 1 ? 's' : ''} for ${MODE_VERB[this.mode]}, ${d.now ? 'leaving now' : `leaving at ${clockLabel(d.hour, d.minute)}`} (${bandLabel}).`);
-    $('#routes').replaceChildren(caption, ...cards);
+    const why = this.explanation && this.routes.length
+      ? h('p', { class: 'route-why', role: 'status' }, h('b', null, 'Why this route? '), this.explanation)
+      : '';
+    $('#routes').replaceChildren(caption, why, ...cards);
   }
 
   card(r, i, d, bandLabel) {
