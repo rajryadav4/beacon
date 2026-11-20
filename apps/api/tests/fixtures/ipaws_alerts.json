@@ -1,0 +1,86 @@
+{
+  "metadata": {"entityname": "IpawsArchivedAlerts", "note": "trimmed, anonymised test fixture in the OpenFEMA v1 shape"},
+  "IpawsArchivedAlerts": [
+    {
+      "identifier": "test-ipaws-lae-1",
+      "sender": "Example_County_Emergency_Management",
+      "sent": "2026-11-17T06:30:02.000Z",
+      "status": "Actual",
+      "msgType": "Alert",
+      "scope": "Public",
+      "code": ["IPAWSv1.0"],
+      "id": "00000000-0000-0000-0000-000000000001",
+      "searchGeometry": {"type": "MultiPolygon", "coordinates": [[[[-122.36, 48.48], [-122.30, 48.48], [-122.30, 48.52], [-122.36, 48.52], [-122.36, 48.48]]]]},
+      "originalMessage": "<alert>...</alert>",
+      "info": [
+        {
+          "language": "es-US",
+          "event": "Local Area Emergency",
+          "severity": "Extreme", "urgency": "Immediate", "certainty": "Observed",
+          "eventCode": [{"id": 1, "name": "SAME", "value": "LAE"}],
+          "parameter": [{"name": "CMAMtext", "value": "Alerta: fuga de gas, evacuar ahora"}],
+          "description": "",
+          "area": [{"areaDesc": "Example, WA",
+                    "polygon": {"type": "Polygon", "coordinates": [[[-122.36, 48.48], [-122.30, 48.48], [-122.30, 48.52], [-122.36, 48.52], [-122.36, 48.48]]]},
+                    "geocode": [{"name": "SAME", "value": "053057"}]}]
+        },
+        {
+          "language": "en-US",
+          "event": "Local Area Emergency",
+          "senderName": "Example County Emergency Management",
+          "severity": "Extreme", "urgency": "Immediate", "certainty": "Observed",
+          "effective": "2026-11-16T22:30:00-08:00",
+          "onset": "2026-11-16T22:30:00-08:00",
+          "expires": "2026-11-17T01:30:00-08:00",
+          "eventCode": [{"id": 1, "name": "SAME", "value": "LAE"}],
+          "parameter": [
+            {"name": "WEAHandling", "value": "Public Safety"},
+            {"name": "CMAMtext", "value": "Example Alert: Gas leak on Main St. Evacuate now."},
+            {"name": "CMAMlongtext", "value": "Example Alert: A natural gas leak on Main Street. Evacuate a 500-foot radius now. Call 911 if you need help."}
+          ],
+          "description": "",
+          "instruction": "",
+          "web": "https://example.org/alerts",
+          "area": [{"areaDesc": "Example, WA",
+                    "polygon": {"type": "Polygon", "coordinates": [[[-122.36, 48.48], [-122.30, 48.48], [-122.30, 48.52], [-122.36, 48.52], [-122.36, 48.48]]]},
+                    "geocode": [{"name": "SAME", "value": "053057"}]}]
+        }
+      ]
+    },
+    {
+      "identifier": "urn:oid:2.49.0.1.840.0.test-nws-copy.001.1.IPAWS",
+      "sender": "w-nws.webmaster@noaa.gov",
+      "sent": "2026-11-19T03:06:00.000Z",
+      "status": "Actual",
+      "msgType": "Alert",
+      "info": [{"language": "en-US", "event": "Flash Flood Warning", "severity": "Severe", "urgency": "Immediate",
+                "certainty": "Likely", "eventCode": [{"name": "SAME", "value": "FFW"}], "area": []}]
+    },
+    {
+      "identifier": "test-ipaws-rmt-1",
+      "sender": "Example_OEM",
+      "sent": "2026-11-15T22:02:20.000Z",
+      "status": "Actual",
+      "msgType": "Alert",
+      "info": [{"language": "en-US", "event": "Required Monthly Test", "severity": "Unknown", "urgency": "Unknown",
+                "certainty": "Unknown", "eventCode": [{"name": "SAME", "value": "RMT"}], "area": [{"areaDesc": "WA"}]}]
+    },
+    {
+      "identifier": "test-ipaws-cdw-1",
+      "sender": "Example_State_EMD",
+      "sent": "2026-11-18T12:00:00.000Z",
+      "status": "Actual",
+      "msgType": "Update",
+      "references": "Example_State_EMD,test-ipaws-cdw-0,2026-11-18T11:00:00-08:00",
+      "searchGeometry": {"type": "Polygon", "coordinates": [[[-122.5, 47.4], [-122.2, 47.4], [-122.2, 47.7], [-122.5, 47.7], [-122.5, 47.4]]]},
+      "info": [{"language": "en-US", "event": "Civil Danger Warning", "senderName": "Example State EMD",
+                "headline": "Civil Danger Warning for central Example County",
+                "description": "Shelter in place. Stay away from windows.",
+                "instruction": "Go indoors now and stay there until told it is safe.",
+                "severity": "Extreme", "urgency": "Immediate", "certainty": "Likely",
+                "expires": "2026-11-18T16:00:00-08:00",
+                "eventCode": [{"name": "SAME", "value": "CDW"}],
+                "area": [{"areaDesc": "Central Example County", "geocode": [{"name": "SAME", "value": "053033"}]}]}]
+    }
+  ]
+}

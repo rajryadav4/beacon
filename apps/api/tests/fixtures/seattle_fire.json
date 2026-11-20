@@ -1,0 +1,15 @@
+[
+  {"address": "100 Example Ave", "type": "Aid Response", "datetime": "2026-11-19T19:19:00.000",
+   "latitude": "47.6062", "longitude": "-122.3321", "incident_number": "FTEST0001"},
+  {"address": "200 Example Ave", "type": "Hazardous Mat- Spill-Leak", "datetime": "2026-11-19T19:10:00.000",
+   "latitude": "47.6070", "longitude": "-122.3330", "incident_number": "FTEST0002"},
+  {"address": "300 Example Ave", "type": "Brush Fire", "datetime": "2026-11-19T18:55:00.000",
+   "latitude": "47.6100", "longitude": "-122.3400", "incident_number": "FTEST0003"},
+  {"address": "400 Example Ave", "type": "Fire in Building", "datetime": "2026-11-19T18:40:00.000",
+   "latitude": "47.6000", "longitude": "-122.3300", "incident_number": "FTEST0004"},
+  {"address": "500 Example Ave", "type": "Water Rescue Response", "datetime": "2026-07-04T12:00:00.000",
+   "latitude": "47.6200", "longitude": "-122.3500", "incident_number": "FTEST0005"},
+  {"address": "Unknown", "type": "Scenes Of Violence 7", "datetime": "2026-11-19T18:30:00.000",
+   "incident_number": "FTEST0006"},
+  {"address": "No number", "type": "Car Fire", "datetime": "2026-11-19T18:30:00.000"}
+]
