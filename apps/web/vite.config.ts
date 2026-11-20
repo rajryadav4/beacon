@@ -1,7 +1,11 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// The dev server proxies /api to the FastAPI app (uvicorn on port 8000).
+// The dev server proxies /api to the FastAPI app (uvicorn on port 8000). /openapi.json tells the UI which
+// optional endpoints exist (the hazard outlook), so it never calls a missing one.
+const api = process.env.API_URL ?? 'http://localhost:8000';
+const proxy = { '/api': api, '/openapi.json': api };
+
 export default defineConfig({
   plugins: [react()],
   worker: { format: 'es' },
@@ -13,7 +17,7 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    proxy: { '/api': process.env.API_URL ?? 'http://localhost:8000' },
+    proxy,
   },
   // `vite preview` serves the production build (and proxies /api) for quick sharing
   // through a Cloudflare quick tunnel; only *.trycloudflare.com hosts are allowed.
@@ -21,6 +25,6 @@ export default defineConfig({
     port: 4173,
     strictPort: true,
     allowedHosts: ['.trycloudflare.com'],
-    proxy: { '/api': process.env.API_URL ?? 'http://localhost:8000' },
+    proxy,
   },
 });
