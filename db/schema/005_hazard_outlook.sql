@@ -52,6 +52,15 @@ INSERT INTO hazard_zone_kinds (hazard, kind) VALUES
     ('volcano',    'lahar');
 COMMIT;
 
+-- One dissolved, simplified (~10 m) outline per zone kind, so an outlook item can be
+-- drawn over "the tsunami inundation zones" without dissolving thousands of polygons.
+CREATE TABLE IF NOT EXISTS hazard_zone_footprints (
+    kind       varchar(30) PRIMARY KEY,
+    geom       geometry(MultiPolygon, 4326) NOT NULL,
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS ix_hazard_zone_footprints_geom ON hazard_zone_footprints USING gist (geom);
+
 CREATE TABLE IF NOT EXISTS cell_terrain (
     cell_id     integer PRIMARY KEY REFERENCES grid_cells (cell_id),
     elev_median real,                -- metres above sea level, land pixels

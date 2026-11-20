@@ -237,9 +237,9 @@ AREA_SQL = """
     WITH g AS (
         SELECT ST_Multi(ST_CollectionExtract(ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON(%(geom)s), 4326)), 3)) AS g
     ), z AS (
-        SELECT ST_SimplifyPreserveTopology(ST_Union(ST_Intersection(hz.geom, g.g)), 0.00003) AS zg
-        FROM hazard_zones hz, g
-        WHERE %(zones)s::text[] IS NOT NULL AND hz.kind = ANY(%(zones)s::text[]) AND hz.geom && g.g
+        SELECT ST_Union(ST_Intersection(f.geom, g.g)) AS zg
+        FROM hazard_zone_footprints f, g
+        WHERE %(zones)s::text[] IS NOT NULL AND f.kind = ANY(%(zones)s::text[]) AND f.geom && g.g
     ), a AS (
         SELECT ST_Multi(ST_CollectionExtract(ST_MakeValid(
                    CASE WHEN z.zg IS NOT NULL AND NOT ST_IsEmpty(z.zg) THEN z.zg ELSE g.g END), 3)) AS area

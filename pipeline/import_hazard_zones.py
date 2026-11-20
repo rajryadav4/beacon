@@ -44,6 +44,7 @@ FEMA_NFHL = "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer
 TERRAIN_URL = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"
 TERRAIN_ZOOM = 13
 CLIP_MARGIN = 0.01  # degrees kept around the grid box
+SIMPLIFY_DEG = 0.00002  # ~2 m: zone outlines are stored simplified
 
 SEATTLE_LICENSE = "City of Seattle open GIS data, provided as is without warranty (City of Seattle Open Data Policy)"
 DNR_LICENSE = ("Washington Geological Survey (WA DNR) tsunami model, vectorised and published by the City of "
@@ -182,9 +183,9 @@ INSERT_ZONE = """
     INSERT INTO hazard_zones (hazard, kind, source, source_ref, name, level, geom, properties, license)
     SELECT %(hazard)s, %(kind)s, %(source)s, %(ref)s, %(name)s, %(level)s, g, %(props)s, %(license)s
     FROM (
-        SELECT ST_Multi(ST_CollectionExtract(ST_MakeValid(ST_Intersection(
+        SELECT ST_Multi(ST_CollectionExtract(ST_MakeValid(ST_SimplifyPreserveTopology(ST_Intersection(
                    ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON(%(geom)s), 4326)),
-                   ST_MakeEnvelope(%(w)s, %(s)s, %(e)s, %(n)s, 4326))), 3)) AS g
+                   ST_MakeEnvelope(%(w)s, %(s)s, %(e)s, %(n)s, 4326)), %(tol)s)), 3)) AS g
     ) x
     WHERE NOT ST_IsEmpty(g)
     ON CONFLICT (source, source_ref) DO NOTHING
@@ -194,7 +195,7 @@ INSERT_ZONE = """
 DISSOLVE = """
     INSERT INTO hazard_zones (hazard, kind, source, source_ref, name, level, geom, properties, license)
     SELECT hazard, kind, source, 'tile-' || tx || '-' || ty || '-' || level, min(name), level,
-           ST_Multi(ST_CollectionExtract(ST_MakeValid(ST_Union(geom)), 3)),
+           ST_Multi(ST_CollectionExtract(ST_MakeValid(ST_SimplifyPreserveTopology(ST_Union(geom), 0.00002)), 3)),
            jsonb_build_object('mergedFeatures', count(*)), min(license)
     FROM (
         SELECT z.*, floor(ST_X(ST_Centroid(geom)) / 0.01)::int AS tx, floor(ST_Y(ST_Centroid(geom)) / 0.01)::int AS ty
@@ -222,7 +223,7 @@ def load_zone_source(conn, src: dict, bbox) -> int:
                      "name": name[:255], "level": level, "props": json.dumps({k: v for k, v in extra.items()
                                                                                if v is not None}),
                      "license": src["license"], "geom": json.dumps(f["geometry"]),
-                     "w": clip[0], "s": clip[1], "e": clip[2], "n": clip[3]})
+                     "w": clip[0], "s": clip[1], "e": clip[2], "n": clip[3], "tol": SIMPLIFY_DEG})
     with conn.transaction():
         conn.execute("DELETE FROM hazard_zones WHERE source = %s", (src["key"],))
         if src.get("dissolve"):
@@ -255,6 +256,24 @@ def import_zones(conn, bbox, only: set[str] | None = None) -> None:
             record_status(conn, src["key"], "error", str(exc)[:500], None)
             print(f"  {src['key']}: FAILED {exc}", file=sys.stderr)
         conn.commit()
+
+
+FOOTPRINTS = """
+    INSERT INTO hazard_zone_footprints (kind, geom)
+    SELECT kind, ST_Multi(ST_CollectionExtract(ST_MakeValid(ST_Union(ST_MakeValid(
+               ST_SnapToGrid(ST_SimplifyPreserveTopology(geom, 0.0001), 0.00001)))), 3))
+    FROM hazard_zones GROUP BY kind
+"""
+
+
+def import_footprints(conn) -> None:
+    """One dissolved outline per zone kind (~10 m simplification) for outlook areas."""
+    started = time.time()
+    with conn.transaction():
+        conn.execute("DELETE FROM hazard_zone_footprints")
+        conn.execute(FOOTPRINTS)
+    kinds = [r[0] for r in conn.execute("SELECT kind FROM hazard_zone_footprints ORDER BY kind")]
+    print(f"  footprints: {', '.join(kinds)} ({time.time() - started:.0f} s)")
 
 
 # ---- terrain -----------------------------------------------------------------
@@ -455,6 +474,8 @@ def main() -> None:
             if not args.skip_zones:
                 print("Hazard zones:")
                 import_zones(conn, SEATTLE_BBOX, set(args.only.split(",")) if args.only else None)
+            if not args.skip_zones or not conn.execute("SELECT 1 FROM hazard_zone_footprints LIMIT 1").fetchone():
+                import_footprints(conn)
             if not args.skip_terrain:
                 print("Terrain:")
                 import_terrain(conn, SEATTLE_BBOX)
