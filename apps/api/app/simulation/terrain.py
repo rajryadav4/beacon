@@ -165,6 +165,17 @@ def _from_db(conn) -> dict[int, float] | None:
     return {int(c): float(e) for c, e in rows}
 
 
+def water_cells(conn) -> set[int]:
+    """Cells that are mostly open water (`cell_terrain.water_share` >= 0.5); empty without that table."""
+    try:
+        if conn is None or conn.execute("SELECT to_regclass('cell_terrain')").fetchone()[0] is None:
+            return set()
+        return {r[0] for r in conn.execute("SELECT cell_id FROM cell_terrain WHERE water_share >= 0.5").fetchall()}
+    except Exception:
+        log.info("cell_terrain not readable; no water mask")
+        return set()
+
+
 def cell_elevations(conn=None) -> dict[int, float] | None:
     """Elevation (m above sea level) per cell id, or None when no source is available."""
     global _elevations, _failed_at

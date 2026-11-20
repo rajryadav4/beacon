@@ -21,12 +21,16 @@ Models (simple and explainable on purpose; each response repeats its own in `sce
 - **tsunami**: the WA DNR inundation polygons in `hazard_zones` for the chosen scenario
   (water deeper than 1 ft = severe, up to 1 ft = moderate), clipped to `size` metres
   around the event. Without them: grid cells within `size` whose centre elevation (AWS
-  Terrain Tiles, cached; or `cell_terrain`) is <= 6 m (severe) or <= 12 m (moderate).
+  Terrain Tiles, cached; or `cell_terrain`) is <= 5 m (severe) or <= 10 m (moderate). The
+  evacuation margin (moderate) uses cells rated high/moderate in `cell_hazard_exposure`
+  when present, else low ground near the inundation zone. Open-water cells
+  (`cell_terrain.water_share` >= 0.5) are never counted as land or high ground.
   Destination: the nearer of high ground (a cell >= 15 m, outside the zones) and a
   suitable safe place outside the zones; a warning when the first wave could arrive first.
 - **flood**: water rises `depthM` (default 3 m) above the ground at the event; cells within
   `size` up to half that height above it are severe, up to the full height moderate
-  (plus mapped `flood_zone` areas if present). Destination: high ground or a hub outside.
+  (plus cells rated high flood exposure in `cell_hazard_exposure`, or mapped `flood_zone`
+  areas). Destination: high ground or a hub outside.
 - **wildfire**: a wind-driven ellipse; the head moves downwind at 5 + 1.5 x wind km/h
   metres per minute, the back at 15 % of that, length-to-breadth 1 + wind/20. Severe =
   fire area after 60 min (timeline at 0/15/30/60 min); moderate = embers and smoke up to
@@ -323,10 +327,10 @@ def place_reason(c: dict, hazard: str, zones: models.Zones, elevations: dict[int
 
 
 def high_ground(origin: tuple[float, float], zones: models.Zones, cells: dict[str, list[int]],
-                elevations: dict[int, float] | None) -> dict | None:
+                elevations: dict[int, float] | None, water: set[int] = frozenset()) -> dict | None:
     if not elevations or zones.high_ground_m is None:
         return None
-    affected = set(cells["severe"]) | set(cells["moderate"])
+    affected = set(cells["severe"]) | set(cells["moderate"]) | set(water)
     best = None
     for cell, elev in elevations.items():
         if elev < zones.high_ground_m or cell in affected:
@@ -376,6 +380,7 @@ def simulate(req: SimulateRequest, response: Response) -> dict:
     with pool.connection() as conn:
         zones = models.build(conn, hazard, event[0], event[1], size, params)
         elevations = zones.extra.pop("elevations", None)
+        water = zones.extra.pop("water", set())
         sev_parts = [t for t in (resolve(conn, p) for p in zones.severe) if t]
         mod_parts = [t for t in (resolve(conn, p) for p in zones.moderate) if t]
         sev, mod = finalize(conn, sev_parts, mod_parts)
@@ -386,7 +391,7 @@ def simulate(req: SimulateRequest, response: Response) -> dict:
         scored = sorted(((s, c) for c in places
                          if (s := score_place(c, hazard, zones, status, event, elevations)) is not None),
                         key=lambda sc: sc[0])
-        area = high_ground(origin, zones, cells, elevations) if status != "outside" else None
+        area = high_ground(origin, zones, cells, elevations, water) if status != "outside" else None
         if area is None and status != "outside" and hazard in ("wildfire", "hazmat", "volcano"):
             area = escape_area(conn, origin, zones, sev, mod)
         rings = severe_rings(conn, sev) if status != "inside_severe" else []

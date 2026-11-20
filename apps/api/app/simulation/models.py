@@ -127,9 +127,20 @@ def cells_part(cells: list[int]) -> Part | None:
     return Part(sql=CELLS_SQL, params={"cells": cells}) if cells else None
 
 
-def _cells_within(lat: float, lng: float, radius_m: float) -> list[int]:
+def exposure_cells(conn, hazard: str, levels: list[str]) -> list[int] | None:
+    """Cells at the given levels in `cell_hazard_exposure` (outlook pipeline); None without the table or rows."""
+    if not table_exists(conn, "cell_hazard_exposure"):
+        return None
+    rows = conn.execute("SELECT cell_id FROM cell_hazard_exposure WHERE hazard = %s AND level = ANY(%s)",
+                        (hazard, levels)).fetchall()
+    return [r[0] for r in rows] or None
+
+
+def _cells_within(lat: float, lng: float, radius_m: float, skip: set[int] | frozenset = frozenset()) -> list[int]:
     out = []
     for cell in terrain.all_cells():
+        if cell in skip:
+            continue
         clat, clng = terrain.cell_center(cell)
         if abs(clat - lat) * g.M_PER_DEG_LAT <= radius_m and g.meters(lat, lng, clat, clng) <= radius_m:
             out.append(cell)
@@ -174,22 +185,33 @@ def tsunami(conn, lat, lng, radius_m, params, elevations) -> Zones:
     reach = g.circle(lat, lng, radius_m)
     first = TSUNAMI_FIRST_WAVE_MIN[scenario]
     z = Zones(high_ground_m=15)
+    water = terrain.water_cells(conn)
     deep = hazard_zone_part(conn, ["tsunami_inundation"], reach, levels=["high", "moderate"],
                             sources=[TSUNAMI_SOURCES[scenario]])
     shallow = hazard_zone_part(conn, ["tsunami_inundation"], reach, levels=["low"], sources=[TSUNAMI_SOURCES[scenario]])
-    low_cells = [c for c in _cells_within(lat, lng, radius_m) if elevations.get(c, 99) <= 10] if elevations else []
+    in_reach = _cells_within(lat, lng, radius_m, water)
+    low_cells = [c for c in in_reach if elevations.get(c, 99) <= 10] if elevations else []
+    exposed = exposure_cells(conn, "tsunami", ["high", "moderate"])
     if deep:
         z.severe.append(deep)
         if shallow:
             z.moderate.append(shallow)
-        if low_cells:
+        if exposed:
+            # Evacuation margin: cells the outlook pipeline rates high or moderate for tsunami.
+            reach_set = set(in_reach)
+            z.moderate.extend(p for p in [cells_part([c for c in exposed if c in reach_set])] if p)
+            margin = "cells rated high or moderate tsunami exposure (cell_hazard_exposure)"
+            z.sources.append("Beacon per-cell tsunami exposure (cell_hazard_exposure)")
+        elif low_cells:
             # Evacuation margin: low ground (<= 10 m) within about 1.2 km of the inundation zone.
             flooded = cells_in_zone(conn, deep.params["zone"])
             z.moderate.extend(p for p in [cells_part(near_cells(low_cells, flooded, rows=5, cols=5))] if p)
+            margin = "low ground (cell centre at most 10 m above sea level) within about 1.2 km of it"
+        else:
+            margin = "nothing else"
         z.model = (f"WA DNR tsunami inundation model for the {TSUNAMI_LABEL[scenario]} scenario, within "
-                   f"{radius_m / 1000:.0f} km of the event: water deeper than 1 ft is severe; up to 1 ft, and low ground "
-                   "(cell centre at most 10 m above sea level) within about 1.2 km of it, is moderate (the margin "
-                   "officials ask people to leave).")
+                   f"{radius_m / 1000:.0f} km of the event: water deeper than 1 ft is severe; up to 1 ft, and {margin}, "
+                   "is moderate (the margin officials ask people to leave).")
         z.sources.append(f"Washington DNR tsunami inundation, {TSUNAMI_LABEL[scenario]} scenario (hazard_zones)")
         z.growth = [(t, Part(sql=CLIP_SQL, params={"zone": deep.params["zone"],
                                                     "clip": json.dumps(g.circle(lat, lng, radius_m * f))}))
@@ -223,10 +245,11 @@ def flood(conn, lat, lng, radius_m, params, elevations) -> Zones:
     depth = float(params.get("depthM") or 3.0)
     reach = g.circle(lat, lng, radius_m)
     z = Zones()
+    water = terrain.water_cells(conn)
     if elevations:
         base_cell = terrain.cell_at(lat, lng)
         base = elevations.get(base_cell, 0.0) if base_cell is not None else 0.0
-        cells = _cells_within(lat, lng, radius_m)
+        cells = _cells_within(lat, lng, radius_m, water)
         severe = [c for c in cells if elevations.get(c, 999) <= base + depth * 0.5]
         moderate = [c for c in cells if base + depth * 0.5 < elevations.get(c, 999) <= base + depth]
         z.severe.extend(p for p in [cells_part(severe)] if p)
@@ -244,10 +267,17 @@ def flood(conn, lat, lng, radius_m, params, elevations) -> Zones:
         z.moderate.append(Part(geojson=reach))
         z.growth = [(0, Part(geojson=g.circle(lat, lng, radius_m * 0.15))), (90, Part(geojson=reach))]
         z.model = "No terrain data available: rings around the event (40 % severe, 100 % moderate)."
-    zone = hazard_zone_part(conn, ["flood_zone"], reach)
-    if zone:
-        z.moderate.append(zone)
-        z.sources.append("Mapped flood zones (hazard_zones)")
+    exposed = exposure_cells(conn, "flood", ["high"])
+    if exposed:
+        reach_set = set(_cells_within(lat, lng, radius_m, water))
+        z.moderate.extend(p for p in [cells_part([c for c in exposed if c in reach_set])] if p)
+        z.sources.append("Beacon per-cell flood exposure from FEMA and City of Seattle flood zones (cell_hazard_exposure)")
+        z.model += " Cells rated high flood exposure within the reach are moderate too."
+    else:
+        zone = hazard_zone_part(conn, ["flood_zone"], reach)
+        if zone:
+            z.moderate.append(zone)
+            z.sources.append("Mapped flood zones (hazard_zones)")
     z.timeline = [
         (0, "Heavy rain: the river starts to rise."),
         (30, f"Low ground floods (simulated, about {depth * 0.5:g} m of water)."),
@@ -419,5 +449,6 @@ def build(conn, hazard: str, lat: float, lng: float, size: float, params: dict) 
     zones = MODELS[hazard](conn, lat, lng, size, params, elevations)
     if hazard in ("tsunami", "flood") and elevations:
         zones.extra["elevations"] = elevations
+        zones.extra["water"] = terrain.water_cells(conn)
     return zones
 
