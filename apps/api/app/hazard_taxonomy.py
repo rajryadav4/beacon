@@ -53,7 +53,7 @@ SAME_CODE_HAZARD: dict[str, str | None] = {
     # civil danger, attack, national emergency
     "CDW": "conflict", "EAN": "conflict", "NAT": "conflict", "NIC": "conflict",
     # law enforcement
-    "LEW": "crime", "CAE": "crime", "BLU": "crime",
+    "LEW": "crime", "CAE": "crime", "BLU": "crime", "MEP": "crime",
     # generic emergencies: the text decides (classifier), default "other"
     "CEM": "other", "LAE": "other", "SPW": "other", "EVI": "other", "TOE": "other",
     "ADR": None, "DMO": None, "RWT": None, "RMT": None, "NPT": None, "NMN": None,

@@ -71,7 +71,8 @@ def test_classify_endpoint_shape(client):
     r = client.post("/api/hazard/classify", json={"text": "River rising rapidly, evacuate low areas"})
     assert r.status_code == 200
     body = r.json()
-    assert set(body) == {"hazard", "hazardLabel", "confidence", "severity", "scores", "model"}
+    assert set(body) == {"hazard", "hazardLabel", "confidence", "severity", "scores", "model", "method"}
+    assert body["method"] == "model"
     assert body["hazard"] in HAZARD_KEYS
     assert 0.0 <= body["confidence"] <= 1.0
     assert len(body["scores"]) == 3 and all(k in HAZARD_KEYS for k in body["scores"])
@@ -92,3 +93,36 @@ def test_model_endpoint(client):
     assert body["version"].startswith("hazard-")
     assert body["trainedAt"] and 0 < body["threshold"] < 1
     assert body["metrics"]["macroF1Masked"] > 0.5
+
+
+@pytest.mark.parametrize("text, expected", [
+    ("Strong shaking felt downtown, buildings damaged", "earthquake"),
+    ("Air raid sirens, go to the nearest shelter immediately", "conflict"),
+    ("Tsunami waves expected after the earthquake, move inland", "tsunami"),
+    ("Mount Rainier eruption: ash fall expected east of the mountain", "volcano"),
+    ("Missile alert: take cover in a basement now", "conflict"),
+])
+def test_rare_hazard_rules(text, expected):
+    pytest.importorskip("joblib")
+    from app import hazard_model
+    try:
+        result = hazard_model.classify(text)
+    except hazard_model.HazardModelUnavailable:
+        pytest.skip("hazard model not trained")
+    assert result["hazard"] == expected and result["method"] == "rules"
+
+
+def test_non_emergency_text_abstains():
+    from app import hazard_model
+    try:
+        result = hazard_model.classify("Lunch at noon in the cafeteria")
+    except hazard_model.HazardModelUnavailable:
+        pytest.skip("hazard model not trained")
+    assert result["hazard"] == "other" and result["method"] == "abstain" and result["severity"] is None
+
+
+def test_rule_patterns_without_model():
+    from app.hazard_model import rule_hazard
+    assert rule_hazard("Tsunami warning issued after a strong earthquake")[0] == "tsunami"
+    assert rule_hazard("Tornado warning: sirens are sounding") is None  # sirens alone are not an attack
+    assert rule_hazard("Flash flood warning for the Cedar River") is None

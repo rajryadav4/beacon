@@ -212,3 +212,19 @@ are called wildfire. Beacon should show these as "Other emergency" unless the co
 - `apps/api/app/hazard_model.py`: `classify(text)`, used by `POST /api/hazard/classify`.
 
 Rebuild: `python ml/hazard/fetch_ipaws.py`, then `python ml/hazard/train_hazard_model.py`.
+
+## Rules on top of the model (serving, `apps/api/app/hazard_model.py`)
+
+US alerts contain very few earthquake (32), tsunami (63), volcano (18) and conflict (354) messages, so the
+model alone confuses them with storms ("Strong shaking felt downtown" -> storm; "Air raid sirens" -> storm).
+At serving time two transparent rules run on top of the model; the result's `method` says which decided:
+
+| `method` | When | Answer |
+|---|---|---|
+| `rules` | A clear rare-hazard term: tsunami / tidal wave; volcano, eruption, ash fall, lahar; air raid, missile, airstrike, shelling, bombing, active shooter, armed or terrorist attack, invasion; earthquake, quake, aftershock, seismic, tremor, shaking. Checked in that order (a tsunami warning often names its earthquake). | That hazard, `confidence` 0.8 (a fixed rule confidence, not a probability), `matched` = the term |
+| `abstain` | No emergency vocabulary at all (e.g. "Lunch at noon") and model confidence below 0.8 | `other` |
+| `model` | Otherwise | The model's answer, `other` below the 0.50 threshold |
+
+"Sirens" alone is not treated as an attack (tornado warnings mention sirens). The metrics above are for the
+model alone; the rules are checked by tests in `apps/api/tests/test_hazard.py`. An official alert code still
+always wins over both.
