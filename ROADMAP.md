@@ -25,7 +25,7 @@
 | Safe places (feature 5), hazard-aware, incl. underground stations for air raids | Done |
 | Hazard outlook: upcoming calamities from NASA EONET, GDACS, NOAA, USGS, Open-Meteo; worst/safest areas; where to go | Done |
 | Simulator ("digital twin") page with shareable scenarios and presenter mode | Done |
-| Hazard classifier trained on FEMA IPAWS alerts | In progress |
+| Hazard classifier trained on FEMA IPAWS alerts (+ rules for rare hazards) | Done |
 | Free hosting config (Docker, Render, Neon, GitHub Actions) | Ready; needs accounts and a push |
 
 ## Advanced features
@@ -49,7 +49,7 @@ Ranked by value for Beacon. ★ = build first.
 | 13 ✓ | **Official alerts + survival mode** | Government alerts for your location; when a severe one covers you, the app guides you on the map to a safe place | NWS CAP, USGS, FEMA IPAWS, Seattle Fire 911 |
 | 14 ✓ | **Hazard outlook** | Calamities that may be coming in the next ~72 h, worst and safest areas per hazard, where to go | NASA EONET, GDACS, tsunami.gov, NOAA, Open-Meteo, WA DNR / Seattle / FEMA hazard zones |
 | 15 ✓ | **Simulator (digital twin)** | Simulated calamities on a 3D Seattle with guidance and safe routes, shareable links, presenter mode | Same data as the app |
-| 16 | **Hazard classifier** | Reads free-text emergency messages and tells the kind of calamity and its severity | FEMA IPAWS archive |
+| 16 ✓ | **Hazard classifier** | Reads free-text emergency messages and tells the kind of calamity and its severity | FEMA IPAWS archive |
 
 Not planned: community crime reports. Moderating crowd accusations is where competitors got into trouble.
 

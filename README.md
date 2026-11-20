@@ -203,9 +203,13 @@ Optional: a free NASA FIRMS key (`FIRMS_MAP_KEY`) adds satellite fire hotspots t
 - A transparent formula from hazard-zone overlap, elevation and distance to a suitable safe place.
 - It is a relative score, not a probability.
 
-**Hazard classifier.** `ml/hazard/`, in progress.
-- A text model trained on real FEMA IPAWS alerts. It reads free-text messages that carry no official event code and returns the kind of calamity and its severity.
-- An official event code always wins over the model.
+**Hazard classifier.** `ml/hazard/`; see the [model card](ml/hazard/MODEL_CARD.md).
+- **What it does:** reads free-text emergency messages that carry no official event code and returns the kind of calamity and its severity.
+- **Training data:** about 58,000 real FEMA IPAWS alerts from 2012 to 2026, using TF-IDF features and a calibrated linear SVM.
+- **Test score (2023 onward, event names masked):** macro-F1 0.69, against 0.44 for keyword matching. Severity macro-F1 is 0.83.
+- **Rare hazards:** US alerts contain few earthquakes, tsunamis, volcanoes or attacks, so clear terms such as "aftershock", "eruption" and "air raid" decide those.
+- **Not an emergency:** text with no emergency vocabulary returns "other" instead of a guess.
+- **Official codes win:** an official event code always overrides the model.
 
 ---
 
@@ -279,7 +283,7 @@ On a python.org build of Python on macOS, HTTPS downloads may need `SSL_CERT_FIL
 | `apps/api` | FastAPI app: map data, alerts, safe places, outlook, simulation; tests in `apps/api/tests` |
 | `db/schema` | PostgreSQL + PostGIS schema, applied on first start of the database container |
 | `pipeline/` | Data download and loading: crime, ML risk import, alerts, safe places, hazard zones, outlook, publishing to a hosted DB |
-| `ml/` | Crime risk model (and the hazard classifier) with model cards |
+| `ml/` | Crime risk model and hazard classifier, with model cards |
 | `docker-compose.yml`, `Dockerfile`, `render.yaml`, `.github/workflows/` | Local database, production image, free hosting, CI and scheduled data refresh |
 | `docs/` | [Development](docs/DEVELOPMENT.md), [deployment](docs/DEPLOY.md), API contract and class-project documents |
 | `CrimeRadar/`, `sql/`, `scripts/`, `tools/`, `poster/`, `project-plan/` | The original CrimeRadar class app (Java/JSP/MySQL), kept as a reference |
@@ -305,6 +309,7 @@ All endpoints are read-only and return JSON or GeoJSON. There's interactive docu
 | `GET /api/hazard-zones?hazard=&bbox=`, `GET /api/hazard-grid?hazard=` | Official hazard zones; per-block exposure from worst to safest |
 | `GET /api/safe-areas?lat&lng&hazard` | Where to go: nearest low-exposure areas and safe places |
 | `POST /api/simulate` | Simulator: affected area, user status, guidance, destination and a route that avoids the danger |
+| `POST /api/hazard/classify`, `GET /api/hazard/model` | Hazard classifier for free-text messages; model version and metrics |
 
 ---
 
