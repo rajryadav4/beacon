@@ -7,8 +7,6 @@ uvicorn's access log line for these requests has lat/lng redacted.
 
 from __future__ import annotations
 
-import logging
-import re
 from datetime import datetime, timezone
 from typing import Annotated
 
@@ -33,26 +31,6 @@ FEEDS = {
 # after it was sent (the same rule as pipeline/ingest_alerts.py END_TIME_SQL).
 ACTIVE_SQL = """a.ended_at IS NULL AND a.status = 'Actual' AND a.msg_type IS DISTINCT FROM 'Cancel'
     AND coalesce(a.expires, a.sent + interval '1 day', a.fetched_at + interval '1 day') > now()"""
-
-
-# ---- never log the caller's location ------------------------------
-
-_COORD_PARAM = re.compile(r"((?:^|[?&])(?:lat|lng|lon|latitude|longitude)=)[^&\s]*", re.IGNORECASE)
-
-
-class _RedactLocation(logging.Filter):
-    def filter(self, record: logging.LogRecord) -> bool:
-        if isinstance(record.args, tuple) and record.args:
-            record.args = tuple(_COORD_PARAM.sub(r"\1redacted", a) if isinstance(a, str) else a
-                                for a in record.args)
-        return True
-
-
-def redact(text: str) -> str:
-    return _COORD_PARAM.sub(r"\1redacted", text)
-
-
-logging.getLogger("uvicorn.access").addFilter(_RedactLocation())
 
 
 # ---- helpers ---------------------------------------------------

@@ -8,8 +8,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from . import privacy
 from .db import pool
 from .routers import alerts, map_data, safe_places
+
+
+privacy.install()
 
 
 @asynccontextmanager

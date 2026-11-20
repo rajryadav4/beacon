@@ -12,7 +12,6 @@ access log (a reverse proxy in front of the API must do the same).
 
 from __future__ import annotations
 
-import logging
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query, Response
@@ -41,22 +40,6 @@ PREFERRED_RADIUS_M = 2000  # better-ranked kinds win only within this distance (
 CACHE = {"Cache-Control": "public, max-age=300"}
 NO_STORE = {"Cache-Control": "no-store"}
 NEAREST_PATH = "/safe-places/nearest"
-
-
-class _RedactNearestQuery(logging.Filter):
-    """Drop the query string (lat/lng) of /safe-places/nearest from uvicorn's access log."""
-
-    def filter(self, record: logging.LogRecord) -> bool:
-        args = record.args
-        if isinstance(args, tuple) and len(args) >= 3 and isinstance(args[2], str) \
-                and NEAREST_PATH in args[2] and "?" in args[2]:
-            record.args = (*args[:2], args[2].split("?", 1)[0], *args[3:])
-        return True
-
-
-_access_log = logging.getLogger("uvicorn.access")
-if not any(isinstance(f, _RedactNearestQuery) for f in _access_log.filters):
-    _access_log.addFilter(_RedactNearestQuery())
 
 
 def parse_bbox(value: str) -> tuple[float, float, float, float]:
